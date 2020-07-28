@@ -33,7 +33,7 @@ class Category(ModelWithUUID):
 
     """
 
-    title = models.CharField(max_length=50, unique=True)
+    title = models.CharField(max_length=50)
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='categories'
     )
