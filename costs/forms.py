@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 
-from .models import Cost, Category
+from .models import Cost, Category, Income
 
 
 User = get_user_model()
@@ -23,6 +23,18 @@ class CostForm(forms.Form):
     title = forms.CharField(max_length=255)
     costs_sum = forms.DecimalField(max_digits=7, decimal_places=2)
     category = forms.ModelChoiceField(queryset=Category.objects.all())
+
+
+class IncomeForm(forms.Form):
+
+    """
+    Form for Income model with following fields:
+
+        incomes_sum -- income's sum
+
+    """
+
+    incomes_sum = forms.DecimalField(max_digits=7, decimal_places=2)
 
 
 class CategoryForm(forms.Form):

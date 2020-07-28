@@ -6,16 +6,11 @@
 
 {% block content %}
 
-<div class="dates">
-    <div class="dates_left_button">
-        <a href="{% url 'costs_for_the_date' previous_date %}">&lt;</a>
-    </div>
-    <div class="dates_current_date">
-        {{ date }}
-    </div>
-    <div class="dates_right_button">
-        <a href="{% url 'costs_for_the_date' next_date %}">&gt;</a>
-    </div>
+{% include 'dates.html' with previous_date=previous_date date=date next_date=next_date %}
+
+<div class="changer">
+    <span class="changer_current">Costs</span>
+    <a href="{% url 'incomes_for_the_date' date %}" class="changer_link">Incomes</a>
 </div>
 
 <a href="{% url 'create_cost' %}" class="create_button">Add Cost</a>

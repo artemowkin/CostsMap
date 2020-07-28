@@ -21,6 +21,18 @@ urlpatterns = [
     path('costs/<uuid:pk>/delete/', views.DeleteCostView.as_view(),
          name='delete_cost'),
 
+    # Incomes
+    path('incomes/', views.IncomesForTheDateView.as_view(),
+         name='today_incomes'),
+    path('incomes/<date:date>/', views.IncomesForTheDateView.as_view(),
+         name='incomes_for_the_date'),
+    path('incomes/add/', views.CreateIncomeView.as_view(),
+         name='create_income'),
+    path('incomes/<uuid:pk>/change/', views.ChangeIncomeView.as_view(),
+         name='change_income'),
+    path('incomes/<uuid:pk>/delete/', views.DeleteIncomeView.as_view(),
+         name='delete_income'),
+
     # Categories
     path('categories/', views.CategoryListView.as_view(),
          name='category_list'),
@@ -35,7 +47,9 @@ urlpatterns = [
 
     # Statistic
     path('statistic/json/', views.StatisticView.as_view(), name='statistic'),
-    path('statistic/', views.StatisticPageView.as_view(),
-         name='statistic_page'),
+    path('statistic/costs/', views.CostsStatisticPageView.as_view(),
+         name='costs_statistic_page'),
+    path('statistic/incomes/', views.IncomesStatisticPageView.as_view(),
+         name='incomes_statistic_page'),
 ]
 

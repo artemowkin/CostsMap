@@ -94,3 +94,36 @@ class Cost(ModelWithUUID):
     def get_absolute_url(self):
         return reverse('costs_for_the_date', args=[self.date.isoformat()])
 
+
+class Income(ModelWithUUID):
+
+    """
+    Income with the following fields:
+
+        incomes_sum -- decimal sum of income
+
+        owner -- income's owner. Foreign key to User model
+
+        date -- income's date
+
+        pub_datetime -- income's publication date and time. Needs for ordering
+
+    """
+
+    incomes_sum = models.DecimalField(max_digits=7, decimal_places=2)
+    owner = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='incomes'
+    )
+    date = models.DateField(auto_now_add=True)
+    pub_datetime = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'income'
+        ordering = ('-pub_datetime',)
+
+    def __str__(self):
+        return f"Income: {self.incomes_sum}"
+
+    def get_absolute_url(self):
+        return reverse('incomes_for_the_date', args=[self.date.isoformat()])
+

@@ -100,7 +100,7 @@ header {
     padding: 0 .5rem;
 }
 
-.cost {
+.cost, .income {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -109,7 +109,7 @@ header {
     padding-bottom: .5rem;
 }
 
-.cost_left {
+.cost_left, .income_left {
     width: 50%;
     display: flex;
     justify-content: flex-start;
@@ -117,37 +117,37 @@ header {
     padding-left: .5rem;
 }
 
-.cost_right {
+.cost_right, .income_right {
     padding-right: .5rem;
     display: flex;
     justify-content: flex-end;
     align-items: center;
 }
 
-.costs_image {
+.costs_image, .incomes_image {
     width: 50px;
 }
 
-.costs_title {
+.costs_title, .incomes_title {
     color: #333;
     font-family: sans-serif;
     font-size: 1.15rem;
     margin-bottom: .25rem;
 }
 
-.costs_sum {
+.costs_sum,  {
     font-size: 1.1rem;
     font-family: sans-serif;
     color: #333;
 }
 
-.costs_category {
+.costs_category, .incomes_subtitle {
     color: #808080;
     font-family: sans-serif;
     font-size: .8rem;
 }
 
-.cost_title_and_date {
+.cost_title_and_date, .income_title_and_date {
     margin-left: 1rem;
 }
 
@@ -239,7 +239,7 @@ header {
     padding-right: 10px;
 }
 
-.cost_edit_button {
+.cost_edit_button, .income_edit_button {
     display: block;
     width: 40px;
     height: 40px;
@@ -252,7 +252,7 @@ header {
     transition: background-color ease-in-out .25s, border-color ease-in-out .25s;
 }
 
-.cost_edit_button:hover {
+.cost_edit_button:hover, .income_edit_button:hover {
     background-color: #fafafa;
     border-color: #fafafa;
 }
@@ -433,6 +433,40 @@ form p select:focus {
     font-size: 1rem;
     color: #333;
     margin-left: .5rem;
+    margin-bottom: 3rem;
+}
+
+.changer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.changer_current {
+    display: block;
+    font-size: 1.25rem;
+    font-family: sans-serif;
+    text-align: center;
+    color: #333;
+    padding: 1rem 2rem;
+    border-bottom: 2px solid #333;
+}
+
+.changer_link {
+    display: block;
+    font-size: 1.25rem;
+    font-family: sans-serif;
+    text-align: center;
+    color: #333;
+    padding: 1rem 2rem;
+    border-bottom: 2px solid white;
+    transition: border-color ease-in-out .25s;
+}
+
+.changer_link:hover {
+    border-color: #333;
 }
 
 @media (max-width: 1024px) {
@@ -518,5 +552,15 @@ form p select:focus {
     #statistic_graph {
         margin-top: 2rem;
         margin-bottom: 2rem;
+    }
+
+    .changer {
+        width: 100%;
+    }    
+
+    .changer_link, .changer_current {
+        width: 50%;
+        padding-left: 0;
+        padding-right: 0;
     }
 }

@@ -10,9 +10,11 @@ from django.urls import reverse
 from django.http import JsonResponse
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.http import Http404
+from django.conf import settings
 
 from .services.costs import CostService
 from .services.categories import CategoryService
+from .services.incomes import IncomeService
 from .templates import ContextDate
 
 
@@ -37,6 +39,9 @@ class BaseView(View):
         except (Http404, PermissionDenied, ImproperlyConfigured):
             raise
         except Exception:
+            if settings.DEBUG:
+                raise
+
             return render(request, 'errors/something_strange.html')
 
 
@@ -92,7 +97,45 @@ class APIAuthorizedView(LoginRequiredMixin, BaseView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class CostsForTheDateView(RenderAuthorizedView):
+class DateView(RenderAuthorizedView):
+
+    """
+    Abstract view to return entries for the date. Has following attributes:
+
+        service -- the service the view works with
+
+        template_name -- template to display entries for the date
+
+        context_object_name -- name of context object. By default `object`
+
+    """
+
+    service = CostService()
+    template_name = 'costs/costs.html'
+    context_object_name = 'object_list'
+
+    def get(self, request, date=None):
+        """Return costs for the date"""
+        if not date:
+            date = datetime.date.today().isoformat()
+
+        entries = self.service.get_for_the_date(
+            owner=request.user, date=date
+        )
+        total_sum = self.service.get_total_sum(entries)
+
+        context_date = ContextDate(date)
+        context = {
+            self.context_object_name: entries,
+            'total_sum': total_sum,
+            'date': context_date.date,
+            'previous_date': context_date.previous_day,
+            'next_date': context_date.next_day
+        }
+        return render(request, self.template_name, context)
+
+
+class CostsForTheDateView(DateView):
 
     """
     View to return costs for the date. Has following attributes:
@@ -101,30 +144,31 @@ class CostsForTheDateView(RenderAuthorizedView):
 
         template_name -- template to display costs for the date
 
+        context_object_name -- name of costs in template
+
     """
 
     service = CostService()
     template_name = 'costs/costs.html'
+    context_object_name = 'costs'
 
-    def get(self, request, date=None):
-        """Return costs for the date"""
-        if not date:
-            date = datetime.date.today().isoformat()
 
-        costs = self.service.get_for_the_date(
-            owner=request.user, date=date
-        )
-        total_sum = self.service.get_sum_of_costs(costs)
+class IncomesForTheDateView(DateView):
 
-        context_date = ContextDate(date)
-        context = {
-            'costs': costs,
-            'total_sum': total_sum,
-            'date': context_date.date,
-            'previous_date': context_date.previous_day,
-            'next_date': context_date.next_day
-        }
-        return render(request, self.template_name, context)
+    """
+    View to return incomes for the date. Has following attributes:
+
+        service -- income's service
+
+        template_name -- template to display income's for the date
+
+        context_object_name -- name of incomes in template
+
+    """
+
+    service = IncomeService()
+    template_name = 'costs/incomes.html'
+    context_object_name = 'incomes'
 
 
 class CostsHistoryView(RenderAuthorizedView):
@@ -144,7 +188,7 @@ class CostsHistoryView(RenderAuthorizedView):
     def get(self, request):
         """Return all the costs for all time"""
         all_costs = self.service.get_all(owner=request.user)
-        total_sum = self.service.get_sum_of_costs(all_costs)
+        total_sum = self.service.get_total_sum(all_costs)
 
         context = {
             'costs': all_costs,
@@ -245,7 +289,7 @@ class CreateCostView(CreateView):
 
         service -- cost's service
 
-        template_name -- template with form to create an instance
+        template_name -- template with form to create a cost
 
     """
 
@@ -258,6 +302,21 @@ class CreateCostView(CreateView):
         return render(request, self.template_name, {'form': form})
 
 
+class CreateIncomeView(CreateView):
+
+    """
+    View to create a new income. Has following attributes:
+
+        service -- income's service
+
+        template_name -- template with form to create an incomr
+
+    """
+
+    service = IncomeService()
+    template_name = 'costs/add_income.html'
+
+
 class ChangeCostView(ChangeView):
 
     """
@@ -265,7 +324,7 @@ class ChangeCostView(ChangeView):
 
         service -- cost's service
 
-        template_name -- template with form to change an instance
+        template_name -- template with form to change a cost
 
         context_object_name -- name of cost object in template
 
@@ -274,6 +333,24 @@ class ChangeCostView(ChangeView):
     service = CostService()
     template_name = 'costs/change_cost.html'
     context_object_name = 'cost'
+
+
+class ChangeIncomeView(ChangeView):
+
+    """
+    View to change an income. Has following attributes:
+
+        service -- income's service
+
+        template_name -- template with form to change an income
+
+        context_object_name -- name of income object in template
+
+    """
+
+    service = IncomeService()
+    template_name = 'costs/change_income.html'
+    context_object_name = 'income'
 
 
 class DeleteCostView(DeleteView):
@@ -293,6 +370,24 @@ class DeleteCostView(DeleteView):
     service = CostService()
     template_name = 'costs/delete_cost.html'
     context_object_name = 'cost'
+
+
+class DeleteIncomeView(DeleteView):
+
+    """
+    View to delete an income. Has following attributes:
+
+        service -- income's service
+
+        template_name -- template with form to delete an income
+
+        context_object_name -- name of income object in template
+
+    """
+
+    service = IncomeService()
+    template_name = 'costs/delete_income.html'
+    context_object_name = 'income'
 
 
 class CategoryListView(RenderAuthorizedView):
@@ -389,28 +484,63 @@ class StatisticView(APIAuthorizedView):
 class StatisticPageView(RenderAuthorizedView):
 
     """
-    View to return costs statistic with costs fot the month.
+    Abstract view to return statistic with entries fot the month.
+    Has following attributes:
+
+        context_object_name -- entry name in template
+
+    """
+
+    context_object_name = 'object'
+
+    def get(self, request):
+        """Render template with entries for the month"""
+        entries_for_the_month = self.service.get_for_the_last_month(
+            owner=request.user
+        )
+        total_sum = self.service.get_total_sum(entries_for_the_month)
+
+        context = {
+            self.context_object_name: entries_for_the_month,
+            'total_sum': total_sum
+        }
+        return render(request, self.template_name, context)
+
+
+class CostsStatisticPageView(StatisticPageView):
+
+    """
+    View to return statistic with costs for the month.
     Has following attributes:
 
         service -- cost's service
 
-        template_name -- template to display statistic
+        template_name -- template to display statistic with costs
+
+        context_object_name -- name of costs in template
 
     """
 
     service = CostService()
-    template_name = 'costs/statistic.html'
+    template_name = 'costs/costs_statistic.html'
+    context_object_name = 'costs'
 
-    def get(self, request):
-        """Render template with costs for the month"""
-        costs_for_the_month = self.service.get_for_the_last_month(
-            owner=request.user
-        )
-        total_sum = self.service.get_sum_of_costs(costs_for_the_month)
 
-        context = {
-            'costs': costs_for_the_month,
-            'total_sum': total_sum
-        }
-        return render(request, self.template_name, context)
+class IncomesStatisticPageView(StatisticPageView):
+
+    """
+    View to return statistic with incomes for the month.
+    Has following attributes:
+
+        service -- income's service
+
+        template_name -- template to display statistic with incomes
+
+        context_object_name -- name of incomes in template
+
+    """
+
+    service = IncomeService()
+    template_name = 'costs/incomes_statistic.html'
+    context_object_name = 'incomes'
 

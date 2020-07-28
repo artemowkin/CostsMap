@@ -33,7 +33,9 @@ SECRET_KEY = get_env(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_env('DEBUG', '1')
 
-ALLOWED_HOSTS = ['costsmap.herokuapp.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'costsmap.herokuapp.com', 'localhost', '127.0.0.1', '192.168.1.69'
+]
 
 
 ENVIRONMENT = get_env('ENVIRONMENT', 'development')

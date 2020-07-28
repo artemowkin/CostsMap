@@ -23,8 +23,33 @@ class CategoryService(BaseCRUDService):
 
         form's -- category form
 
+    Overridden methods:
+
+        create -- create a category without duplicates for one owner
+
     """
 
     model = Category
     form = CategoryForm
+
+    def _add_exist_error_to_form(self, form: Form) -> Form:
+        """Add an error `already exists` to form"""
+        form.add_error(
+            None, f'The same {self.model.__name__.lower()} already exists'
+        )
+
+    def create(self, form_data: dict, owner: User):
+        """Create a new owner's category from form_data"""
+        self._check_owner_is_user(owner)
+        form = self.form(form_data)
+        if form.is_valid():
+            category, has_created = self.model.objects.get_or_create(
+                **form.cleaned_data, owner=owner
+            )
+            if has_created:
+                return category
+
+            self._add_exist_error_to_form(form)
+
+        return form
 

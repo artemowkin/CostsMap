@@ -1,0 +1,20 @@
+{% load static %}
+
+<div class="total_sum_container">
+    <div class="total_sum">Total sum: {{ total_sum }} &#8381;</div>
+</div>
+
+{% for income in incomes %}
+    <div class="income">
+        <div class="income_left">
+            <img src="{% static 'images/rouble_white.png' %}" class="incomes_image">
+            <div class="income_title_and_date">
+                <div class="incomes_title">{{ income.incomes_sum }} &#8381;</div>
+                <div class="incomes_subtitle">{{ income.date }}</div>
+            </div>
+        </div>
+        <div class="income_right">
+            <a href="{% url 'change_income' income.pk %}" class="income_edit_button"></a>
+        </div>
+    </div>
+{% endfor %}

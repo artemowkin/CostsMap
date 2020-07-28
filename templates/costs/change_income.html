@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Change Income{% endblock %}
+
+{% block content %}
+<h1 class="form_title">Change Income</h1>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="form_submit" type="submit">Change</button>
+    <a class="form_delete" href="{% url 'delete_income' income.pk %}">Delete</a>
+</form>
+{% endblock %}

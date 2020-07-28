@@ -1,6 +1,8 @@
 """Module with base services"""
 
 from __future__ import annotations
+import re
+import datetime
 
 from django.contrib.auth import get_user_model
 from django.db.models import QuerySet, Model
@@ -70,24 +72,15 @@ class BaseCRUDService:
         self._check_owner_is_user(owner)
         return get_object_or_404(self.model, pk=pk, owner=owner)
 
-    def _add_exist_error_to_form(self, form: Form) -> Form:
-        """Add an error `already exists` to form"""
-        form.add_error(
-            None, f'The same {self.model.__name__.lower()} already exists'
-        )
-
     def create(self, form_data: dict, owner: User):
         """Create a new owner's model instance from form_data"""
         self._check_owner_is_user(owner)
         form = self.form(form_data)
         if form.is_valid():
-            instance, has_created = self.model.objects.get_or_create(
+            instance = self.model.objects.create(
                 **form.cleaned_data, owner=owner
             )
-            if has_created:
-                return instance
-
-            self._add_exist_error_to_form(form)
+            return instance
 
         return form
 
@@ -138,4 +131,36 @@ class BaseCRUDService:
         changing_instance = self.get_concrete(pk=pk, owner=owner)
         form_data = self._get_form_data_by_instance(changing_instance)
         return self.form(form_data)
+
+
+class DateStrategy:
+
+    """Strategy with date functionality"""
+
+    def __init__(self, service: BaseCRUDService) -> None:
+        self._service = service
+        self._today = datetime.date.today()
+
+    def get_for_the_last_month(self, owner: User) -> QuerySet:
+        """Return owner's entries for the last month"""
+        self._service._check_owner_is_user(owner)
+        return self._service.model.objects.filter(
+            owner=owner, date__month=self._today.month
+        )
+
+    def _check_date_in_iso(self, date) -> None:
+        """Check if date in ISO format. If not then raise exception"""
+        if not re.match(r"\d{4}-\d{2}-\d{2}", date):
+            raise ImproperlyConfigured(
+                "`date` must be in ISO format: yyyy-mm-dd"
+            )
+
+    def get_for_the_date(self, owner: User, date: str) -> QuerySet:
+        """Return owner's entries for the concrete date in ISO format"""
+        self._service._check_owner_is_user(owner)
+        self._check_date_in_iso(date)
+        date_object = datetime.date.fromisoformat(date)
+        return self._service.model.objects.filter(
+            owner=owner, date=date_object
+        )
 

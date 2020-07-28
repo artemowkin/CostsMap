@@ -8,6 +8,7 @@
 
 {% block content %}
 <h1 class="categories_header">Statistic</h1>
+
 {% if costs %}
     <canvas id="statistic_graph"></canvas>
 
@@ -60,7 +61,12 @@
         get_data().then(data => create_graph(data, graph));
     </script>
 
-    {% include 'costs_list.html' with costs=costs total_sum=total_sum %}
+    <div class="changer">
+        <span class="changer_current">Costs</span>
+        <a href="{% url 'incomes_statistic_page' %}" class="changer_link">Incomes</a>
+    </div>
+
+    {% include 'costs_list.html' with costs=costs total_sum=total_sum with_costs_date=True %}
 {% else %}
     <p class="empty_text">You don't have any costs</p>
 {% endif %}

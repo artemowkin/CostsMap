@@ -3,16 +3,15 @@
 from __future__ import annotations
 import datetime
 from decimal import Decimal
-import re
 
 from django.contrib.auth import get_user_model
 from django.db.models import QuerySet, Sum
 from django.db import connection
-from django.shortcuts import get_object_or_404
 
-from ..models import Cost, Category
+from ..models import Cost
 from ..forms import CostForm
-from .base import BaseCRUDService
+from .base import BaseCRUDService, DateStrategy
+from .categories import CategoryService
 
 
 User = get_user_model()
@@ -21,11 +20,11 @@ User = get_user_model()
 class CostService(BaseCRUDService):
 
     """
-    Service with business logic of Costs. Has following attributes:
+    Service with business logic for Costs. Has following attributes:
 
         model -- cost's model
 
-        category_model -- category's model
+        category_service -- category's service
 
         form -- cost's form
 
@@ -40,56 +39,38 @@ class CostService(BaseCRUDService):
         get_statistic_for_the_last_month -- return costs for the month
         in each category
 
+    Overridden methods:
+
+        get_create_form -- changed queryset for the category field
+
+        get_change_form -- changed queryset for the category field
+
     """
 
     model = Cost
-    category_model = Category
+    category_service = CategoryService()
     form = CostForm
 
     def __init__(self) -> None:
-        self.today = datetime.date.today()
+        self.date_strategy = DateStrategy(self)
         super().__init__()
 
     def get_for_the_last_month(self, owner: User) -> QuerySet:
         """Return owner's costs for the last month"""
-        self._check_owner_is_user(owner)
-        return self.model.objects.filter(
-            owner=owner, date__month=self.today.month
-        )
-
-    def _check_date_in_iso(self, date) -> None:
-        """Check if date in ISO format. If not then raise exception"""
-        if not re.match(r"\d{4}-\d{2}-\d{2}", date):
-            raise ImproperlyConfigured(
-                "`date` must be in ISO format: yyyy-mm-dd"
-            )
+        return self.date_strategy.get_for_the_last_month(owner)
 
     def get_for_the_date(self, owner: User, date: str) -> QuerySet:
         """Return owner's costs for the concrete date in ISO format"""
-        self._check_owner_is_user(owner)
-        self._check_date_in_iso(date)
-        date_object = datetime.date.fromisoformat(date)
-        return self.model.objects.filter(owner=owner, date=date_object)
+        return self.date_strategy.get_for_the_date(owner, date)
 
-    def _check_queryset_is_valid(self, queryset) -> None:
-        """
-        Check if queryset is instance of QuerySet. If not then
-        raise exception
-        """
-        if not isinstance(queryset, QuerySet):
-            raise ImproperlyConfigured(
-                "`queryset` must be a QuerySet object"
-            )
-
-    def get_sum_of_costs(self, queryset: QuerySet) -> Decimal:
+    def get_total_sum(self, queryset: QuerySet) -> Decimal:
         """Return sum of costs in queryset"""
-        self._check_queryset_is_valid(queryset)
         costs_sum = queryset.aggregate(Sum('costs_sum'))
         return costs_sum['costs_sum__sum'] or Decimal('0')
 
     def _form_set_owners_categories(self, form: Form, owner: User) -> None:
         """Set queryset for categories field of form"""
-        owners_categories = self.category_model.objects.filter(owner=owner)
+        owners_categories = self.category_service.get_all(owner=owner)
         form.fields['category'].queryset = owners_categories
 
     def get_create_form(self, owner: User) -> Form:
