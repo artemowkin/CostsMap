@@ -42,8 +42,12 @@ urlpatterns = [
          name='change_category'),
     path('categories/<uuid:pk>/delete/', views.DeleteCategoryView.as_view(),
          name='delete_category'),
-    path('history/', views.CostsHistoryView.as_view(),
+
+    # History
+    path('history/costs/', views.CostsHistoryView.as_view(),
          name='costs_history'),
+    path('history/incomes/', views.IncomesHistoryView.as_view(),
+         name='incomes_history'),
 
     # Statistic
     path('statistic/json/', views.StatisticView.as_view(), name='statistic'),

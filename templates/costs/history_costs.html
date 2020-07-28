@@ -4,6 +4,12 @@
 
 {% block content %}
 <h1 class="history_header">History</h1>
+
+<div class="changer">
+    <span class="changer_current">Costs</span>
+    <a href="{% url 'incomes_history' %}" class="changer_link">Incomes</a>
+</div>
+
 {% if costs %}
     {% include 'costs_list.html' with costs=costs total_sum=total_sum with_costs_date=True %}
 {% else %}

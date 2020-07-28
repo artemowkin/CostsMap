@@ -171,30 +171,66 @@ class IncomesForTheDateView(DateView):
     context_object_name = 'incomes'
 
 
-class CostsHistoryView(RenderAuthorizedView):
+class HistoryView(RenderAuthorizedView):
 
     """
-    View to return all costs for all time. Has following attributes:
+    Abstract view to return all entries for all time.
+    Has following attributes:
+
+        context_object_name -- name of entry in template
+
+    """
+
+    context_object_name = 'object_list'
+
+    def get(self, request):
+        """Return all the costs for all time"""
+        all_entries = self.service.get_all(owner=request.user)
+        total_sum = self.service.get_total_sum(all_entries)
+
+        context = {
+            self.context_object_name: all_entries,
+            'total_sum': total_sum
+        }
+        return render(request, self.template_name, context)
+
+
+class CostsHistoryView(HistoryView):
+
+    """
+    View to return all costs for all time.
+    Has following attributes:
 
         service -- cost's service
 
         template_name -- template to display history of costs
 
+        context_object_name -- name of costs in template
+
     """
 
     service = CostService()
-    template_name = 'costs/history.html'
+    template_name = 'costs/history_costs.html'
+    context_object_name = 'costs'
 
-    def get(self, request):
-        """Return all the costs for all time"""
-        all_costs = self.service.get_all(owner=request.user)
-        total_sum = self.service.get_total_sum(all_costs)
 
-        context = {
-            'costs': all_costs,
-            'total_sum': total_sum
-        }
-        return render(request, self.template_name, context)
+class IncomesHistoryView(HistoryView):
+
+    """
+    View to return all incomes for all time.
+    Has following attributes:
+
+        service -- income's service
+
+        template_name -- template to display history of incomes
+
+        context_object_name -- name of incomes in template
+
+    """
+
+    service = IncomeService()
+    template_name = 'costs/history_incomes.html'
+    context_object_name = 'incomes'
 
 
 class CreateView(RenderAuthorizedView):
