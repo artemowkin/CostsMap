@@ -41,6 +41,7 @@ class Category(ModelWithUUID):
     class Meta:
         db_table = 'category'
         ordering = ('title',)
+        verbose_name_plural = 'categories'
 
     def __str__(self):
         return self.title
