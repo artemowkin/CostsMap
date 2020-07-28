@@ -10,7 +10,7 @@ from django.db.models import QuerySet, Sum
 from django.db import connection
 from django.shortcuts import get_object_or_404
 
-from ..models import Cost
+from ..models import Cost, Category
 from ..forms import CostForm
 from .base import BaseCRUDService
 
@@ -24,6 +24,8 @@ class CostService(BaseCRUDService):
     Service with business logic of Costs. Has following attributes:
 
         model -- cost's model
+
+        category_model -- category's model
 
         form -- cost's form
 
@@ -41,6 +43,7 @@ class CostService(BaseCRUDService):
     """
 
     model = Cost
+    category_model = Category
     form = CostForm
 
     def __init__(self) -> None:
@@ -83,6 +86,23 @@ class CostService(BaseCRUDService):
         self._check_queryset_is_valid(queryset)
         costs_sum = queryset.aggregate(Sum('costs_sum'))
         return costs_sum['costs_sum__sum'] or Decimal('0')
+
+    def _form_set_owners_categories(self, form: Form, owner: User) -> None:
+        """Set queryset for categories field of form"""
+        owners_categories = self.category_model.objects.filter(owner=owner)
+        form.fields['category'].queryset = owners_categories
+
+    def get_create_form(self, owner: User) -> Form:
+        """Return cost's create form with owner's categories"""
+        form = super().get_create_form()
+        self._form_set_owners_categories(form, owner)
+        return form
+
+    def get_change_form(self, pk, owner: User) -> Form:
+        """Return cost's change form with owner's categories"""
+        form = super().get_change_form(pk, owner)
+        self._form_set_owners_categories(form, owner)
+        return form
 
     def get_statistic_for_the_last_month(self, owner: User):
         """

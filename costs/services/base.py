@@ -133,7 +133,7 @@ class BaseCRUDService:
         ]
         return dict(zip(fields_names, fields_values))
 
-    def get_change_form(self, pk, owner: User):
+    def get_change_form(self, pk, owner: User) -> Form:
         """Return a form for changing an owner's model instance with pk"""
         changing_instance = self.get_concrete(pk=pk, owner=owner)
         form_data = self._get_form_data_by_instance(changing_instance)

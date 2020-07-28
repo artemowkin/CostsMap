@@ -252,6 +252,11 @@ class CreateCostView(CreateView):
     service = CostService()
     template_name = 'costs/add_cost.html'
 
+    def get(self, request):
+        """Return create cost form"""
+        form = self.service.get_create_form(owner=request.user)
+        return render(request, self.template_name, {'form': form})
+
 
 class ChangeCostView(ChangeView):
 
