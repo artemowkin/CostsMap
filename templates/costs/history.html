@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block title %}History{% endblock %}
+
+{% block content %}
+<h1 class="history_header">History</h1>
+{% include 'costs_list.html' with costs=costs total_sum=total_sum with_costs_date=True %}
+{% endblock content %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Statistic{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+{% endblock %}
+
+{% block content %}
+<canvas id="statistic_graph"></canvas>
+
+<script>
+    let graph = document.getElementById('statistic_graph').getContext('2d');
+
+    function create_graph(data, context) {
+        let categories = [];
+        let costs = [];
+
+        if (document.documentElement.clientWidth > 1024) {
+            context.canvas.width = 500;
+            context.canvas.height = 500;
+        } else {
+            context.canvas.width = 300;
+            context.canvas.height = 300;
+        }
+
+        for (let stat of data) {
+            categories.push(stat.category);
+            costs.push(stat.costs);
+        }
+
+        let chart = new Chart(context, {
+            type: 'pie',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: 'Costs',
+                    data: costs,
+                    backgroundColor: "#333",
+                }],
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: 'Costs for each category per month'
+                },
+                responsive: false
+            }
+        })
+    }
+
+    async function get_data() {
+        let response = await fetch('/statistic/json/');
+        let json = await response.json();
+        return json;
+    }
+
+    get_data().then(data => create_graph(data, graph));
+</script>
+
+{% include 'costs_list.html' with costs=costs total_sum=total_sum %}
+{% endblock %}

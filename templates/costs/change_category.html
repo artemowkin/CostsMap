@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Change Category{% endblock %}
+
+{% block content %}
+<h1 class="form_title">Change Category "{{ category.title }}"</h1>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="form_submit" type="submit">Change</button>
+    <a class="form_delete" href="{% url 'delete_category' category.pk %}">Delete</a>
+</form>
+{% endblock %}
