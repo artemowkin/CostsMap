@@ -4,8 +4,8 @@ import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 
 
-def get_env(env_name):
-    env = os.getenv(env_name)
+def get_env(env_name, default_value=None):
+    env = os.getenv(env_name, default_value)
     if env is None:
         raise ImproperlyConfigured(
             f"You need to set the {env_name} environment variable"
@@ -25,15 +25,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_env('SECRET_KEY')
+SECRET_KEY = get_env(
+    'SECRET_KEY', "^i+x120jepo*poe^psbrm*)wsk_yctk(d36)b#ja)z4sv(leg8"
+)
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_env('DEBUG')
+DEBUG = get_env('DEBUG', '1')
 
 ALLOWED_HOSTS = ['*']
 
 
-ENVIRONMENT = get_env('ENVIRONMENT')
+ENVIRONMENT = get_env('ENVIRONMENT', 'development')
 
 if ENVIRONMENT == 'production':
     SECURE_BORWSER_XSS_FILTER = True
