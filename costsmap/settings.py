@@ -33,7 +33,7 @@ SECRET_KEY = get_env(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_env('DEBUG', '1')
 
-ALLOWED_HOSTS = ['costsmap.herokuapp.com', 'localhost']
+ALLOWED_HOSTS = ['costsmap.herokuapp.com', 'localhost', '127.0.0.1']
 
 
 ENVIRONMENT = get_env('ENVIRONMENT', 'development')
@@ -109,7 +109,14 @@ WSGI_APPLICATION = 'costsmap.wsgi.application'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {}
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': get_env('POSTGRES_NAME', 'costsmap'),
+        'USER': get_env('POSTGRES_USER', 'django'),
+        'PASSWORD': get_env('POSTGRES_PASSWORD', 'django'),
+        'HOST': get_env('POSTGRES_HOST', 'localhost'),
+        'PORT': get_env('POSTGRES_PORT', '')
+    }
 }
 
 db_from_env = dj_database_url.config(conn_max_age=500)

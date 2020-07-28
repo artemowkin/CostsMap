@@ -7,56 +7,61 @@
 {% endblock %}
 
 {% block content %}
-<canvas id="statistic_graph"></canvas>
+<h1 class="categories_header">Statistic</h1>
+{% if costs %}
+    <canvas id="statistic_graph"></canvas>
 
-<script>
-    let graph = document.getElementById('statistic_graph').getContext('2d');
+    <script>
+        let graph = document.getElementById('statistic_graph').getContext('2d');
 
-    function create_graph(data, context) {
-        let categories = [];
-        let costs = [];
+        function create_graph(data, context) {
+            let categories = [];
+            let costs = [];
 
-        if (document.documentElement.clientWidth > 1024) {
-            context.canvas.width = 500;
-            context.canvas.height = 500;
-        } else {
-            context.canvas.width = 300;
-            context.canvas.height = 300;
-        }
-
-        for (let stat of data) {
-            categories.push(stat.category);
-            costs.push(stat.costs);
-        }
-
-        let chart = new Chart(context, {
-            type: 'pie',
-            data: {
-                labels: categories,
-                datasets: [{
-                    label: 'Costs',
-                    data: costs,
-                    backgroundColor: "#333",
-                }],
-            },
-            options: {
-                title: {
-                    display: true,
-                    text: 'Costs for each category per month'
-                },
-                responsive: false
+            if (document.documentElement.clientWidth > 1024) {
+                context.canvas.width = 500;
+                context.canvas.height = 500;
+            } else {
+                context.canvas.width = 300;
+                context.canvas.height = 300;
             }
-        })
-    }
 
-    async function get_data() {
-        let response = await fetch('/statistic/json/');
-        let json = await response.json();
-        return json;
-    }
+            for (let stat of data) {
+                categories.push(stat.category);
+                costs.push(stat.costs);
+            }
 
-    get_data().then(data => create_graph(data, graph));
-</script>
+            let chart = new Chart(context, {
+                type: 'pie',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        label: 'Costs',
+                        data: costs,
+                        backgroundColor: "#333",
+                    }],
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: 'Costs for each category per month'
+                    },
+                    responsive: false
+                }
+            })
+        }
 
-{% include 'costs_list.html' with costs=costs total_sum=total_sum %}
+        async function get_data() {
+            let response = await fetch('/statistic/json/');
+            let json = await response.json();
+            return json;
+        }
+
+        get_data().then(data => create_graph(data, graph));
+    </script>
+
+    {% include 'costs_list.html' with costs=costs total_sum=total_sum %}
+{% else %}
+    <p class="empty_text">You don't have any costs</p>
+{% endif %}
 {% endblock %}

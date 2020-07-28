@@ -428,6 +428,13 @@ form p select:focus {
     margin-bottom: 5rem;
 }
 
+.empty_text {
+    font-family: sans-serif;
+    font-size: 1rem;
+    color: #333;
+    margin-left: .5rem;
+}
+
 @media (max-width: 1024px) {
     header {
         display: none;

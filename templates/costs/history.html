@@ -4,5 +4,9 @@
 
 {% block content %}
 <h1 class="history_header">History</h1>
-{% include 'costs_list.html' with costs=costs total_sum=total_sum with_costs_date=True %}
+{% if costs %}
+    {% include 'costs_list.html' with costs=costs total_sum=total_sum with_costs_date=True %}
+{% else %}
+    <p class="empty_text">You don't have any costs</p>
+{% endif %}
 {% endblock content %}
