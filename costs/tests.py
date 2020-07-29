@@ -204,3 +204,8 @@ class CategoryServiceTest(TestCase, CRUDTests):
         self.assertEqual(instance.title, 'New title')
         self.assertEqual(instance.owner, self.user)
 
+    def test_set_default_categories(self):
+        self.service.set_default_categories(self.user)
+        new_categories = self.user.categories.all()
+        self.assertGreater(len(new_categories), 1)
+

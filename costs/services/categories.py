@@ -19,9 +19,11 @@ class CategoryService(BaseCRUDService):
     Service with business logic of Categories. Just inherit
     CRUD functionality from BaseCRUDService. Has following attributes:
 
-        model's -- category model
+        model -- category model
 
-        form's -- category form
+        form -- category form
+
+        default_categories -- list of default categories titles
 
     Overridden methods:
 
@@ -31,6 +33,7 @@ class CategoryService(BaseCRUDService):
 
     model = Category
     form = CategoryForm
+    default_categories = ['Еда', 'Здоровье', 'Развлечения', 'Транспорт']
 
     def _add_exist_error_to_form(self, form: Form) -> Form:
         """Add an error `already exists` to form"""
@@ -52,4 +55,9 @@ class CategoryService(BaseCRUDService):
             self._add_exist_error_to_form(form)
 
         return form
+
+    def set_default_categories(self, owner: User) -> None:
+        """Create default categories for owner"""
+        for category in self.default_categories:
+            self.model.objects.create(title=category, owner=owner)
 
