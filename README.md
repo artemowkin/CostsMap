@@ -83,6 +83,6 @@ code of conduct, and the process for submitting pull requests to us.
 
 ## License
 
-This project is licensed under the [GPL-3.0](LICENSE.md) License - see
-the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the [GPL-3.0](LICENSE) License - see
+the [LICENSE](LICENSE) file for details
 
