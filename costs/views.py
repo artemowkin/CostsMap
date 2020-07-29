@@ -525,9 +525,12 @@ class StatisticPageView(RenderAuthorizedView):
 
         context_object_name -- entry name in template
 
+        costs_service -- cost's service to calculate a profit
+
     """
 
     context_object_name = 'object'
+    cost_service = None
 
     def get(self, request):
         """Render template with entries for the month"""
@@ -535,10 +538,14 @@ class StatisticPageView(RenderAuthorizedView):
             owner=request.user
         )
         total_sum = self.service.get_total_sum(entries_for_the_month)
+        profit = self.cost_service.get_profit_for_the_last_month(
+            request.user
+        )
 
         context = {
             self.context_object_name: entries_for_the_month,
-            'total_sum': total_sum
+            'total_sum': total_sum,
+            'profit': profit
         }
         return render(request, self.template_name, context)
 
@@ -558,6 +565,7 @@ class CostsStatisticPageView(StatisticPageView):
     """
 
     service = CostService()
+    cost_service = CostService()
     template_name = 'costs/costs_statistic.html'
     context_object_name = 'costs'
 
@@ -577,6 +585,7 @@ class IncomesStatisticPageView(StatisticPageView):
     """
 
     service = IncomeService()
+    cost_service = CostService()
     template_name = 'costs/incomes_statistic.html'
     context_object_name = 'incomes'
 

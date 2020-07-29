@@ -10,7 +10,7 @@
 <h1 class="categories_header">Statistic</h1>
 
 {% if costs %}
-    <canvas id="statistic_graph"></canvas>
+    {% include 'statistic.html' with profit=profit %}
 
     <script>
         let graph = document.getElementById('statistic_graph').getContext('2d');

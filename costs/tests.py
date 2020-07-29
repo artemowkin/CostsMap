@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
@@ -61,6 +62,9 @@ class CostServiceTest(TestCase, CRUDTests, DatesTests):
         self.category = Category.objects.create(
             title='Test category', owner=self.user
         )
+        self.income = Income.objects.create(
+            incomes_sum='50.00', owner=self.user
+        )
         self.instance = Cost.objects.create(
             title='Test cost', costs_sum='35.00',
             category=self.category, owner=self.user
@@ -71,6 +75,12 @@ class CostServiceTest(TestCase, CRUDTests, DatesTests):
         costs_sum = self.service.get_total_sum(costs)
         cost = self.service.get_concrete(self.instance.pk, self.user)
         self.assertEqual(costs_sum, cost.costs_sum)
+
+    def test_get_profit_for_the_last_month(self):
+        profit = self.service.get_profit_for_the_last_month(self.user)
+        incomes = Decimal(self.income.incomes_sum)
+        costs = Decimal(self.instance.costs_sum)
+        self.assertEqual(profit, incomes - costs)
 
     def test_get_statistic_for_the_last_month(self):
         cost = self.service.get_concrete(self.instance.pk, self.user)

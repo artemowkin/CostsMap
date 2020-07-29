@@ -12,6 +12,7 @@ from ..models import Cost
 from ..forms import CostForm
 from .base import BaseCRUDService, DateStrategy
 from .categories import CategoryService
+from .incomes import IncomeService
 
 
 User = get_user_model()
@@ -25,6 +26,8 @@ class CostService(BaseCRUDService):
         model -- cost's model
 
         category_service -- category's service
+
+        income_service -- income's service
 
         form -- cost's form
 
@@ -49,6 +52,7 @@ class CostService(BaseCRUDService):
 
     model = Cost
     category_service = CategoryService()
+    income_service = IncomeService()
     form = CostForm
 
     def __init__(self) -> None:
@@ -84,6 +88,15 @@ class CostService(BaseCRUDService):
         form = super().get_change_form(pk, owner)
         self._form_set_owners_categories(form, owner)
         return form
+
+    def get_profit_for_the_last_month(self, owner: User) -> Decimal:
+        """Return difference between monthly incomes and monthly costs"""
+        monthly_incomes = self.income_service.get_for_the_last_month(owner)
+        monthly_costs = self.get_for_the_last_month(owner)
+        incomes_total_sum = self.income_service.get_total_sum(monthly_incomes)
+        costs_total_sum = self.get_total_sum(monthly_costs)
+        profit = incomes_total_sum - costs_total_sum
+        return profit
 
     def get_statistic_for_the_last_month(self, owner: User):
         """
