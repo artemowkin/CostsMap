@@ -3,11 +3,6 @@
 CostsMap is a site for costs accounting. On this site you can add your
 costs and incomes, sort them by category and see monthly statistic
 
-This initially appeared on
-[gist](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2), but as
-I can no longer open that page as there are too many comments, I have
-moved it here.
-
 ## Summary
 
   - [Getting Started](#getting-started)
