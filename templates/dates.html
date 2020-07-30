@@ -11,9 +11,9 @@
     </div>
     <div class="dates_right_button">
         {% if incomes %}
-            <a href="{% url 'incomes_for_the_date' next_date %}">&lt;</a>
+            <a href="{% url 'incomes_for_the_date' next_date %}">&gt;</a>
         {% else %}
-            <a href="{% url 'costs_for_the_date' next_date %}">&lt;</a>
+            <a href="{% url 'costs_for_the_date' next_date %}">&gt;</a>
         {% endif %}
     </div>
 </div>
