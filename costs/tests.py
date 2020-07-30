@@ -3,8 +3,9 @@
 import datetime
 from decimal import Decimal
 
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 from .models import Cost, Category, Income
 from .services.costs import CostService
@@ -222,4 +223,297 @@ class CategoryServiceTest(TestCase, CRUDTests):
         self.service.set_default_categories(self.user)
         new_categories = self.user.categories.all()
         self.assertGreater(len(new_categories), 1)
+
+
+class CostsViewsTests(TestCase):
+
+    def setUp(self):
+        self.today = datetime.date.today()
+        self.user = User.objects.create_superuser(
+            username='testuser', password='testpass'
+        )
+        self.category = Category.objects.create(
+            title='testcategory', owner=self.user
+        )
+        self.cost = Cost.objects.create(
+            title='testcost', costs_sum='100.00',
+            owner=self.user, category=self.category
+        )
+        self.client = Client()
+        self.client.login(username='testuser', password='testpass')
+
+    def test_costs_for_the_date_view(self):
+        response = self.client.get(reverse('today_costs'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/costs.html')
+        self.assertContains(response, self.cost.title)
+
+    def test_costs_for_the_date_view_with_dates(self):
+        response = self.client.get(
+            reverse('costs_for_the_date', args=[self.today.isoformat()])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/costs.html')
+        self.assertContains(response, self.cost.title)
+        response = self.client.get(
+            reverse('costs_for_the_date', args=['2020-01-01'])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/costs.html')
+        self.assertNotContains(response, self.cost.title)
+
+    def test_create_cost_view(self):
+        response = self.client.get(reverse('create_cost'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/add_cost.html')
+        response = self.client.post(reverse('create_cost'), {
+            'title': 'some_title',
+            'costs_sum': '100',
+            'category': self.category.pk
+        })
+        self.assertEqual(response.status_code, 302)
+
+    def test_change_cost_view(self):
+        response = self.client.get(
+            reverse('change_cost', args=[self.cost.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/change_cost.html')
+        response = self.client.post(
+            reverse('change_cost', args=[self.cost.pk]), {
+                'title': 'some_title',
+                'costs_sum': '100',
+                'category': self.category.pk
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_delete_cost_view(self):
+        response = self.client.get(
+            reverse('delete_cost', args=[self.cost.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/delete_cost.html')
+        response = self.client.post(
+            reverse('delete_cost', args=[self.cost.pk])
+        )
+        self.assertEqual(response.status_code, 302)
+
+
+class IncomesViewsTests(TestCase):
+
+    def setUp(self):
+        self.today = datetime.date.today()
+        self.user = User.objects.create_superuser(
+            username='testuser', password='testpass'
+        )
+        self.income = Income.objects.create(
+            incomes_sum='100.00', owner=self.user
+        )
+        self.client = Client()
+        self.client.login(username='testuser', password='testpass')
+
+    def test_incomes_for_the_date_view(self):
+        response = self.client.get(reverse('today_incomes'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/incomes.html')
+        self.assertContains(response, self.income.incomes_sum)
+
+    def test_incomes_for_the_date_view_with_dates(self):
+        response = self.client.get(
+            reverse('incomes_for_the_date', args=[self.today.isoformat()])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/incomes.html')
+        self.assertContains(response, self.income.incomes_sum)
+        response = self.client.get(
+            reverse('incomes_for_the_date', args=['2020-01-01'])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/incomes.html')
+        self.assertNotContains(response, self.income.incomes_sum)
+
+    def test_create_income_view(self):
+        response = self.client.get(reverse('create_income'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/add_income.html')
+        response = self.client.post(reverse('create_income'), {
+            'incomes_sum': '100'
+        })
+        self.assertEqual(response.status_code, 302)
+
+    def test_change_income_view(self):
+        response = self.client.get(
+            reverse('change_income', args=[self.income.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/change_income.html')
+        response = self.client.post(
+            reverse('change_income', args=[self.income.pk]), {
+                'incomes_sum': '100'
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_delete_income_view(self):
+        response = self.client.get(
+            reverse('delete_income', args=[self.income.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/delete_income.html')
+        response = self.client.post(
+            reverse('delete_income', args=[self.income.pk])
+        )
+        self.assertEqual(response.status_code, 302)
+
+
+class CategoriesViewsTests(TestCase):
+
+    def setUp(self):
+        self.today = datetime.date.today()
+        self.user = User.objects.create_superuser(
+            username='testuser', password='testpass'
+        )
+        self.category = Category.objects.create(
+            title='testcategory', owner=self.user
+        )
+        self.client = Client()
+        self.client.login(username='testuser', password='testpass')
+
+    def test_category_list_view(self):
+        response = self.client.get(reverse('category_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/category_list.html')
+        self.assertContains(response, self.category.title)
+
+    def test_create_category_view(self):
+        response = self.client.get(reverse('create_category'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/add_category.html')
+        response = self.client.post(reverse('create_category'), {
+            'title': 'some_title',
+        })
+        self.assertEqual(response.status_code, 302)
+
+    def test_change_category_view(self):
+        response = self.client.get(
+            reverse('change_category', args=[self.category.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/change_category.html')
+        response = self.client.post(
+            reverse('change_category', args=[self.category.pk]), {
+                'title': 'some_title',
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_delete_category_view(self):
+        response = self.client.get(
+            reverse('delete_category', args=[self.category.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/delete_category.html')
+        response = self.client.post(
+            reverse('delete_category', args=[self.category.pk])
+        )
+        self.assertEqual(response.status_code, 302)
+
+
+class HistoryViewsTests(TestCase):
+
+    def setUp(self):
+        self.today = datetime.date.today()
+        self.user = User.objects.create_superuser(
+            username='testuser', password='testpass'
+        )
+        self.category = Category.objects.create(
+            title='testcategory', owner=self.user
+        )
+        self.cost = Cost.objects.create(
+            title='testcost', costs_sum='100.00',
+            owner=self.user, category=self.category
+        )
+        self.income = Income.objects.create(
+            incomes_sum='100.00', owner=self.user
+        )
+        self.client = Client()
+        self.client.login(username='testuser', password='testpass')
+
+    def test_costs_history_view(self):
+        response = self.client.get(reverse('costs_history'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/history_costs.html')
+        self.assertContains(response, self.cost.title)
+
+    def test_incomes_history_view(self):
+        response = self.client.get(reverse('incomes_history'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/history_incomes.html')
+        self.assertContains(response, self.income.incomes_sum)
+
+
+class StatisticViewsTests(TestCase):
+
+    def setUp(self):
+        self.today = datetime.date.today()
+        self.user = User.objects.create_superuser(
+            username='testuser', password='testpass'
+        )
+        self.category = Category.objects.create(
+            title='testcategory', owner=self.user
+        )
+        self.cost = Cost.objects.create(
+            title='testcost', costs_sum='100.00',
+            owner=self.user, category=self.category
+        )
+        self.income = Income.objects.create(
+            incomes_sum='100.00', owner=self.user
+        )
+        self.client = Client()
+        self.client.login(username='testuser', password='testpass')
+
+    def test_statistic_view(self):
+        response = self.client.get(
+            reverse('statistic', args=[self.today.isoformat()[:-3]])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.category.title)
+        self.assertContains(response, self.cost.costs_sum)
+
+    def test_costs_statistic_page_view(self):
+        response = self.client.get(reverse('costs_statistic_for_this_month'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/costs_statistic.html')
+        self.assertContains(response, self.cost.title)
+        self.assertContains(response, 'canvas')
+        self.assertContains(response, 'profit')
+
+    def test_costs_statistic_page_view_with_date(self):
+        response = self.client.get(
+            reverse('costs_statistic_page', args=['2020-01'])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/costs_statistic.html')
+        self.assertNotContains(response, self.cost.title)
+        self.assertNotContains(response, 'canvas')
+        self.assertNotContains(response, 'profit')
+
+    def test_incomes_statistic_page_view(self):
+        response = self.client.get(reverse('incomes_statistic_for_this_month'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/incomes_statistic.html')
+        self.assertContains(response, self.income.incomes_sum)
+        self.assertContains(response, 'canvas')
+        self.assertContains(response, 'profit')
+
+    def test_incomes_statistic_page_view_with_date(self):
+        response = self.client.get(
+            reverse('incomes_statistic_page', args=['2020-01'])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/incomes_statistic.html')
+        self.assertNotContains(response, self.income.incomes_sum)
+        self.assertNotContains(response, 'canvas')
+        self.assertNotContains(response, 'profit')
 
