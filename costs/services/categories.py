@@ -7,6 +7,7 @@ from django.db.models import QuerySet
 
 from ..models import Category
 from ..forms import CategoryForm
+from .strategies import UniqueCreateCRUDStrategy
 from .base import BaseCRUDService
 
 
@@ -25,9 +26,11 @@ class CategoryService(BaseCRUDService):
 
         default_categories -- list of default categories titles
 
-    Overridden methods:
+        crud_strategy -- strategy with CRUD functionality
 
-        create -- create a category without duplicates for one owner
+    And the following methods:
+
+        set_default_categories -- create default categories for user
 
     """
 
@@ -35,29 +38,11 @@ class CategoryService(BaseCRUDService):
     form = CategoryForm
     default_categories = ['Еда', 'Здоровье', 'Развлечения', 'Транспорт']
 
-    def _add_exist_error_to_form(self, form: Form) -> Form:
-        """Add an error `already exists` to form"""
-        form.add_error(
-            None, f'The same {self.model.__name__.lower()} already exists'
-        )
-
-    def create(self, form_data: dict, owner: User):
-        """Create a new owner's category from form_data"""
-        self._check_owner_is_user(owner)
-        form = self.form(form_data)
-        if form.is_valid():
-            category, has_created = self.model.objects.get_or_create(
-                **form.cleaned_data, owner=owner
-            )
-            if has_created:
-                return category
-
-            self._add_exist_error_to_form(form)
-
-        return form
+    def __init__(self) -> None:
+        self.crud_strategy = UniqueCreateCRUDStrategy(self)
 
     def set_default_categories(self, owner: User) -> None:
-        """Create default categories for owner"""
+        """Create default categories from default_categories for owner"""
         for category in self.default_categories:
             self.model.objects.create(title=category, owner=owner)
 

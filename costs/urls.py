@@ -6,6 +6,7 @@ from . import views, converters
 
 
 register_converter(converters.ISODateConverter, 'date')
+register_converter(converters.MonthYearConverter, 'month')
 
 urlpatterns = [
     # Costs
@@ -50,10 +51,16 @@ urlpatterns = [
          name='incomes_history'),
 
     # Statistic
-    path('statistic/json/', views.StatisticView.as_view(), name='statistic'),
+    path('statistic/<month:date>/json/', views.StatisticView.as_view(),
+         name='statistic'),
     path('statistic/costs/', views.CostsStatisticPageView.as_view(),
-         name='costs_statistic_page'),
+         name='costs_statistic_for_this_month'),
     path('statistic/incomes/', views.IncomesStatisticPageView.as_view(),
+         name='incomes_statistic_for_this_month'),
+    path('statistic/<month:date>/costs/',
+         views.CostsStatisticPageView.as_view(), name='costs_statistic_page'),
+    path('statistic/<month:date>/incomes/',
+         views.IncomesStatisticPageView.as_view(),
          name='incomes_statistic_page'),
 ]
 

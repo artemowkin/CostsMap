@@ -46,7 +46,10 @@
     }
 
     async function get_data() {
-        let response = await fetch('/statistic/json/');
+        let current_date = document.querySelector('.dates_current_date');
+        let date_string = current_date.textContent.trim();
+        let url = `/statistic/${date_string}/json/`;
+        let response = await fetch(url);
         let json = await response.json();
         return json;
     }

@@ -1,3 +1,5 @@
+"""Module with cost's tests"""
+
 import datetime
 from decimal import Decimal
 
@@ -40,13 +42,13 @@ class CRUDTests:
 
 class DatesTests:
 
-    def test_get_for_the_last_month(self):
-        entries = self.service.get_for_the_last_month(self.user)
+    def test_get_for_the_month(self):
+        entries = self.service.get_for_the_month(self.user, self.today)
         self.assertEqual(entries[0].date.month, self.today.month)
 
     def test_get_for_the_date(self):
         entries = self.service.get_for_the_date(
-            self.user, self.today.isoformat()
+            self.user, self.today
         )
         self.assertEqual(entries[0].date, self.today)
 
@@ -76,19 +78,21 @@ class CostServiceTest(TestCase, CRUDTests, DatesTests):
         cost = self.service.get_concrete(self.instance.pk, self.user)
         self.assertEqual(costs_sum, cost.costs_sum)
 
-    def test_get_profit_for_the_last_month(self):
-        profit = self.service.get_profit_for_the_last_month(self.user)
+    def test_get_profit_for_the_month(self):
+        profit = self.service.get_profit_for_the_month(self.user, self.today)
         incomes = Decimal(self.income.incomes_sum)
         costs = Decimal(self.instance.costs_sum)
-        self.assertEqual(profit, incomes - costs)
+        self.assertEqual(profit, incomes-costs)
 
-    def test_get_statistic_for_the_last_month(self):
+    def test_get_statistic_for_the_month(self):
         cost = self.service.get_concrete(self.instance.pk, self.user)
         correct_statistic = [{
             'category': self.category.title,
             'costs': cost.costs_sum
         }]
-        statistic = self.service.get_statistic_for_the_last_month(self.user)
+        statistic = self.service.get_statistic_for_the_month(
+            self.user, self.today
+        )
         self.assertEqual(statistic, correct_statistic)
 
     def test_create(self):

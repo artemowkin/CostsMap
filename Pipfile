@@ -13,6 +13,7 @@ gunicorn = "*"
 ipython = "*"
 psycopg2-binary = "*"
 whitenoise = "*"
+monthdelta = "*"
 
 [requires]
 python_version = "3.8"

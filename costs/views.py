@@ -1,4 +1,4 @@
-"""Modules with views for costs"""
+"""Module with views for costs"""
 
 import datetime
 
@@ -15,7 +15,7 @@ from django.conf import settings
 from .services.costs import CostService
 from .services.categories import CategoryService
 from .services.incomes import IncomeService
-from .templates import ContextDate
+from .utils import ContextDate, MonthContextDate
 
 
 class BaseView(View):
@@ -114,24 +114,29 @@ class DateView(RenderAuthorizedView):
     template_name = 'costs/costs.html'
     context_object_name = 'object_list'
 
-    def get(self, request, date=None):
-        """Return costs for the date"""
-        if not date:
-            date = datetime.date.today().isoformat()
-
-        entries = self.service.get_for_the_date(
-            owner=request.user, date=date
-        )
-        total_sum = self.service.get_total_sum(entries)
-
+    def get_context(self, request, date):
+        """Return context for the template"""
         context_date = ContextDate(date)
         context = {
-            self.context_object_name: entries,
-            'total_sum': total_sum,
+            self.context_object_name: self.entries,
+            'total_sum': self.total_sum,
             'date': context_date.date,
             'previous_date': context_date.previous_day,
             'next_date': context_date.next_day
         }
+        return context
+
+    def get(self, request, date=None):
+        """Return costs for the date"""
+        if not date:
+            date = datetime.date.today()
+
+        self.entries = self.service.get_for_the_date(
+            owner=request.user, date=date
+        )
+        self.total_sum = self.service.get_total_sum(self.entries)
+
+        context = self.get_context(request, date)
         return render(request, self.template_name, context)
 
 
@@ -509,10 +514,10 @@ class StatisticView(APIAuthorizedView):
 
     service = CostService()
 
-    def get(self, request):
+    def get(self, request, date):
         """Return json with cost's statistic for the month"""
-        data = self.service.get_statistic_for_the_last_month(
-            owner=request.user
+        data = self.service.get_statistic_for_the_month(
+            owner=request.user, date=date
         )
         return JsonResponse(data, safe=False)
 
@@ -532,21 +537,32 @@ class StatisticPageView(RenderAuthorizedView):
     context_object_name = 'object'
     cost_service = None
 
-    def get(self, request):
-        """Render template with entries for the month"""
-        entries_for_the_month = self.service.get_for_the_last_month(
-            owner=request.user
+    def get_context(self, request, date):
+        """Return context for template"""
+        context_date = MonthContextDate(date)
+        context = {
+            self.context_object_name: self.entries_for_the_month,
+            'date': context_date.date,
+            'previous_date': context_date.previous_month,
+            'next_date': context_date.next_month,
+            'total_sum': self.total_sum,
+            'profit': self.profit
+        }
+        return context
+
+    def get(self, request, date=None):
+        """Render template with entries for the month in date"""
+        self.entries_for_the_month = self.service.get_for_the_month(
+            owner=request.user, date=date
         )
-        total_sum = self.service.get_total_sum(entries_for_the_month)
-        profit = self.cost_service.get_profit_for_the_last_month(
-            request.user
+        self.total_sum = self.service.get_total_sum(
+            self.entries_for_the_month
+        )
+        self.profit = self.cost_service.get_profit_for_the_month(
+            request.user, date=date
         )
 
-        context = {
-            self.context_object_name: entries_for_the_month,
-            'total_sum': total_sum,
-            'profit': profit
-        }
+        context = self.get_context(request, date)
         return render(request, self.template_name, context)
 
 
@@ -588,4 +604,13 @@ class IncomesStatisticPageView(StatisticPageView):
     cost_service = CostService()
     template_name = 'costs/incomes_statistic.html'
     context_object_name = 'incomes'
+
+    def get_context(self, request, date, *args, **kwargs):
+        """Return context with costs"""
+        context = super().get_context(request, date, *args, **kwargs)
+        costs = self.cost_service.get_for_the_month(
+            owner=request.user, date=date
+        )
+        context.update({'costs': costs})
+        return context
 

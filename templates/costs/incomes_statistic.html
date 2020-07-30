@@ -7,18 +7,30 @@
 {% endblock %}
 
 {% block content %}
-<h1 class="categories_header">Statistic</h1>
+<div class="dates">
+    <div class="dates_left_button">
+        <a href="{% url 'incomes_statistic_page' previous_date %}">&lt;</a>
+    </div>
+    <div class="dates_current_date">
+        {{ date }}
+    </div>
+    <div class="dates_right_button">
+        <a href="{% url 'incomes_statistic_page' next_date %}">&gt;</a>
+    </div>
+</div>
 
-{% include 'statistic.html' with profit=profit %}
+{% if costs %}
+    {% include 'statistic.html' with profit=profit %}
+{% endif %}
 
 <div class="changer">
-    <a href="{% url 'costs_statistic_page' %}" class="changer_link">Costs</a>
+    <a href="{% url 'costs_statistic_page' date %}" class="changer_link">Costs</a>
     <span class="changer_current">Incomes</span>
 </div>
 
 {% if incomes %}
     {% include 'incomes_list.html' with incomes=incomes total_sum=total_sum %}
 {% else %}
-    <p class="empty_text">You don't have any incomes</p>
+    <p class="empty_text">You don't have any incomes for this month</p>
 {% endif %}
 {% endblock %}

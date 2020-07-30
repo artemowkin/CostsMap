@@ -1,3 +1,5 @@
+"""Module with cost's forms"""
+
 from django import forms
 from django.contrib.auth import get_user_model
 

@@ -15,7 +15,7 @@
             <div class="mobile_buttons_wrapper">
                 <a href="{% url 'today_costs' %}"><img src="{% static 'images/home.png' %}"></a>
                 <a href="{% url 'category_list' %}"><img src="{% static 'images/categories.png' %}"></a>
-                <a href="{% url 'costs_statistic_page' %}"><img src="{% static 'images/statistics.png' %}"></a>
+                <a href="{% url 'costs_statistic_for_this_month' %}"><img src="{% static 'images/statistics.png' %}"></a>
                 <a href="{% url 'costs_history' %}"><img src="{% static 'images/history.png' %}"></a>
             </div>
         </div>
@@ -32,7 +32,7 @@
                     <a href="{% url 'category_list' %}" class="header_nav_link">
                         Categories
                     </a>
-                    <a href="{% url 'costs_statistic_page' %}" class="header_nav_link">
+                    <a href="{% url 'costs_statistic_for_this_month' %}" class="header_nav_link">
                         Statistic
                     </a>
                     <a href="{% url 'costs_history' %}" class="header_nav_link">
