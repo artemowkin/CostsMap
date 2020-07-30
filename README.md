@@ -7,7 +7,6 @@ costs and incomes, sort them by category and see monthly statistic
 
   - [Getting Started](#getting-started)
   - [Runing the tests](#running-the-tests)
-  - [Contributing](#contributing)
   - [Authors](#authors)
   - [License](#license)
 
@@ -71,11 +70,6 @@ To run the tests you need to run the following command:
 ```
 $ ./manage.py test
 ```
-
-## Contributing
-
-Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for details on our
-code of conduct, and the process for submitting pull requests to us.
 
 ## Authors
 
