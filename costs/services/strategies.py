@@ -67,9 +67,10 @@ class BaseCRUDStrategy:
 
     def _add_exist_error_to_form(self, form: Form) -> Form:
         """Add an error `already exists` to form"""
-        form.add_error(
-            None, f'The same {self.model.__name__.lower()} already exists'
+        error_message = (
+            f'The same {self._service.model.__name__.lower()} already exists'
         )
+        form.add_error(None, error_message)
 
     def change(self, form_data: dict, pk, owner: User):
         """Change an owner's model instance with pk from form_data"""
