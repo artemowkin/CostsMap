@@ -24,7 +24,9 @@ class CostForm(forms.Form):
 
     title = forms.CharField(max_length=255)
     costs_sum = forms.DecimalField(max_digits=7, decimal_places=2)
-    category = forms.ModelChoiceField(queryset=Category.objects.all())
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(), empty_label=None
+    )
 
 
 class IncomeForm(forms.Form):
