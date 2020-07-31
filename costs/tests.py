@@ -3,7 +3,7 @@
 import datetime
 from decimal import Decimal
 
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
@@ -239,7 +239,6 @@ class CostsViewsTests(TestCase):
             title='testcost', costs_sum='100.00',
             owner=self.user, category=self.category
         )
-        self.client = Client()
         self.client.login(username='testuser', password='testpass')
 
     def test_costs_for_the_date_view(self):
@@ -310,7 +309,6 @@ class IncomesViewsTests(TestCase):
         self.income = Income.objects.create(
             incomes_sum='100.00', owner=self.user
         )
-        self.client = Client()
         self.client.login(username='testuser', password='testpass')
 
     def test_incomes_for_the_date_view(self):
@@ -377,7 +375,6 @@ class CategoriesViewsTests(TestCase):
         self.category = Category.objects.create(
             title='testcategory', owner=self.user
         )
-        self.client = Client()
         self.client.login(username='testuser', password='testpass')
 
     def test_category_list_view(self):
@@ -437,7 +434,6 @@ class HistoryViewsTests(TestCase):
         self.income = Income.objects.create(
             incomes_sum='100.00', owner=self.user
         )
-        self.client = Client()
         self.client.login(username='testuser', password='testpass')
 
     def test_costs_history_view(self):
@@ -470,7 +466,6 @@ class StatisticViewsTests(TestCase):
         self.income = Income.objects.create(
             incomes_sum='100.00', owner=self.user
         )
-        self.client = Client()
         self.client.login(username='testuser', password='testpass')
 
     def test_statistic_view(self):
