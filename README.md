@@ -41,7 +41,7 @@ POSTGRES_NAME=<postgres_dbname>
 POSTGRES_USER=<postgres_dbuser>
 POSTGRES_PASSWORD=<postgres_dbuser_password>
 POSTGRES_HOST=<postgres_dbhost>
-POSTGRES_PORT=<postgres_dbport
+POSTGRES_PORT=<postgres_dbport>
 ```
 
 For example:
