@@ -127,6 +127,16 @@ if ENVIRONMENT == 'production':
     DATABASES['default'].update(db_from_env)
 
 
+# Cache
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/django_cache'
+    }
+}
+
+
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 

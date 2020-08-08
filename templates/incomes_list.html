@@ -1,4 +1,5 @@
 {% load static %}
+{% load cache %}
 
 <div class="total_sum_container">
     <div class="total_sum">Total sum: {{ total_sum }} &#8381;</div>
@@ -7,7 +8,9 @@
 {% for income in incomes %}
     <div class="income">
         <div class="income_left">
-            <img src="{% static 'images/rouble_white.png' %}" class="incomes_image">
+            {% cache 604800 income_image %}
+                <img src="{% static 'images/rouble_white.png' %}" class="incomes_image">
+            {% endcache %}
             <div class="income_title_and_date">
                 <div class="incomes_title">{{ income.incomes_sum }} &#8381;</div>
                 <div class="incomes_subtitle">{{ income.date }}</div>

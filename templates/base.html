@@ -1,4 +1,5 @@
 {% load static %}
+{% load cache %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -11,36 +12,40 @@
     </head>
     <body>
 
-        <div class="mobile_buttons">
-            <div class="mobile_buttons_wrapper">
-                <a href="{% url 'today_costs' %}"><img src="{% static 'images/home.png' %}"></a>
-                <a href="{% url 'category_list' %}"><img src="{% static 'images/categories.png' %}"></a>
-                <a href="{% url 'costs_statistic_for_this_month' %}"><img src="{% static 'images/statistics.png' %}"></a>
-                <a href="{% url 'costs_history' %}"><img src="{% static 'images/history.png' %}"></a>
-            </div>
-        </div>
-
-        <header>
-            <div class="header_wrapper">
-                <div class="logo">
-                    CostsMap
+        {% cache 604800 mobile_buttons %}
+            <div class="mobile_buttons">
+                <div class="mobile_buttons_wrapper">
+                    <a href="{% url 'today_costs' %}"><img src="{% static 'images/home.png' %}"></a>
+                    <a href="{% url 'category_list' %}"><img src="{% static 'images/categories.png' %}"></a>
+                    <a href="{% url 'costs_statistic_for_this_month' %}"><img src="{% static 'images/statistics.png' %}"></a>
+                    <a href="{% url 'costs_history' %}"><img src="{% static 'images/history.png' %}"></a>
                 </div>
-                <nav class="header_nav">
-                    <a href="{% url 'today_costs' %}" class="header_nav_link">
-                        Costs
-                    </a>
-                    <a href="{% url 'category_list' %}" class="header_nav_link">
-                        Categories
-                    </a>
-                    <a href="{% url 'costs_statistic_for_this_month' %}" class="header_nav_link">
-                        Statistic
-                    </a>
-                    <a href="{% url 'costs_history' %}" class="header_nav_link">
-                        History
-                    </a>
-                </nav>
             </div>
-        </header>
+        {% endcache %}
+
+        {% cache 604800 header %}
+            <header>
+                <div class="header_wrapper">
+                    <div class="logo">
+                        CostsMap
+                    </div>
+                    <nav class="header_nav">
+                        <a href="{% url 'today_costs' %}" class="header_nav_link">
+                            Costs
+                        </a>
+                        <a href="{% url 'category_list' %}" class="header_nav_link">
+                            Categories
+                        </a>
+                        <a href="{% url 'costs_statistic_for_this_month' %}" class="header_nav_link">
+                            Statistic
+                        </a>
+                        <a href="{% url 'costs_history' %}" class="header_nav_link">
+                            History
+                        </a>
+                    </nav>
+                </div>
+            </header>
+        {% endcache %}
 
         <div class="content">
             <div class="wrapper">

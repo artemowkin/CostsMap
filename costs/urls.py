@@ -1,6 +1,7 @@
 from django.urls import path, register_converter
 from django.views.generic.base import RedirectView
 from django.views.generic import TemplateView
+from django.views.decorators.cache import cache_page
 
 from . import views, converters
 
@@ -27,18 +28,24 @@ urlpatterns = [
          name='today_incomes'),
     path('incomes/<date:date>/', views.IncomesForTheDateView.as_view(),
          name='incomes_for_the_date'),
-    path('incomes/add/', views.CreateIncomeView.as_view(),
+    path('incomes/add/', cache_page(604800)(views.CreateIncomeView.as_view()),
          name='create_income'),
     path('incomes/<uuid:pk>/change/', views.ChangeIncomeView.as_view(),
          name='change_income'),
-    path('incomes/<uuid:pk>/delete/', views.DeleteIncomeView.as_view(),
-         name='delete_income'),
+    path(
+        'incomes/<uuid:pk>/delete/',
+        cache_page(604800)(views.DeleteIncomeView.as_view()),
+        name='delete_income'
+    ),
 
     # Categories
     path('categories/', views.CategoryListView.as_view(),
          name='category_list'),
-    path('categories/add/', views.CreateCategoryView.as_view(),
-         name='create_category'),
+    path(
+        'categories/add/',
+        cache_page(604800)(views.CreateCategoryView.as_view()),
+        name='create_category'
+    ),
     path('categories/<uuid:pk>/change/', views.ChangeCategoryView.as_view(),
          name='change_category'),
     path('categories/<uuid:pk>/delete/', views.DeleteCategoryView.as_view(),
@@ -59,8 +66,10 @@ urlpatterns = [
          name='incomes_statistic_for_this_month'),
     path('statistic/<month:date>/costs/',
          views.CostsStatisticPageView.as_view(), name='costs_statistic_page'),
-    path('statistic/<month:date>/incomes/',
-         views.IncomesStatisticPageView.as_view(),
-         name='incomes_statistic_page'),
+    path(
+        'statistic/<month:date>/incomes/',
+        views.IncomesStatisticPageView.as_view(),
+        name='incomes_statistic_page'
+    ),
 ]
 
