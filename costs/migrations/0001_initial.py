@@ -16,18 +16,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Category',
-            fields=[
-                ('uuid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('title', models.CharField(max_length=50, unique=True)),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='categories', to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'db_table': 'category',
-                'ordering': ('title',),
-            },
-        ),
-        migrations.CreateModel(
             name='Cost',
             fields=[
                 ('uuid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
@@ -35,7 +23,7 @@ class Migration(migrations.Migration):
                 ('costs_sum', models.DecimalField(decimal_places=2, max_digits=7)),
                 ('date', models.DateField(auto_now_add=True)),
                 ('pub_datetime', models.DateTimeField(auto_now_add=True)),
-                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='costs', to='costs.Category')),
+                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='costs', to='categories.Category')),
                 ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='costs', to=settings.AUTH_USER_MODEL)),
             ],
             options={

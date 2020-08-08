@@ -1,17 +1,6 @@
 from django.contrib import admin
 
-from .models import Cost, Category, Income
-
-
-@admin.register(Income)
-class IncomeAdmin(admin.ModelAdmin):
-    list_display = ('incomes_sum', 'owner')
-
-
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('title', 'owner')
-    search_fields = ('title',)
+from .models import Cost, Category
 
 
 @admin.register(Cost)

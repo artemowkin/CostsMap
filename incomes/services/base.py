@@ -1,11 +1,11 @@
-"""Module with incomes services"""
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.db.models import QuerySet, Sum
 
-from .base import BaseCRUDService
-from .strategies import SimpleCRUDStrategy, DateStrategy
+from services.base import BaseCRUDService
+from services.strategies import DateStrategy
+
 from ..models import Income
 from ..forms import IncomeForm
 
@@ -15,8 +15,31 @@ User = get_user_model()
 
 class IncomeService(BaseCRUDService):
 
-    """
-    Service with business logic for Incomes
+    """Service with business logic for Incomes
+
+    Attributes
+    ----------
+    model : Model
+        Income's model
+
+    form : Form
+        Income's form
+
+    self.date_strategy : Strategy
+        Strategy with date functionality
+
+
+    Methods
+    -------
+    self.get_for_the_month(*args, **kwargs)
+        Return date strategy get_for_the_month() result
+
+    self.get_for_the_date(*args, **kwargs)
+        Return date strategy get_for_the_date result
+
+    self.get_total_sum(queryset)
+        Return sum of incomes in queryset
+
     """
 
     model = Income

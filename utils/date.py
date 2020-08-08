@@ -1,4 +1,4 @@
-"""Module with utilities"""
+"""Module with dates utilities"""
 
 import datetime
 from monthdelta import monthdelta
@@ -6,7 +6,14 @@ from monthdelta import monthdelta
 
 class BaseContextDate:
 
-    """Abstract class for dates in template context"""
+    """Abstract class for dates in template context
+
+    Properties
+    ----------
+    date : str
+        Return string with current date
+
+    """
 
     def __init__(self, date: datetime.date = None):
         if not date:
@@ -16,14 +23,22 @@ class BaseContextDate:
 
     @property
     def date(self):
-        """Return ISO string of current date"""
+        """Return ISO string with current date"""
         return self._date.isoformat()
 
 
 class ContextDate(BaseContextDate):
 
-    """
-    Date with previous_day and next_day properties for template context
+    """ContextDate with previous_day and next_day properties
+
+    Properties
+    ----------
+    previous_day : str
+        Return string with previous day date
+
+    next_day : str
+        Return string with next day date
+
     """
 
     @property
@@ -41,8 +56,19 @@ class ContextDate(BaseContextDate):
 
 class MonthContextDate(BaseContextDate):
 
-    """
-    Date with previous_month and next_month properties for template context
+    """ContextDate with previous_month and next_month properties
+
+    Properties
+    ----------
+    date : str
+        Return string with current date without days
+
+    previous_month : str
+        Return string with previous month date
+
+    next_month : str
+        Return string with next_month date
+
     """
 
     @property

@@ -1,41 +1,132 @@
-"""Model with base services"""
+"""Module with cost's services"""
 
-from django.db.models import QuerySet, Model
-from .strategies import SimpleCRUDStrategy
+from __future__ import annotations
+import datetime
+from decimal import Decimal
+
+from django.contrib.auth import get_user_model
+from django.db.models import QuerySet, Sum
+from django.db import connection
+
+from services.base import BaseCRUDService
+from services.strategies import (
+    CustomFormCategoriesCRUDStrategy,
+    DateStrategy
+)
+from incomes.services import IncomeService
+from categories.services import CategoryService
+
+from ..models import Cost
+from ..forms import CostForm
 
 
-class BaseCRUDService:
+User = get_user_model()
 
-    """Class with base CRUD methods"""
+
+class CostService(BaseCRUDService):
+
+    """Service with business logic for Costs
+
+    Attributes
+    ----------
+    model : Model
+        Cost model
+
+    category_service : Service
+        Category service
+
+    income_service : Service
+        Income service
+
+    form : Form
+        Cost form
+
+    crud_strategy : Strategy
+        Strategy with CRUD functionality
+
+
+    Methods
+    -------
+    get_for_the_month(*args, **kwargs)
+        Return costs for the last month
+
+    get_for_the_date(*args, **kwargs)
+        Return costs for the concrete date
+
+    get_total_sum(queryset)
+        Return sum of costs
+
+    get_profit_for_the_month(owner, date)
+        Return difference between costs and incomes
+
+    get_statistic_for_the_month(owner, date)
+        Return costs for the month in each category
+
+    """
+
+    model = Cost
+    category_service = CategoryService()
+    income_service = IncomeService()
+    form = CostForm
 
     def __init__(self) -> None:
-        self.crud_strategy = SimpleCRUDStrategy(self)
+        self.date_strategy = DateStrategy(self)
+        self.crud_strategy = CustomFormCategoriesCRUDStrategy(self)
 
-    def get_all(self, *args, **kwargs) -> QuerySet:
-        """Return all owner's model instances"""
-        return self.crud_strategy.get_all(*args, **kwargs)
+    def get_for_the_month(self, *args, **kwargs) -> QuerySet:
+        """Return owner's costs for the last month"""
+        return self.date_strategy.get_for_the_month(*args, **kwargs)
 
-    def get_concrete(self, *args, **kwargs) -> Model:
-        """Return a concrete owner's model instance"""
-        return self.crud_strategy.get_concrete(*args, **kwargs)
+    def get_for_the_date(self, *args, **kwargs) -> QuerySet:
+        """Return owner's costs for the concrete date"""
+        return self.date_strategy.get_for_the_date(*args, **kwargs)
 
-    def create(self, *args, **kwargs):
-        """Create a new owner's model instance"""
-        return self.crud_strategy.create(*args, **kwargs)
+    def get_total_sum(self, queryset: QuerySet) -> Decimal:
+        """Return sum of costs in queryset"""
+        costs_sum = queryset.aggregate(Sum('costs_sum'))
+        return costs_sum['costs_sum__sum'] or Decimal('0')
 
-    def change(self, *args, **kwargs):
-        """Change an owner's model instance"""
-        return self.crud_strategy.change(*args, **kwargs)
+    def get_profit_for_the_month(self, owner: User,
+                                 date: datetime.date) -> Decimal:
+        """Return difference between monthly incomes and monthly costs"""
+        monthly_incomes = self.income_service.get_for_the_month(owner, date)
+        monthly_costs = self.get_for_the_month(owner, date)
+        incomes_total_sum = self.income_service.get_total_sum(monthly_incomes)
+        costs_total_sum = self.get_total_sum(monthly_costs)
+        profit = incomes_total_sum - costs_total_sum
+        return profit
 
-    def delete(self, *args, **kwargs):
-        """Delete an owner's model instance"""
-        return self.crud_strategy.delete(*args, **kwargs)
+    def get_statistic_for_the_month(self, owner: User,
+                                    date: datetime.date) -> list:
+        """
+        Return costs for the month in each category as
+        a list of dicts in format
 
-    def get_create_form(self, *args, **kwargs):
-        """Return a form for creating a new model instance"""
-        return self.crud_strategy.get_create_form(*args, **kwargs)
+        {
+            'category': category_title,
+            'costs': sum_of_costs_in_category
+        }
 
-    def get_change_form(self, *args, **kwargs):
-        """Return a form for changing an owner's model instance"""
-        return self.crud_strategy.get_change_form(*args, **kwargs)
+        """
+        date = date or datetime.date.today()
+        sql_get_statistic = (
+            "SELECT category.title, SUM(cost.costs_sum) "
+            "FROM cost INNER JOIN category "
+            "ON cost.category_id = category.uuid "
+            "WHERE category.owner_id = %s AND "
+            "EXTRACT(month FROM cost.date) = %s AND "
+            "EXTRACT(year FROM cost.date) = %s "
+            "GROUP BY category.title;"
+        )
+        with connection.cursor() as cursor:
+            cursor.execute(
+                sql_get_statistic, [owner.pk, date.month, date.year]
+            )
+            result = cursor.fetchall()
+
+        statistic = []
+        for category, costs in result:
+            statistic.append({'category': category, 'costs': costs})
+
+        return statistic
 

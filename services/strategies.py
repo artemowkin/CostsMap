@@ -1,7 +1,6 @@
 """Module with base services"""
 
 from __future__ import annotations
-import re
 import datetime
 
 from django.contrib.auth import get_user_model
@@ -9,7 +8,6 @@ from django.db.models import QuerySet, Model
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.forms import Form
-from django.core.exceptions import PermissionDenied, ImproperlyConfigured
 
 
 User = get_user_model()
@@ -17,24 +15,30 @@ User = get_user_model()
 
 class BaseCRUDStrategy:
 
-    """
-    Base class of strategies with CRUD functionality.
+    """Base class of strategies with CRUD functionality.
 
-    Has following methods:
+    Methods
+    -------
+    get_all(owner)
+        Return all model instances
 
-        get_all -- return all model instances
+    get_concrete(pk, owner)
+        Return a concrete model instance
 
-        get_concrete -- return a concrete model instance
+    create(form_data, owner)
+        Create a new model instance
 
-        create -- create a new model instance
+    change(form_data, pk, owner)
+        Change a model instance
 
-        change -- change a model instance
+    delete(pk, owner)
+        Delete a model instance
 
-        delete -- delete a model instance
+    get_create_form()
+        Return a form for creating a new model instance
 
-        get_create_form -- return a form for creating a new model instance
-
-        get_change_form -- return a form for changin a model instance
+    get_change_form(pk, owner)
+        Return a form for changin a model instance
 
     """
 
@@ -118,17 +122,24 @@ class BaseCRUDStrategy:
 
 class SimpleCRUDStrategy(BaseCRUDStrategy):
 
-    """CRUD strategy with default simple functionality"""
+    """CRUD strategy with simple default functionality"""
 
     pass
 
 
 class UniqueCreateCRUDStrategy(BaseCRUDStrategy):
 
-    """CRUD strategy with unique create an entry functionality"""
+    """CRUD strategy with unique create an entry functionality
+
+    Methods
+    -------
+    create(form_data, owner)
+        Create a new unique category
+
+    """
 
     def create(self, form_data: dict, owner: User):
-        """Create a new owner's category from form_data"""
+        """Create a new owner's category from form_data if not exists"""
         form = self._service.form(form_data)
         if form.is_valid():
             category, has_created = self._service.model.objects.get_or_create(
@@ -144,23 +155,34 @@ class UniqueCreateCRUDStrategy(BaseCRUDStrategy):
 
 class CustomFormCategoriesCRUDStrategy(BaseCRUDStrategy):
 
-    """CRUD strategy with custom form categories"""
+    """CRUD strategy with custom form categories
+
+    Methods
+    -------
+    get_create_form(owner)
+        Return create form with user categories
+
+    get_change_form(pk, owner)
+        Return change form with user categories
+
+    """
 
     def _form_set_owners_categories(self, form: Form, owner: User) -> None:
         """Set queryset for categories field of form"""
         owners_categories = self._service.category_service.get_all(
             owner=owner
         )
+        # ModelChoiceField.queryset
         form.fields['category'].queryset = owners_categories
 
     def get_create_form(self, owner: User) -> Form:
-        """Return create form with owner's categories"""
+        """Return create form with owner categories"""
         form = super().get_create_form()
         self._form_set_owners_categories(form, owner)
         return form
 
     def get_change_form(self, pk, owner: User) -> Form:
-        """Return change form with owner's categories"""
+        """Return change form with owner categories"""
         form = super().get_change_form(pk, owner)
         self._form_set_owners_categories(form, owner)
         return form
@@ -168,7 +190,17 @@ class CustomFormCategoriesCRUDStrategy(BaseCRUDStrategy):
 
 class DateStrategy:
 
-    """Strategy with date functionality"""
+    """Strategy with date functionality
+
+    Methods
+    -------
+    get_for_the_month(owner, date)
+        Return entries for the month
+
+    get_for_the_date(owner, date)
+        Return entries for the concrete date
+
+    """
 
     def __init__(self, service: BaseCRUDService) -> None:
         self._service = service

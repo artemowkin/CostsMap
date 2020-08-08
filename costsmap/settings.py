@@ -70,6 +70,8 @@ INSTALLED_APPS = [
 
     # Local
     'costs',
+    'incomes',
+    'categories',
     'accounts',
 ]
 
