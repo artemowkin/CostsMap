@@ -43,7 +43,9 @@ class CategoryService(BaseCRUDService):
 
     model = Category
     form = CategoryForm
-    default_categories = ['Еда', 'Здоровье', 'Развлечения', 'Транспорт']
+    default_categories = [
+        'Еда', 'Здоровье', 'Развлечения', 'Транспорт', 'Одежда'
+    ]
 
     def __init__(self) -> None:
         self.crud_strategy = UniqueCreateCRUDStrategy(self)
