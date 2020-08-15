@@ -1,7 +1,7 @@
 """Module with dates utilities"""
 
 import datetime
-from monthdelta import monthdelta
+from dateutil.relativedelta import relativedelta
 
 
 class BaseContextDate:
@@ -79,12 +79,12 @@ class MonthContextDate(BaseContextDate):
     @property
     def previous_month(self):
         """Return previous month in format <year>-<month>"""
-        previous_month = self._date - monthdelta(1)
+        previous_month = self._date - relativedelta(months=1)
         return previous_month.isoformat()[:-3]
 
     @property
     def next_month(self):
         """Return next month in format <year>-<month>"""
-        next_month = self._date + monthdelta(1)
+        next_month = self._date + relativedelta(months=1)
         return next_month.isoformat()[:-3]
 

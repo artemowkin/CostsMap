@@ -96,6 +96,14 @@ class CostService(BaseCRUDService):
         profit = incomes_total_sum - costs_total_sum
         return profit
 
+    def _execute_sql_command(self, command: str, args: list) -> list[tuple]:
+        """Execute sql command and return fetchall result"""
+        with connection.cursor() as cursor:
+            cursor.execute(command, args)
+            result = cursor.fetchall()
+
+        return result
+
     def get_statistic_for_the_month(self, owner: User,
                                     date: datetime.date) -> list:
         """
@@ -118,15 +126,39 @@ class CostService(BaseCRUDService):
             "EXTRACT(year FROM cost.date) = %s "
             "GROUP BY category.title;"
         )
-        with connection.cursor() as cursor:
-            cursor.execute(
-                sql_get_statistic, [owner.pk, date.month, date.year]
-            )
-            result = cursor.fetchall()
 
+        result = self._execute_sql_command(
+            sql_get_statistic, [owner.pk, date.month, date.year]
+        )
         statistic = []
         for category, costs in result:
             statistic.append({'category': category, 'costs': costs})
+
+        return statistic
+
+    def get_statistic_for_the_last_year(self, owner: User) -> dict:
+        """Return statistic by months for the last year
+
+        Returns
+        -------
+        dict
+            {
+                'cost_date': date_of_cost,
+                'cost_sum': sum_of_costs_for_this_month
+            }
+
+        """
+        current_year = datetime.date.today().year
+        sql_get_statistic = (
+            "SELECT EXTRACT(month FROM date), SUM(costs_sum) FROM cost "
+            "WHERE EXTRACT(year FROM cost.date) = %s "
+            "GROUP BY date;"
+        )
+
+        result = self._execute_sql_command(sql_get_statistic, [current_year])
+        statistic = []
+        for cost_month, cost_sum in result:
+            statistic.append({'cost_month': cost_month, 'cost_sum': cost_sum})
 
         return statistic
 

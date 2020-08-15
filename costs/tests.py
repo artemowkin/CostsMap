@@ -60,6 +60,15 @@ class CostServiceTest(TestCase, CRUDTests, DatesTests):
         )
         self.assertEqual(statistic, correct_statistic)
 
+    def test_get_statistic_for_the_last_year(self):
+        cost = self.service.get_concrete(self.instance.pk, self.user)
+        correct_statistic = [{
+            'cost_month': self.today.month,
+            'cost_sum': cost.costs_sum
+        }]
+        statistic = self.service.get_statistic_for_the_last_year(self.user)
+        self.assertEqual(statistic, correct_statistic)
+
     def test_create(self):
         form_data = {
             'title': 'Some title',
