@@ -7,6 +7,7 @@ from . import views
 
 register_converter(converters.ISODateConverter, 'date')
 register_converter(converters.MonthYearConverter, 'month')
+register_converter(converters.YearConverter, 'year')
 
 urlpatterns = [
     path('', views.CostsForTheDateView.as_view(),
@@ -27,5 +28,10 @@ urlpatterns = [
          views.CostsStatisticPageView.as_view(), name='costs_statistic_page'),
     path('<month:date>/statistic/json/', views.StatisticView.as_view(),
          name='statistic'),
+    path(
+        '<year:date>/statistic/json/',
+        views.CostStatisticForTheLastYear.as_view(),
+        name='statistic_for_the_year'
+    ),
 ]
 

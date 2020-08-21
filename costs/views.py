@@ -170,3 +170,24 @@ class CostsStatisticPageView(StatisticPageView):
     template_name = 'costs/costs_statistic.html'
     context_object_name = 'costs'
 
+
+class CostStatisticForTheLastYear(APIAuthorizedView):
+
+    """View to return statistic with costs by months for the last year
+
+        Attributes
+        ----------
+        service : Service
+            Cost service
+
+    """
+
+    service = CostService()
+
+    def get(self, request, date):
+        """Return json with cost statistic for the last year"""
+        data = self.service.get_statistic_for_the_year(
+            request.user, date
+        )
+        return JsonResponse(data, safe=False)
+

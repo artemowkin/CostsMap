@@ -136,26 +136,26 @@ class CostService(BaseCRUDService):
 
         return statistic
 
-    def get_statistic_for_the_last_year(self, owner: User) -> dict:
-        """Return statistic by months for the last year
+    def get_statistic_for_the_year(self, owner: User,
+                                        date: datetime.date) -> dict:
+        """Return statistic by months for the year
 
         Returns
         -------
-        dict
-            {
+        list
+            [{
                 'cost_date': date_of_cost,
                 'cost_sum': sum_of_costs_for_this_month
-            }
+            }]
 
         """
-        current_year = datetime.date.today().year
         sql_get_statistic = (
             "SELECT EXTRACT(month FROM date), SUM(costs_sum) FROM cost "
             "WHERE EXTRACT(year FROM cost.date) = %s "
             "GROUP BY date;"
         )
 
-        result = self._execute_sql_command(sql_get_statistic, [current_year])
+        result = self._execute_sql_command(sql_get_statistic, [date.year])
         statistic = []
         for cost_month, cost_sum in result:
             statistic.append({'cost_month': cost_month, 'cost_sum': cost_sum})

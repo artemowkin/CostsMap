@@ -60,13 +60,15 @@ class CostServiceTest(TestCase, CRUDTests, DatesTests):
         )
         self.assertEqual(statistic, correct_statistic)
 
-    def test_get_statistic_for_the_last_year(self):
+    def test_get_statistic_for_the_year(self):
         cost = self.service.get_concrete(self.instance.pk, self.user)
         correct_statistic = [{
             'cost_month': self.today.month,
             'cost_sum': cost.costs_sum
         }]
-        statistic = self.service.get_statistic_for_the_last_year(self.user)
+        statistic = self.service.get_statistic_for_the_year(
+            self.user, self.today
+        )
         self.assertEqual(statistic, correct_statistic)
 
     def test_create(self):
@@ -193,6 +195,15 @@ class CostsViewsTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.category.title)
+        self.assertContains(response, self.cost.costs_sum)
+
+    def test_statistic_for_the_year_view(self):
+        response = self.client.get(
+            reverse('statistic_for_the_year',
+                    args=[self.today.isoformat()[:4]])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, float(self.today.month))
         self.assertContains(response, self.cost.costs_sum)
 
     def test_costs_statistic_page_view(self):

@@ -35,3 +35,20 @@ class MonthYearConverter:
 
         return value
 
+
+class YearConverter:
+
+    """Converter to check is date in `yyyy` format"""
+
+    regex = '\d{4}'
+
+    def to_python(self, value):
+        value = value + '-01-01'
+        return datetime.date.fromisoformat(value)
+
+    def to_url(self, value):
+        if isinstance(value, datetime.date):
+            return value.isoformat()[:4]
+
+        return value
+

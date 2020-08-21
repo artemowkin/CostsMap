@@ -32,7 +32,7 @@ SECRET_KEY = get_env('SECRET_KEY')
 DEBUG = get_env('DEBUG', '1')
 
 ALLOWED_HOSTS = [
-    'costsmap.herokuapp.com', 'localhost', '127.0.0.1', '192.168.1.69'
+    'costsmap.herokuapp.com', 'localhost', '127.0.0.1', '192.168.43.78'
 ]
 
 

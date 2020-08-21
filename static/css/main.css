@@ -423,7 +423,7 @@ form p select:focus {
     padding: 1.1rem;
 }
 
-#statistic_graph {
+canvas {
     margin: 0 auto;
     margin-bottom: 5rem;
 }
@@ -568,7 +568,7 @@ form p select:focus {
         text-align: center;
     }
 
-    #statistic_graph {
+    canvas {
         margin-top: 2rem;
         margin-bottom: 2rem;
     }
