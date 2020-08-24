@@ -152,7 +152,7 @@ class CostService(BaseCRUDService):
         sql_get_statistic = (
             "SELECT EXTRACT(month FROM date), SUM(costs_sum) FROM cost "
             "WHERE EXTRACT(year FROM cost.date) = %s "
-            "GROUP BY date;"
+            "GROUP BY EXTRACT(month FROM date);"
         )
 
         result = self._execute_sql_command(sql_get_statistic, [date.year])
