@@ -152,10 +152,13 @@ class CostService(BaseCRUDService):
         sql_get_statistic = (
             "SELECT EXTRACT(month FROM date), SUM(costs_sum) FROM cost "
             "WHERE EXTRACT(year FROM cost.date) = %s "
+            "AND owner_id = %s "
             "GROUP BY EXTRACT(month FROM date);"
         )
 
-        result = self._execute_sql_command(sql_get_statistic, [date.year])
+        result = self._execute_sql_command(
+            sql_get_statistic, [date.year, owner.pk]
+        )
         statistic = []
         for cost_month, cost_sum in result:
             statistic.append({'cost_month': cost_month, 'cost_sum': cost_sum})
