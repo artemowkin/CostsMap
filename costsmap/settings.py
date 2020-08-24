@@ -188,7 +188,7 @@ ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Yakutsk'
+TIME_ZONE = 'Asia/Krasnoyarsk'
 
 USE_I18N = True
 
