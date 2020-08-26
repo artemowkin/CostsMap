@@ -8,6 +8,7 @@ from django.urls import reverse
 
 from utils.tests import CRUDTests, DatesTests
 
+from costs.models import Cost
 from .models import Category
 from .services import CategoryService
 
@@ -55,6 +56,10 @@ class CategoryServiceTest(TestCase, CRUDTests):
         new_categories = self.user.categories.all()
         self.assertGreater(len(new_categories), 1)
 
+    def test_get_category_costs(self):
+        costs = self.service.get_category_costs(self.instance.pk, self.user)
+        self.assertEqual(costs.count(), 0)
+
 
 class CategoriesViewsTests(TestCase):
 
@@ -66,12 +71,25 @@ class CategoriesViewsTests(TestCase):
         self.category = Category.objects.create(
             title='testcategory', owner=self.user
         )
+        self.cost = Cost.objects.create(
+            title='testtitle', costs_sum='100.00',
+            category=self.category, owner=self.user
+        )
         self.client.login(username='testuser', password='testpass')
 
     def test_category_list_view(self):
         response = self.client.get(reverse('category_list'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'costs/category_list.html')
+        self.assertContains(response, self.category.title)
+
+    def test_costs_by_category_view(self):
+        response = self.client.get(
+            reverse('category_costs', args=[self.category.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'costs/costs_by_category.html')
+        self.assertContains(response, self.cost.title)
         self.assertContains(response, self.category.title)
 
     def test_create_category_view(self):

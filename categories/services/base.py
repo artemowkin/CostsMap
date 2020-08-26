@@ -1,6 +1,7 @@
 """Module with category's services"""
 
 from __future__ import annotations
+import uuid
 
 from django.contrib.auth import get_user_model
 from django.db.models import QuerySet
@@ -54,4 +55,10 @@ class CategoryService(BaseCRUDService):
         """Create default categories from default_categories for owner"""
         for category in self.default_categories:
             self.model.objects.create(title=category, owner=owner)
+
+    def get_category_costs(self, pk: uuid.UUID, owner: User) -> QuerySet:
+        """Return all costs in category"""
+        category = self.get_concrete(pk, owner)
+        costs = category.costs.all()
+        return costs
 

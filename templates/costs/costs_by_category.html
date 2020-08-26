@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}{{ category.title }}{% endblock %}
+
+{% block content %}
+
+<h1 class="history_header">Category: "{{ category.title }}"</h1>
+
+{% if costs %}
+    {% include 'costs_list.html' with costs=costs total_sum=total_sum %}
+{% else %}
+    <p class="empty_text">You don't have any costs in this category</p>
+{% endif %}
+{% endblock %}

@@ -10,6 +10,7 @@ from utils.views import (
 )
 
 from .services import CategoryService
+from costs.services import CostService
 
 
 class CategoryListView(RenderAuthorizedView):
@@ -34,6 +35,35 @@ class CategoryListView(RenderAuthorizedView):
         categories = self.service.get_all(owner=request.user)
         context = {'categories': categories}
         return render(request, self.template_name, context)
+
+
+class CostsByCategoryView(RenderAuthorizedView):
+
+    """View to return all category costs
+
+    Attributes
+    ----------
+    service : Service
+        Category's service
+
+    template_name : str
+        Template to display costs
+
+    """
+
+    service = CategoryService()
+    cost_service = CostService()
+    template_name = 'costs/costs_by_category.html'
+
+    def get(self, request, pk):
+        """Show page with all category costs"""
+        costs = self.service.get_category_costs(pk, request.user)
+        category = self.service.get_concrete(pk, request.user)
+        total_sum = self.cost_service.get_total_sum(costs)
+        return render(
+            request, self.template_name,
+            {'costs': costs, 'category': category, 'total_sum': total_sum}
+        )
 
 
 class CreateCategoryView(CreateView):

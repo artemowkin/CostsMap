@@ -9,7 +9,7 @@
     <div class="category_list">
         {% for category in categories %}
         <div class="category">
-            <div class="category_title">{{ category.title }}</div>
+            <a class="category_title" href="{% url 'category_costs' category.pk %}">{{ category.title }}</a>
             <a class="category_edit_button" href="{% url 'change_category' category.pk %}"></a>
         </div>
         {% endfor %}

@@ -409,6 +409,8 @@ form p select:focus {
 
 .category_title {
     margin-right: 1.5rem;
+    color: white;
+    text-decoration: none;
 }
 
 .category_edit_button {
