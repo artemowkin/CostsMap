@@ -300,7 +300,8 @@ class StatisticPageView(RenderAuthorizedView):
             'previous_date': context_date.previous_month,
             'next_date': context_date.next_month,
             'total_sum': self.total_sum,
-            'profit': self.profit
+            'profit': self.profit,
+            'average_costs': self.average_costs,
         }
         return context
 
@@ -314,6 +315,9 @@ class StatisticPageView(RenderAuthorizedView):
         )
         self.profit = self.cost_service.get_profit_for_the_month(
             request.user, date=date
+        )
+        self.average_costs = self.cost_service.get_average_costs_for_the_day(
+            request.user
         )
 
         context = self.get_context(request, date)

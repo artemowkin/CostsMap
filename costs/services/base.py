@@ -176,5 +176,6 @@ class CostService(BaseCRUDService):
             ") AS foo;"
         )
         result = self._execute_sql_command(sql_command, [owner.pk])[0][0]
+        result = result.quantize(Decimal("1.00"))
         return result
 
