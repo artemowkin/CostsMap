@@ -170,12 +170,16 @@ class CostService(BaseCRUDService):
         # Select average costs for every day and than select average costs
         # for the all time from these average costs for every day
         sql_command = (
-            "SELECT AVG(average_per_date) FROM ("
-            "    SELECT AVG(costs_sum) AS average_per_date"
+            "SELECT AVG(costs_per_date) FROM ("
+            "    SELECT SUM(costs_sum) AS costs_per_date"
             "    FROM cost WHERE owner_id = %s GROUP BY date"
             ") AS foo;"
         )
         result = self._execute_sql_command(sql_command, [owner.pk])[0][0]
-        result = result.quantize(Decimal("1.00"))
+        if isinstance(result, Decimal):
+            result = result.quantize(Decimal("1.00"))
+        else:
+            result = Decimal("0.00")
+
         return result
 
