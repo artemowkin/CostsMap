@@ -109,6 +109,10 @@ class CostServiceTest(TestCase, CRUDTests, DatesTests):
         form = self.service.get_change_form(self.instance.pk, self.user)
         self.assertEqual(form.is_bound, True)
 
+    def test_get_average_costs_for_the_day(self):
+        avg = self.service.get_average_costs_for_the_day(self.user)
+        self.assertEqual(avg, Decimal(self.instance.costs_sum))
+
 
 class CostsViewsTests(TestCase):
 

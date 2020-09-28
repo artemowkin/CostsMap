@@ -165,3 +165,16 @@ class CostService(BaseCRUDService):
 
         return statistic
 
+    def get_average_costs_for_the_day(self, owner: User) -> Decimal:
+        """Return average costs for the day for owner"""
+        # Select average costs for every day and than select average costs
+        # for the all time from these average costs for every day
+        sql_command = (
+            "SELECT AVG(average_per_date) FROM ("
+            "    SELECT AVG(costs_sum) AS average_per_date"
+            "    FROM cost WHERE owner_id = %s GROUP BY date"
+            ") AS foo;"
+        )
+        result = self._execute_sql_command(sql_command, [owner.pk])[0][0]
+        return result
+
