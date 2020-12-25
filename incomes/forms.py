@@ -1,19 +1,17 @@
-"""Module with incomes forms"""
-
 from django import forms
 from .models import Income
 
 
-class IncomeForm(forms.Form):
+class IncomeForm(forms.ModelForm):
+    """Income form to create/update incomes
 
-    """Form for Income model
-
-    Fields
-    ------
+    Attributes
+    ----------
     incomes_sum : DecimalField
-        Income's sum
+        Sum of income
 
     """
 
-    incomes_sum = forms.DecimalField(max_digits=7, decimal_places=2)
-
+    class Meta:
+        model = Income
+        fields = ('incomes_sum',)

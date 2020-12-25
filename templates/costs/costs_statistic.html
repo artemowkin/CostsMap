@@ -10,13 +10,13 @@
 
 <div class="dates">
     <div class="dates_left_button">
-        <a href="{% url 'costs_statistic_page' previous_date %}">&lt;</a>
+        <a href="{% url 'costs_statistic_page' date.previous_month %}">&lt;</a>
     </div>
     <div class="dates_current_date">
-        {{ date }}
+        {{ date.date }}
     </div>
     <div class="dates_right_button">
-        <a href="{% url 'costs_statistic_page' next_date %}">&gt;</a>
+        <a href="{% url 'costs_statistic_page' date.next_month %}">&gt;</a>
     </div>
 </div>
 
@@ -26,7 +26,7 @@
 
 <div class="changer">
     <span class="changer_current">Costs</span>
-    <a href="{% url 'incomes_statistic_page' date %}" class="changer_link">Incomes</a>
+    <a href="{% url 'incomes_statistic_page' date.date %}" class="changer_link">Incomes</a>
 </div>
 
 {% if costs %}

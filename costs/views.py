@@ -1,193 +1,229 @@
-"""Module with costs views"""
+import datetime
+from uuid import UUID
 
-from django.shortcuts import render
-from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse, HttpResponse, HttpRequest
+from django.views import View
+from django.views.generic import CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.db import IntegrityError
+from django.forms import Form
 
+from .models import Category, Cost
+from .forms import CategoryForm, CostForm
+from . import services
+import services.common as services_common
 from utils.views import (
-    APIAuthorizedView,
-    DateView,
-    HistoryView,
-    CreateView,
-    ChangeView,
-    DeleteView,
-    StatisticPageView
+    DateGenericView, HistoryGenericView, StatisticPageGenericView,
+    GetUserObjectMixin
 )
 
-from .services import CostService
 
-
-class CostsForTheDateView(DateView):
-
-    """View to return costs for the date
+class CategoryListView(LoginRequiredMixin, View):
+    """View to render all user categories
 
     Attributes
     ----------
-    service : Service
-        Cost service
+    template_name : str
+        Template to display categories
+    context_object_name : str
+        Name of categories queryset in context
 
+    """
+
+    template_name = 'costs/category_list.html'
+    context_object_name = 'categories'
+    login_url = reverse_lazy('account_login')
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        categories = services_common.get_all_user_entries(
+            Category, self.request.user
+        )
+        return render(
+            request, self.template_name, {
+                self.context_object_name: categories
+            }
+        )
+
+
+class CostsByCategoryView(LoginRequiredMixin, View):
+    """View to render all user category costs
+
+    Attributes
+    ----------
+    template_name : str
+        Template to display costs
+    context_object_name : str
+        Name of costs queryset in context
+
+    """
+
+    template_name = 'costs/costs_by_category.html'
+    context_object_name = 'costs'
+    login_url = reverse_lazy('account_login')
+
+    def get(self, request: HttpRequest, pk: UUID) -> HttpResponse:
+        category, costs = services.get_category_costs(pk, request.user)
+        total_sum = services_common.get_total_sum(costs)
+        return render(
+            request, self.template_name, {
+                self.context_object_name: costs,
+                'category': category, 'total_sum': total_sum
+            }
+        )
+
+
+class CreateCategoryView(LoginRequiredMixin, CreateView):
+    """View to create a new category"""
+
+    model = Category
+    form_class = CategoryForm
+    template_name = 'costs/add_category.html'
+    login_url = reverse_lazy('account_login')
+
+    def form_valid(self, form: Form) -> HttpResponse:
+        form.instance.owner = self.request.user
+        try:
+            return super().form_valid(form)
+        except IntegrityError:
+            form.add_error(
+                None, 'Category with the same title already exist'
+            )
+            return super().form_invalid(form)
+
+
+class ChangeCategoryView(LoginRequiredMixin, GetUserObjectMixin, UpdateView):
+    """View to change a category"""
+
+    model = Category
+    form_class = CategoryForm
+    template_name = 'costs/change_category.html'
+    context_object_name = 'category'
+    login_url = reverse_lazy('account_login')
+
+
+class DeleteCategoryView(LoginRequiredMixin, GetUserObjectMixin, DeleteView):
+    """View to delete a category"""
+
+    model = Category
+    template_name = 'costs/delete_category.html'
+    context_object_name = 'category'
+    success_url = reverse_lazy('category_list')
+    login_url = reverse_lazy('account_login')
+
+
+class CostsForTheDateView(DateGenericView):
+    """View to render costs for the date
+
+    Attributes
+    ----------
+    model : Type[Model]
+        Cost model
     template_name : str
         Template to display costs for the date
-
     context_object_name : str
         Name of costs in template
 
     """
 
-    service = CostService()
+    model = Cost
     template_name = 'costs/costs.html'
     context_object_name = 'costs'
 
 
-class CostsHistoryView(HistoryView):
-
-    """View to return all costs for all time.
+class CostsHistoryView(HistoryGenericView):
+    """View to render all costs for all time.
 
     Attributes
     ----------
-    service : Service
-        Cost service
-
     template_name : str
         Template to display history of costs
-
     context_object_name : str
         Name of costs in template
 
     """
 
-    service = CostService()
+    model = Cost
     template_name = 'costs/history_costs.html'
     context_object_name = 'costs'
 
 
-class CreateCostView(CreateView):
+class UserCategoriesInFormMixin:
+    """Mixin that setting user categories in cost form"""
 
-    """View to create a new cost
+    def get_form(self, *args, **kwargs) -> Form:
+        form = super().get_form(*args, **kwargs)
+        services.set_form_owner_categories(form, self.request.user)
+        return form
 
-    Attributes
-    ----------
-    service : Service
-        Cost's service
 
-    template_name : str
-        Template with form to create a cost
+class CreateCostView(
+        LoginRequiredMixin, UserCategoriesInFormMixin, CreateView):
+    """View to create a new cost"""
 
-    """
-
-    service = CostService()
+    model = Cost
+    form_class = CostForm
     template_name = 'costs/add_cost.html'
+    login_url = reverse_lazy('account_login')
 
-    def get(self, request):
-        """Return create cost form"""
-        form = self.service.get_create_form(owner=request.user)
-        return render(request, self.template_name, {'form': form})
+    def form_valid(self, form: Form) -> HttpResponse:
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
-class ChangeCostView(ChangeView):
+class ChangeCostView(
+        LoginRequiredMixin, UserCategoriesInFormMixin, GetUserObjectMixin,
+        UpdateView):
+    """View to change a cost"""
 
-    """View to change a cost
-
-    Attributes
-    ----------
-    service : Service
-        Cost's service
-
-    template_name : str
-        Template with form to change a cost
-
-    context_object_name : str
-        Name of cost object in template
-
-    """
-
-    service = CostService()
+    model = Cost
+    form_class = CostForm
     template_name = 'costs/change_cost.html'
     context_object_name = 'cost'
+    login_url = reverse_lazy('account_login')
 
 
-class DeleteCostView(DeleteView):
+class DeleteCostView(LoginRequiredMixin, GetUserObjectMixin, DeleteView):
+    """View to delete a cost"""
 
-    """View to delete a cost
-
-    Attributes
-    ----------
-    service : Service
-        Cost's service
-
-    template_name : str
-        Template with confirmation form to delete an instance
-
-    context_object_name : str
-        Name of cost object in template
-
-    """
-
-    service = CostService()
+    model = Cost
     template_name = 'costs/delete_cost.html'
     context_object_name = 'cost'
+    success_url = reverse_lazy('today_costs')
+    login_url = reverse_lazy('account_login')
 
 
-class StatisticView(APIAuthorizedView):
+class StatisticView(LoginRequiredMixin, View):
+    """View to return json with costs statistic"""
 
-    """View to return json with costs statistic
+    login_url = reverse_lazy('account_login')
 
-    Attributes
-    ----------
-    service : Service
-        Cost's service
-
-    """
-
-    service = CostService()
-
-    def get(self, request, date):
-        """Return json with cost's statistic for the month"""
-        data = self.service.get_statistic_for_the_month(
+    def get(self, request: HttpRequest, date: datetime.date) -> JsonResponse:
+        data = services.get_costs_statistic_for_the_month(
             owner=request.user, date=date
         )
         return JsonResponse(data, safe=False)
 
 
-class CostsStatisticPageView(StatisticPageView):
+class CostsStatisticPageView(StatisticPageGenericView):
+    """View to render statistic with costs for the month"""
 
-    """View to return statistic with costs for the month
-
-    Attributes
-    ----------
-    service : Service
-        Cost's service
-
-    template_name : str
-        Template to display statistic with costs
-
-    context_object_name : str
-        Name of costs in template
-
-    """
-
-    service = CostService()
-    cost_service = CostService()
+    model = Cost
     template_name = 'costs/costs_statistic.html'
     context_object_name = 'costs'
 
 
-class CostStatisticForTheLastYear(APIAuthorizedView):
-
-    """View to return statistic with costs by months for the last year
-
-        Attributes
-        ----------
-        service : Service
-            Cost service
-
+class CostStatisticForTheLastYear(LoginRequiredMixin, View):
+    """
+    View to return json statistic with costs by months
+    for the last year
     """
 
-    service = CostService()
+    login_url = reverse_lazy('account_login')
 
-    def get(self, request, date):
-        """Return json with cost statistic for the last year"""
-        data = self.service.get_statistic_for_the_year(
+    def get(self, request: HttpRequest, date: datetime.date) -> JsonResponse:
+        data = services.get_costs_statistic_for_the_year(
             request.user, date
         )
         return JsonResponse(data, safe=False)
-

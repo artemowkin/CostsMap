@@ -1,17 +1,10 @@
 from allauth.account.views import SignupView
 
-from categories.services import CategoryService
+from costs import services
 
 
 class SignupWithCategoriesView(SignupView):
-
     """SignUp view with setting default categories for new user
-
-    Attributes
-    ----------
-    service : Service
-        Category service
-
 
     Methods
     -------
@@ -20,10 +13,8 @@ class SignupWithCategoriesView(SignupView):
 
     """
 
-    service = CategoryService()
-
     def form_valid(self, form):
         """Add default categories for new user"""
         resp = super().form_valid(form)
-        self.service.set_default_categories(owner=self.user)
+        services.set_user_default_categories(self.user)
         return resp

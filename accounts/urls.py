@@ -1,6 +1,5 @@
 from django.urls import path
 from django.views.decorators.cache import cache_page
-
 from allauth.account import views
 
 from .views import SignupWithCategoriesView

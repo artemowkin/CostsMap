@@ -1,22 +1,15 @@
-"""Module with models utilities"""
-
 import uuid
 
 from django.db import models
 
 
 class ModelWithUUID(models.Model):
-
     """Abstract model with UUID primary key field
 
-    Fields
-    ------
+    Attributes
+    ----------
     uuid : UUIDField
         Primary key uuid field
-
-    Meta
-    ----
-    abstract = True
 
     """
 
@@ -26,4 +19,3 @@ class ModelWithUUID(models.Model):
 
     class Meta:
         abstract = True
-

@@ -71,7 +71,6 @@ INSTALLED_APPS = [
     # Local
     'costs',
     'incomes',
-    'categories',
     'accounts',
 ]
 
@@ -208,4 +207,3 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 if ENVIRONMENT == 'production':
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-

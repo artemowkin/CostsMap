@@ -1,20 +1,19 @@
 <div class="dates">
     <div class="dates_left_button">
         {% if incomes %}
-            <a href="{% url 'incomes_for_the_date' previous_date %}">&lt;</a>
+            <a href="{% url 'incomes_for_the_date' date.previous_day %}">&lt;</a>
         {% else %}
-            <a href="{% url 'costs_for_the_date' previous_date %}">&lt;</a>
+            <a href="{% url 'costs_for_the_date' date.previous_day %}">&lt;</a>
         {% endif %}
     </div>
     <div class="dates_current_date">
-        {{ date }}
+        {{ date.date }}
     </div>
     <div class="dates_right_button">
         {% if incomes %}
-            <a href="{% url 'incomes_for_the_date' next_date %}">&gt;</a>
+            <a href="{% url 'incomes_for_the_date' date.next_day %}">&gt;</a>
         {% else %}
-            <a href="{% url 'costs_for_the_date' next_date %}">&gt;</a>
+            <a href="{% url 'costs_for_the_date' date.next_day %}">&gt;</a>
         {% endif %}
     </div>
 </div>
-

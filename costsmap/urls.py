@@ -10,8 +10,6 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
 
     # Local
-    path('', RedirectView.as_view(url='costs/')),
-    path('costs/', include('costs.urls')),
+    path('', include('costs.urls')),
     path('incomes/', include('incomes.urls')),
-    path('categories/', include('categories.urls')),
 ]

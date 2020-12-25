@@ -6,11 +6,11 @@
 
 {% block content %}
 
-{% include 'dates.html' with date=date previous_date=previous_date next_date=next_date %}
+{% include 'dates.html' with date=date %}
 
 <div class="changer">
     <span class="changer_current">Costs</span>
-    <a href="{% url 'incomes_for_the_date' date %}" class="changer_link">Incomes</a>
+    <a href="{% url 'incomes_for_the_date' date.date %}" class="changer_link">Incomes</a>
 </div>
 
 <a href="{% url 'create_cost' %}" class="create_button">Add Cost</a>

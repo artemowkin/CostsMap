@@ -28,7 +28,5 @@ urlpatterns = [
     path('statistic/', views.IncomesStatisticPageView.as_view(),
          name='incomes_statistic_for_this_month'),
     path('<month:date>/statistic/', views.IncomesStatisticPageView.as_view(),
-        name='incomes_statistic_page'
-    ),
+         name='incomes_statistic_page'),
 ]
-

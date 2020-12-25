@@ -1,155 +1,96 @@
-"""Module with incomes views"""
+import datetime
 
+from django.views.generic import CreateView, UpdateView, DeleteView
+from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.http import HttpRequest, HttpResponse
+from django.forms import Form
+
+from costs.models import Cost
+from .models import Income
+from .forms import IncomeForm
+import services.common as services_common
 from utils.views import (
-    DateView,
-    HistoryView,
-    CreateView,
-    ChangeView,
-    DeleteView,
-    StatisticPageView
+    DateGenericView, HistoryGenericView, StatisticPageGenericView,
+    GetUserObjectMixin
 )
-from costs.services import CostService
-
-from .services import IncomeService
 
 
-class IncomesForTheDateView(DateView):
-
-    """View to return incomes for the date
+class IncomesForTheDateView(DateGenericView):
+    """View to render user incomes for the date
 
     Attributes
     ----------
-    service : Service
-        Income's service
-
+    model : Type[Model]
+        Income model
     template_name : str
-        Template to display income's for the date
-
+        Template to display incomes for the date
     context_object_name : str
-        Name of incomes in template
+        Name of incomes queryset in template
 
     """
 
-    service = IncomeService()
-    template_name = 'costs/incomes.html'
+    model = Income
+    template_name = 'incomes/incomes.html'
     context_object_name = 'incomes'
 
 
-class CreateIncomeView(CreateView):
+class CreateIncomeView(LoginRequiredMixin, CreateView):
+    """View to create a new income"""
 
-    """View to create a new income
+    model = Income
+    form_class = IncomeForm
+    template_name = 'incomes/add_income.html'
+    login_url = reverse_lazy('account_login')
 
-    Attributes
-    ----------
-    service : Service
-        Income's service
-
-    template_name : str
-        Template with form to create an income
-
-    """
-
-    service = IncomeService()
-    template_name = 'costs/add_income.html'
+    def form_valid(self, form: Form) -> HttpResponse:
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
-class ChangeIncomeView(ChangeView):
+class ChangeIncomeView(LoginRequiredMixin, GetUserObjectMixin, UpdateView):
+    """View to change an income"""
 
-    """View to change an income
-
-    Attributes
-    ----------
-    service : Service
-        Income's service
-
-    template_name : str
-        Template with form to change an income
-
-    context_object_name : str
-        Name of income object in template
-
-    """
-
-    service = IncomeService()
-    template_name = 'costs/change_income.html'
+    model = Income
+    form_class = IncomeForm
+    template_name = 'incomes/change_income.html'
     context_object_name = 'income'
+    login_url = reverse_lazy('account_login')
 
 
-class DeleteIncomeView(DeleteView):
+class DeleteIncomeView(LoginRequiredMixin, GetUserObjectMixin, DeleteView):
+    """View to delete an income"""
 
-    """View to delete an income
-
-    Attributes
-    ----------
-    service : Service
-        Income's service
-
-    template_name : str
-        Template with form to delete an income
-
-    context_object_name : str
-        Name of income object in template
-
-    """
-
-    service = IncomeService()
-    template_name = 'costs/delete_income.html'
+    model = Income
+    form_class = IncomeForm
+    template_name = 'incomes/delete_income.html'
     context_object_name = 'income'
+    success_url = reverse_lazy('today_incomes')
 
 
-class IncomesHistoryView(HistoryView):
+class IncomesHistoryView(HistoryGenericView):
+    """View to render all user incomes"""
 
-    """View to return all incomes for all time.
-
-    Attributes
-    ----------
-    service : Service
-        Income service
-
-    template_name : str
-        Template to display history of incomes
-
-    context_object_name : str
-        Name of incomes in template
-
-    """
-
-    service = IncomeService()
-    template_name = 'costs/history_incomes.html'
+    model = Income
+    template_name = 'incomes/history_incomes.html'
     context_object_name = 'incomes'
 
 
-class IncomesStatisticPageView(StatisticPageView):
+class IncomesStatisticPageView(StatisticPageGenericView):
+    """View to return statistic with user incomes for the month"""
 
-    """View to return statistic with incomes for the month.
-
-    Attributes
-    ----------
-    service : Service
-        Income's service
-
-    cost_service : Service
-        Cost's service
-
-    template_name : str
-        Template to display statistic with incomes
-
-    context_object_name : str
-        Name of incomes in template
-
-    """
-
-    service = IncomeService()
-    cost_service = CostService()
-    template_name = 'costs/incomes_statistic.html'
+    model = Income
+    cost_model = Cost
+    template_name = 'incomes/incomes_statistic.html'
     context_object_name = 'incomes'
 
-    def get_context(self, request, date, *args, **kwargs):
+    def get_context_data(
+            self, request: HttpRequest, date: datetime.date) -> dict:
         """Return context with costs"""
-        context = super().get_context(request, date, *args, **kwargs)
-        costs = self.cost_service.get_for_the_month(
-            owner=request.user, date=date
+        context = super().get_context_data(request, date)
+        costs = services_common.get_all_user_entries(
+            self.cost_model, request.user
         )
         context.update({'costs': costs})
         return context
-
