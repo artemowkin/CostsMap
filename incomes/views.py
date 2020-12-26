@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.http import HttpRequest, HttpResponse
 from django.forms import Form
+from django.shortcuts import get_object_or_404
 
 from costs.models import Cost
 from .models import Income
@@ -63,10 +64,10 @@ class DeleteIncomeView(LoginRequiredMixin, GetUserObjectMixin, DeleteView):
     """View to delete an income"""
 
     model = Income
-    form_class = IncomeForm
     template_name = 'incomes/delete_income.html'
     context_object_name = 'income'
     success_url = reverse_lazy('today_incomes')
+    login_url = reverse_lazy('account_login')
 
 
 class IncomesHistoryView(HistoryGenericView):

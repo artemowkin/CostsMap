@@ -98,6 +98,9 @@ class CostsViewsTests(TestCase):
         self.user = User.objects.create_superuser(
             username='testuser', password='testpass'
         )
+        self.bad_user = User.objects.create_superuser(
+            username='baduser', password='badpass'
+        )
         self.category = Category.objects.create(
             title='testcategory', owner=self.user
         )
@@ -152,6 +155,11 @@ class CostsViewsTests(TestCase):
             }
         )
         self.assertEqual(response.status_code, 302)
+        self.client.login(username='baduser', password='badpass')
+        bad_response = self.client.get(
+            reverse('change_cost', args=[self.cost.pk])
+        )
+        self.assertEqual(bad_response.status_code, 404)
 
     def test_delete_cost_view(self):
         response = self.client.get(
@@ -163,6 +171,11 @@ class CostsViewsTests(TestCase):
             reverse('delete_cost', args=[self.cost.pk])
         )
         self.assertEqual(response.status_code, 302)
+        self.client.login(username='baduser', password='badpass')
+        bad_response = self.client.get(
+            reverse('delete_cost', args=[self.cost.pk])
+        )
+        self.assertEqual(bad_response.status_code, 404)
 
     def test_costs_history_view(self):
         response = self.client.get(reverse('costs_history'))
@@ -263,6 +276,9 @@ class CategoriesViewsTests(TestCase):
         self.user = User.objects.create_superuser(
             username='testuser', password='testpass'
         )
+        self.bad_user = User.objects.create_superuser(
+            username='baduser', password='badpass'
+        )
         self.category = Category.objects.create(
             title='testcategory', owner=self.user
         )
@@ -313,6 +329,11 @@ class CategoriesViewsTests(TestCase):
             }
         )
         self.assertEqual(response.status_code, 302)
+        self.client.login(username='baduser', password='badpass')
+        bad_response = self.client.get(
+            reverse('change_category', args=[self.category.pk])
+        )
+        self.assertEqual(bad_response.status_code, 404)
 
     def test_delete_category_view(self):
         response = self.client.get(
@@ -324,3 +345,8 @@ class CategoriesViewsTests(TestCase):
             reverse('delete_category', args=[self.category.pk])
         )
         self.assertEqual(response.status_code, 302)
+        self.client.login(username='baduser', password='badpass')
+        bad_response = self.client.get(
+            reverse('delete_category', args=[self.category.pk])
+        )
+        self.assertEqual(bad_response.status_code, 404)

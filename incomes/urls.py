@@ -1,5 +1,4 @@
 from django.urls import path, register_converter
-from django.views.decorators.cache import cache_page
 
 from utils import converters
 
@@ -18,11 +17,8 @@ urlpatterns = [
          name='create_income'),
     path('<uuid:pk>/change/', views.ChangeIncomeView.as_view(),
          name='change_income'),
-    path(
-        '<uuid:pk>/delete/',
-        cache_page(604800)(views.DeleteIncomeView.as_view()),
-        name='delete_income'
-    ),
+    path('<uuid:pk>/delete/', views.DeleteIncomeView.as_view(),
+         name='delete_income'),
     path('history/', views.IncomesHistoryView.as_view(),
          name='incomes_history'),
     path('statistic/', views.IncomesStatisticPageView.as_view(),

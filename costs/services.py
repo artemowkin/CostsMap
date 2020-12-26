@@ -27,20 +27,20 @@ DEFAULT_CATEGORIES = [
 ####################
 
 
-def set_user_default_categories(user: Type[User]) -> None:
+def set_user_default_categories(user: User) -> None:
     """Create categories from DEFAULT_CATEGORIES for user"""
     for category in DEFAULT_CATEGORIES:
         Category.objects.create(title=category, owner=user)
 
 
-def get_category_costs(pk: uuid.UUID, owner: Type[User]) -> tuple:
+def get_category_costs(pk: uuid.UUID, owner: User) -> tuple:
     """Return all costs in the category and the category itself"""
-    category = get_object_or_404(Category, pk=pk)
+    category = get_object_or_404(Category, pk=pk, owner=owner)
     costs = category.costs.all()
     return category, costs
 
 
-def set_form_owner_categories(form: Form, owner: Type[User]) -> None:
+def set_form_owner_categories(form: Form, owner: User) -> None:
     """Set queryset for `category` field of form"""
     owner_categories = Category.objects.filter(owner=owner)
     form.fields['category'].queryset = owner_categories
@@ -54,7 +54,7 @@ def set_form_owner_categories(form: Form, owner: Type[User]) -> None:
 
 
 def get_costs_statistic_for_the_month(
-        owner: Type[User], date: datetime.date = None) -> list[dict]:
+        owner: User, date: datetime.date = None) -> list[dict]:
     """Return costs per month by category
 
     Returns
@@ -87,7 +87,7 @@ def get_costs_statistic_for_the_month(
 
 
 def get_costs_statistic_for_the_year(
-        owner: Type[User], date: datetime.date = None) -> list[dict]:
+        owner: User, date: datetime.date = None) -> list[dict]:
     """Return costs statistic by months for the year
 
     Returns
@@ -99,6 +99,7 @@ def get_costs_statistic_for_the_year(
         }]
 
     """
+    date = date or datetime.date.today()
     sql_get_statistic = (
         "SELECT EXTRACT(month FROM date), SUM(costs_sum) FROM cost "
         "WHERE EXTRACT(year FROM cost.date) = %s "
