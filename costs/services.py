@@ -20,17 +20,7 @@ DEFAULT_CATEGORIES = [
 ]
 
 
-####################
-#                  #
-#    Categories    #
-#                  #
-####################
-
-
-def set_user_default_categories(user: User) -> None:
-    """Create categories from DEFAULT_CATEGORIES for user"""
-    for category in DEFAULT_CATEGORIES:
-        Category.objects.create(title=category, owner=user)
+# Categories
 
 
 def get_category_costs(pk: uuid.UUID, owner: User) -> tuple:
@@ -40,17 +30,19 @@ def get_category_costs(pk: uuid.UUID, owner: User) -> tuple:
     return category, costs
 
 
+def set_user_default_categories(user: User) -> None:
+    """Create categories from DEFAULT_CATEGORIES for user"""
+    for category in DEFAULT_CATEGORIES:
+        Category.objects.create(title=category, owner=user)
+
+
 def set_form_owner_categories(form: Form, owner: User) -> None:
     """Set queryset for `category` field of form"""
     owner_categories = Category.objects.filter(owner=owner)
     form.fields['category'].queryset = owner_categories
 
 
-###############
-#             #
-#    Costs    #
-#             #
-###############
+# Costs
 
 
 def get_costs_statistic_for_the_month(

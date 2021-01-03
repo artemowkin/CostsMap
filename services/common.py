@@ -11,6 +11,22 @@ from incomes.models import Income
 User = get_user_model()
 
 
+def get_profit_for_the_month(
+        owner: User, date: datetime.date = None) -> Decimal:
+    """Return difference between monthly incomes and monthly costs"""
+    monthly_incomes = get_for_the_month(Income, owner, date)
+    monthly_costs = get_for_the_month(Cost, owner, date)
+    incomes_total_sum = get_total_sum(monthly_incomes)
+    costs_total_sum = get_total_sum(monthly_costs)
+    profit = incomes_total_sum - costs_total_sum
+    return profit
+
+
+def get_all_user_entries(model: Model, user: User) -> QuerySet:
+    """Return all user model entries"""
+    return model.objects.filter(owner=user)
+
+
 def get_for_the_month(
         model: Model, owner: User, date: datetime.date = None) -> QuerySet:
     """Return owner costs or incomes for the month"""
@@ -42,19 +58,3 @@ def get_total_sum(queryset: QuerySet) -> Decimal:
         )
 
     return total_sum['total_sum'] or Decimal('0')
-
-
-def get_profit_for_the_month(
-        owner: User, date: datetime.date = None) -> Decimal:
-    """Return difference between monthly incomes and monthly costs"""
-    monthly_incomes = get_for_the_month(Income, owner, date)
-    monthly_costs = get_for_the_month(Cost, owner, date)
-    incomes_total_sum = get_total_sum(monthly_incomes)
-    costs_total_sum = get_total_sum(monthly_costs)
-    profit = incomes_total_sum - costs_total_sum
-    return profit
-
-
-def get_all_user_entries(model: Model, user: User) -> QuerySet:
-    """Return all user model entries"""
-    return model.objects.filter(owner=user)
