@@ -33,6 +33,7 @@ class Category(ModelWithUUID):
     class Meta:
         db_table = 'category'
         ordering = ('title',)
+        verbose_name = 'category'
         verbose_name_plural = 'categories'
         constraints = (
             models.UniqueConstraint(
@@ -85,6 +86,8 @@ class Cost(ModelWithUUID):
 
     class Meta:
         db_table = 'cost'
+        verbose_name = 'cost'
+        verbose_name_plural = 'costs'
         ordering = ('-pub_datetime',)
 
     def __str__(self):

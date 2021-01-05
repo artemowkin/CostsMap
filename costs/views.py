@@ -1,7 +1,7 @@
 import datetime
 from uuid import UUID
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, HttpRequest
 from django.views import View
 from django.views.generic import CreateView, UpdateView, DeleteView
@@ -21,16 +21,7 @@ from utils.views import (
 
 
 class CategoryListView(LoginRequiredMixin, View):
-    """View to render all user categories
-
-    Attributes
-    ----------
-    template_name : str
-        Template to display categories
-    context_object_name : str
-        Name of categories queryset in context
-
-    """
+    """View to render all user categories"""
 
     template_name = 'costs/category_list.html'
     context_object_name = 'categories'
@@ -48,16 +39,7 @@ class CategoryListView(LoginRequiredMixin, View):
 
 
 class CostsByCategoryView(LoginRequiredMixin, View):
-    """View to render all user category costs
-
-    Attributes
-    ----------
-    template_name : str
-        Template to display costs
-    context_object_name : str
-        Name of costs queryset in context
-
-    """
+    """View to render all user category costs"""
 
     template_name = 'costs/costs_by_category.html'
     context_object_name = 'costs'
@@ -114,18 +96,7 @@ class DeleteCategoryView(LoginRequiredMixin, GetUserObjectMixin, DeleteView):
 
 
 class CostsForTheDateView(DateGenericView):
-    """View to render costs for the date
-
-    Attributes
-    ----------
-    model : Type[Model]
-        Cost model
-    template_name : str
-        Template to display costs for the date
-    context_object_name : str
-        Name of costs in template
-
-    """
+    """View to render costs for the date"""
 
     model = Cost
     template_name = 'costs/costs.html'
@@ -133,16 +104,7 @@ class CostsForTheDateView(DateGenericView):
 
 
 class CostsHistoryView(HistoryGenericView):
-    """View to render all costs for all time.
-
-    Attributes
-    ----------
-    template_name : str
-        Template to display history of costs
-    context_object_name : str
-        Name of costs in template
-
-    """
+    """View to render all costs for all time."""
 
     model = Cost
     template_name = 'costs/history_costs.html'

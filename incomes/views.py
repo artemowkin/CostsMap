@@ -1,12 +1,10 @@
 import datetime
 
 from django.views.generic import CreateView, UpdateView, DeleteView
-from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.http import HttpRequest, HttpResponse
 from django.forms import Form
-from django.shortcuts import get_object_or_404
 
 from costs.models import Cost
 from .models import Income
@@ -19,18 +17,7 @@ from utils.views import (
 
 
 class IncomesForTheDateView(DateGenericView):
-    """View to render user incomes for the date
-
-    Attributes
-    ----------
-    model : Type[Model]
-        Income model
-    template_name : str
-        Template to display incomes for the date
-    context_object_name : str
-        Name of incomes queryset in template
-
-    """
+    """View to render user incomes for the date"""
 
     model = Income
     template_name = 'incomes/incomes.html'

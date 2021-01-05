@@ -244,7 +244,7 @@ class CategoriesServicesTests(TestCase):
         services.set_user_default_categories(self.user)
         new_categories = self.user.categories.all()
         self.assertGreater(
-            len(new_categories), len(services.DEFAULT_CATEGORIES)
+            len(new_categories), len(services.categories.DEFAULT_CATEGORIES)
         )
 
     def test_get_category_costs(self):
