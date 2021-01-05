@@ -30,7 +30,7 @@ To install this project you need to have:
 First, you need to install dependencies
 
 ```
-$ pipenv sync
+$ pipenv install --dev
 ```
 
 After that you need to create a `.env` file with the following content:
@@ -75,10 +75,9 @@ $ ./manage.py test
 
 ## Authors
 
-* **Artemowkin**
+* **Artemowkin** - https://github.com/artemowkin/
 
 ## License
 
 This project is licensed under the [GPL-3.0](LICENSE) License - see
 the [LICENSE](LICENSE) file for details
-
