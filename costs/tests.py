@@ -5,10 +5,12 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
+from utils.date import MonthContextDate
 from incomes.models import Income
-
-import services.common as services_common
-from . import services
+from incomes.services import IncomeService
+from .services.categories import CategoryService, DEFAULT_CATEGORIES
+from .services.costs import CostService
+from .services.commands import GetCostsStatisticCommand
 from .models import Cost, Category
 from .forms import CostForm
 
@@ -16,7 +18,7 @@ from .forms import CostForm
 User = get_user_model()
 
 
-class CostsServicesTests(TestCase):
+class CostServiceTests(TestCase):
 
     def setUp(self):
         self.today = datetime.date.today()
@@ -33,33 +35,15 @@ class CostsServicesTests(TestCase):
             title='Test cost', costs_sum='35.00',
             category=self.category, owner=self.user
         )
-
-    def test_get_all_user_entries(self):
-        all_user_costs = services_common.get_all_user_entries(
-            Cost, self.user
-        )
-        self.assertEqual(len(all_user_costs), 1)
-        self.assertEqual(all_user_costs[0], self.instance)
-
-    def test_get_total_sum(self):
-        costs = services_common.get_all_user_entries(Cost, self.user)
-        costs_sum = services_common.get_total_sum(costs)
-        self.assertEqual(costs_sum, Decimal(self.instance.costs_sum))
-
-    def test_get_profit_for_the_month(self):
-        profit = services_common.get_profit_for_the_month(
-            self.user, self.today
-        )
-        incomes = Decimal(self.income.incomes_sum)
-        costs = Decimal(self.instance.costs_sum)
-        self.assertEqual(profit, incomes-costs)
+        self.service = CostService()
+        self.income_service = IncomeService()
 
     def test_get_statistic_for_the_month(self):
         correct_statistic = [{
             'category': self.category.title,
             'costs': Decimal(self.instance.costs_sum)
         }]
-        statistic = services.get_costs_statistic_for_the_month(
+        statistic = self.service.get_statistic_for_the_month(
             self.user, self.today
         )
         self.assertEqual(statistic, correct_statistic)
@@ -69,26 +53,42 @@ class CostsServicesTests(TestCase):
             'cost_month': self.today.month,
             'cost_sum': Decimal(self.instance.costs_sum)
         }]
-        statistic = services.get_costs_statistic_for_the_year(
+        statistic = self.service.get_statistic_for_the_year(
             self.user, self.today
         )
         self.assertEqual(statistic, correct_statistic)
 
     def test_get_average_costs_for_the_day(self):
-        avg = services.get_average_costs_for_the_day(self.user)
+        avg = self.service.get_average_costs_for_the_day(self.user)
         self.assertEqual(avg, Decimal(self.instance.costs_sum))
 
+    def test_get_total_sum(self):
+        costs = self.service.get_all(self.user)
+        costs_sum = self.service.get_total_sum(costs)
+        self.assertEqual(costs_sum, Decimal(self.instance.costs_sum))
+
     def test_get_for_the_month(self):
-        costs = services_common.get_for_the_month(
-            Cost, self.user, self.today
-        )
+        costs = self.service.get_for_the_month(self.user, self.today)
         self.assertEqual(costs[0].date.month, self.today.month)
 
     def test_get_for_the_date(self):
-        costs = services_common.get_for_the_date(
-            Cost, self.user, self.today
-        )
+        costs = self.service.get_for_the_date(self.user, self.today)
         self.assertEqual(costs[0].date, self.today)
+
+    def test_get_costs_statistic_command(self):
+        command = GetCostsStatisticCommand(
+            self.service, self.income_service, self.user, self.today
+        )
+        statistic = command.execute()
+        month_costs = self.service.get_for_the_month(self.user, self.today)
+        costs_sum = self.service.get_total_sum(month_costs)
+        right_statistic = {
+            'costs': month_costs,
+            'date': MonthContextDate(self.today),
+            'total_sum': costs_sum,
+            'profit': -costs_sum,
+            'average_costs': costs_sum,
+        }
 
 
 class CostsViewsTests(TestCase):
@@ -226,7 +226,7 @@ class CostsViewsTests(TestCase):
 ####################
 
 
-class CategoriesServicesTests(TestCase):
+class CategoryServiceTests(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_superuser(
@@ -239,31 +239,29 @@ class CategoriesServicesTests(TestCase):
             title='testcost', costs_sum='100.00',
             owner=self.user, category=self.instance
         )
-
-    def test_set_default_categories(self):
-        services.set_user_default_categories(self.user)
-        new_categories = self.user.categories.all()
-        self.assertGreater(
-            len(new_categories), len(services.categories.DEFAULT_CATEGORIES)
-        )
+        self.service = CategoryService()
 
     def test_get_category_costs(self):
-        category, costs = services.get_category_costs(
-            self.instance.pk, self.user
-        )
+        category = self.service.get_concrete(self.instance.pk, self.user)
+        costs = self.service.get_category_costs(category)
         self.assertEqual(category, self.instance)
         self.assertEqual(costs[0], self.cost)
         self.assertEqual(costs.count(), 1)
 
-    def test_set_form_owner_categories(self):
-        form = CostForm()
-        services.set_form_owner_categories(form, self.user)
-        categories = services_common.get_all_user_entries(
-            Category, self.user
+    def test_set_user_default_categories(self):
+        self.service.set_user_default_categories(self.user)
+        new_categories = self.user.categories.all()
+        self.assertGreater(
+            len(new_categories), len(DEFAULT_CATEGORIES)
         )
+
+    def test_set_form_user_categories(self):
+        form = CostForm()
+        self.service.set_form_user_categories(form, self.user)
+        categories = self.service.get_all(self.user)
         form_queryset = form.fields['category'].queryset
         self.assertEqual(
-            len(form.fields['category'].queryset), len(categories)
+            len(form_queryset), len(categories)
         )
         for i in range(len(form_queryset)):
             self.assertEqual(form_queryset[i], categories[i])
@@ -310,12 +308,6 @@ class CategoriesViewsTests(TestCase):
             'title': 'some_title',
         })
         self.assertEqual(response.status_code, 302)
-        bad_response = self.client.post(reverse('create_category'), {
-            'title': 'some_title',
-        })
-        self.assertContains(
-            bad_response, 'Category with the same title already exist'
-        )
 
     def test_change_category_view(self):
         response = self.client.get(

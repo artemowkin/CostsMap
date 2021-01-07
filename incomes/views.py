@@ -1,66 +1,95 @@
-import datetime
-
-from django.views.generic import CreateView, UpdateView, DeleteView
+from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from django.http import HttpRequest, HttpResponse
-from django.forms import Form
+from django.shortcuts import render, redirect
 
-from costs.models import Cost
-from .models import Income
+from costs.services.costs import CostService
 from .forms import IncomeForm
-import services.common as services_common
+from .services import IncomeService
+from .services.commands import GetIncomesStatisticCommand
 from utils.views import (
-    DateGenericView, HistoryGenericView, StatisticPageGenericView,
-    GetUserObjectMixin
+    DateGenericView, HistoryGenericView, StatisticPageGenericView
 )
 
 
 class IncomesForTheDateView(DateGenericView):
     """View to render user incomes for the date"""
 
-    model = Income
+    service = IncomeService()
     template_name = 'incomes/incomes.html'
     context_object_name = 'incomes'
 
 
-class CreateIncomeView(LoginRequiredMixin, CreateView):
+class CreateIncomeView(LoginRequiredMixin, View):
     """View to create a new income"""
 
-    model = Income
     form_class = IncomeForm
     template_name = 'incomes/add_income.html'
     login_url = reverse_lazy('account_login')
+    service = IncomeService()
 
-    def form_valid(self, form: Form) -> HttpResponse:
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
+    def get(self, request):
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            income = self.service.create(form.cleaned_data, request.user)
+            return redirect(income.get_absolute_url())
+
+        return render(request, self.template_name, {'form': form})
 
 
-class ChangeIncomeView(LoginRequiredMixin, GetUserObjectMixin, UpdateView):
+class ChangeIncomeView(LoginRequiredMixin, View):
     """View to change an income"""
 
-    model = Income
+    service = IncomeService()
     form_class = IncomeForm
     template_name = 'incomes/change_income.html'
-    context_object_name = 'income'
     login_url = reverse_lazy('account_login')
 
+    def get(self, request, pk):
+        income = self.service.get_concrete(pk, request.user)
+        form = self.form_class(instance=income)
+        return render(
+            request, self.template_name, {'form': form, 'income': income}
+        )
 
-class DeleteIncomeView(LoginRequiredMixin, GetUserObjectMixin, DeleteView):
+    def post(self, request, pk):
+        income = self.service.get_concrete(pk, request.user)
+        form = self.form_class(request.POST, instance=income)
+        if form.is_valid():
+            income = self.service.change(income, form)
+            return redirect(income.get_absolute_url())
+
+        return render(
+            request, self.template_name, {'form': form, 'income': income}
+        )
+
+
+class DeleteIncomeView(LoginRequiredMixin, View):
     """View to delete an income"""
 
-    model = Income
     template_name = 'incomes/delete_income.html'
-    context_object_name = 'income'
     success_url = reverse_lazy('today_incomes')
     login_url = reverse_lazy('account_login')
+    service = IncomeService()
+
+    def get(self, request, pk):
+        income = self.service.get_concrete(pk, request.user)
+        return render(request, self.template_name, {'income': income})
+
+    def post(self, request, pk):
+        income = self.service.get_concrete(pk, request.user)
+        self.service.delete(income)
+        return redirect(self.success_url)
 
 
 class IncomesHistoryView(HistoryGenericView):
     """View to render all user incomes"""
 
-    model = Income
+    service = IncomeService()
     template_name = 'incomes/history_incomes.html'
     context_object_name = 'incomes'
 
@@ -68,17 +97,7 @@ class IncomesHistoryView(HistoryGenericView):
 class IncomesStatisticPageView(StatisticPageGenericView):
     """View to return statistic with user incomes for the month"""
 
-    model = Income
-    cost_model = Cost
     template_name = 'incomes/incomes_statistic.html'
-    context_object_name = 'incomes'
-
-    def get_context_data(
-            self, request: HttpRequest, date: datetime.date) -> dict:
-        """Return context with costs"""
-        context = super().get_context_data(request, date)
-        costs = services_common.get_all_user_entries(
-            self.cost_model, request.user
-        )
-        context.update({'costs': costs})
-        return context
+    cost_service = CostService()
+    income_service = IncomeService()
+    command = GetIncomesStatisticCommand

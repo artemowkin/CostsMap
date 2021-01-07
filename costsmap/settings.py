@@ -3,18 +3,7 @@ import os
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 
-
-def get_env(env_name, default_value=None):
-    env = os.getenv(env_name, default_value)
-    if env is None:
-        raise ImproperlyConfigured(
-            f"You need to set the {env_name} environment variable"
-        )
-
-    if env.isdigit():
-        env = int(env)
-
-    return env
+from utils.settings import get_env
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -119,7 +108,7 @@ DATABASES = {
         'USER': get_env('POSTGRES_USER', 'django'),
         'PASSWORD': get_env('POSTGRES_PASSWORD', 'django'),
         'HOST': get_env('POSTGRES_HOST', 'localhost'),
-        'PORT': get_env('POSTGRES_PORT', '')
+        'PORT': get_env('POSTGRES_PORT', 5432)
     }
 }
 
@@ -135,6 +124,46 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': '/tmp/django_cache'
     }
+}
+
+
+# Logging
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': {
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+        'verbose': {
+            'format': '{levelname} {asctime} {module}: {message}',
+            'style': '{',
+        },
+    },
+
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+            'filename': os.path.join(BASE_DIR, 'costsmap.log'),
+        },
+    },
+
+    'loggers': {
+        'filelogger': {
+            'handlers': ['file'],
+            'level': 'INFO',
+        },
+    },
 }
 
 

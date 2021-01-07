@@ -17,6 +17,7 @@ gunicorn = "*"
 psycopg2-binary = "*"
 whitenoise = "*"
 python-dateutil = "*"
+dj-services = "*"
 
 [requires]
 python_version = "3.8"

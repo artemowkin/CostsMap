@@ -1,17 +1,10 @@
-import datetime
-from typing import Optional
-
 from django.views import View
 from django.urls import reverse_lazy
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
-from django.http import HttpRequest, HttpResponse
-from django.db.models import QuerySet, Model
 
-import costs.services
-import services.common as services_common
-from .date import ContextDate, MonthContextDate
+from .date import ContextDate
 
 
 class BaseGenericListView(LoginRequiredMixin, View):
@@ -29,14 +22,14 @@ class BaseGenericListView(LoginRequiredMixin, View):
     """
 
     login_url = reverse_lazy('account_login')
-    model = None
+    service = None
     template_name = ''
     context_object_name = 'object_list'
 
-    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not self.model:
+    def dispatch(self, request, *args, **kwargs):
+        if not self.service:
             raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have `model` attribute"
+                f"{self.__class__.__name__} must have `service` attribute"
             )
         if not self.template_name:
             raise ImproperlyConfigured(
@@ -50,29 +43,19 @@ class BaseGenericListView(LoginRequiredMixin, View):
 class DateGenericView(BaseGenericListView):
     """Base generic view to display entries for the date"""
 
-    def get_queryset(self) -> QuerySet:
-        """Return QuerySet with rendering model entries"""
-        return services_common.get_for_the_date(
-            self.model, self.request.user, self.date
-        )
-
-    def get_context_data(
-            self, request: HttpRequest,
-            date: Optional[datetime.date]) -> dict:
+    def get_context_data(self, request, date=None) -> dict:
         """Return context for the template"""
         context_date = ContextDate(date)
-        object_list = self.get_queryset()
-        total_sum = services_common.get_total_sum(object_list)
+        date_entries = self.service.get_for_the_date(request.user, date)
+        total_sum = self.service.get_total_sum(date_entries)
         context = {
-            self.context_object_name: object_list,
+            self.context_object_name: date_entries,
             'total_sum': total_sum,
             'date': context_date,
         }
         return context
 
-    def get(self, request: HttpRequest,
-            date: Optional[datetime.date] = None) -> HttpResponse:
-        self.date = date
+    def get(self, request, date=None):
         context = self.get_context_data(request, date)
         return render(request, self.template_name, context)
 
@@ -80,68 +63,55 @@ class DateGenericView(BaseGenericListView):
 class HistoryGenericView(BaseGenericListView):
     """Base generic view to display all entries"""
 
-    def get_queryset(self) -> QuerySet:
-        """Return QuerySet with model entries"""
-        return services_common.get_all_user_entries(
-            self.model, self.request.user
-        )
-
-    def get_context_data(self, request: HttpRequest) -> dict:
+    def get_context_data(self, request) -> dict:
         """Return dict with context variables"""
-        object_list = self.get_queryset()
-        total_sum = services_common.get_total_sum(object_list)
+        all_entries = self.service.get_all(request.user)
+        total_sum = self.service.get_total_sum(all_entries)
         context = {
-            self.context_object_name: object_list,
+            self.context_object_name: all_entries,
             'total_sum': total_sum
         }
         return context
 
-    def get(self, request: HttpRequest) -> HttpResponse:
+    def get(self, request):
         context = self.get_context_data(request)
         return render(request, self.template_name, context)
 
 
-class StatisticPageGenericView(BaseGenericListView):
-    """Base generic view to display statistic page for the month"""
+class StatisticPageGenericView(View):
+    """Generic view to render statistic page"""
 
-    def get_queryset(self) -> QuerySet:
-        """Return QuerySet with model entries"""
-        return services_common.get_for_the_month(
-            self.model, self.request.user, self.date
+    template_name = ''
+    cost_service = None
+    income_service = None
+    command = None
+
+    def dispatch(self, request, *args, **kwargs):
+        if not self.cost_service:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} must have "
+                "`cost_service` attribute"
+            )
+        if not self.income_service:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} must have "
+                "`income_service` attribute"
+            )
+        if not self.command:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} must have `command` attribute"
+            )
+        if not self.template_name:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} must have "
+                "`template_name` attribute"
+            )
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, date=None):
+        command = self.command(
+            self.cost_service, self.income_service, request.user, date
         )
-
-    def get_context_data(
-            self, request: HttpRequest,
-            date: Optional[datetime.date]) -> dict:
-        """Return context for template"""
-        context_date = MonthContextDate(date)
-        object_list = self.get_queryset()
-        total_sum = services_common.get_total_sum(object_list)
-        profit = services_common.get_profit_for_the_month(request.user, date)
-        average_costs = costs.services.get_average_costs_for_the_day(
-            request.user
-        )
-        context = {
-            self.context_object_name: object_list,
-            'date': context_date,
-            'total_sum': total_sum,
-            'profit': profit,
-            'average_costs': average_costs
-        }
-        return context
-
-    def get(self, request: HttpRequest,
-            date: Optional[datetime.date] = None) -> HttpResponse:
-        self.date = date
-        context = self.get_context_data(request, date)
-        return render(request, self.template_name, context)
-
-
-class GetUserObjectMixin:
-    """
-    Mixin that overrides the `get_object` method to return user object
-    """
-
-    def get_object(self) -> Model:
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        return get_object_or_404(self.model, pk=pk, owner=self.request.user)
+        statistic = command.execute()
+        return render(request, self.template_name, statistic)

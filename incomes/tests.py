@@ -6,13 +6,17 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 from .models import Income
-import services.common as services_common
+from .services import IncomeService
+from .services.commands import GetIncomesStatisticCommand
+from utils.date import MonthContextDate
+from costs.services.costs import CostService
+from costs.models import Cost, Category
 
 
 User = get_user_model()
 
 
-class IncomesServicesTest(TestCase):
+class IncomeServiceTests(TestCase):
 
     def setUp(self):
         self.today = datetime.date.today()
@@ -22,31 +26,41 @@ class IncomesServicesTest(TestCase):
         self.instance = Income.objects.create(
             incomes_sum='35.00', owner=self.user
         )
-
-    def test_get_all_user_entries(self):
-        all_user_incomes = services_common.get_all_user_entries(
-            Income, self.user
-        )
-        self.assertEqual(len(all_user_incomes), 1)
-        self.assertEqual(all_user_incomes[0], self.instance)
+        self.service = IncomeService()
+        self.cost_service = CostService()
 
     def test_get_total_sum(self):
-        incomes = services_common.get_all_user_entries(Income, self.user)
-        incomes_sum = services_common.get_total_sum(incomes)
+        incomes = self.service.get_all(self.user)
+        incomes_sum = self.service.get_total_sum(incomes)
         income = Income.objects.get(pk=self.instance.pk, owner=self.user)
         self.assertEqual(incomes_sum, Decimal(income.incomes_sum))
 
     def test_get_for_the_month(self):
-        incomes = services_common.get_for_the_month(
-            Income, self.user, self.today
-        )
+        incomes = self.service.get_for_the_month(self.user, self.today)
         self.assertEqual(incomes[0].date.month, self.today.month)
 
     def test_get_for_the_date(self):
-        incomes = services_common.get_for_the_date(
-            Income, self.user, self.today
-        )
+        incomes = self.service.get_for_the_date(self.user, self.today)
         self.assertEqual(incomes[0].date, self.today)
+
+    def test_get_incomes_statistic_command(self):
+        command = GetIncomesStatisticCommand(
+            self.cost_service, self.service, self.user, self.today
+        )
+        statistic = command.execute()
+        month_incomes = self.service.get_for_the_month(self.user, self.today)
+        month_costs = self.cost_service.get_for_the_month(
+            self.user, self.today
+        )
+        incomes_sum = self.service.get_total_sum(month_incomes)
+        right_statistic = {
+            'incomes': month_incomes,
+            'costs': month_costs,
+            'date': MonthContextDate(self.today),
+            'total_sum': incomes_sum,
+            'profit': incomes_sum,
+            'average_costs': Decimal('0.00'),
+        }
 
 
 class IncomesViewsTests(TestCase):
@@ -139,6 +153,27 @@ class IncomesViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'incomes/incomes_statistic.html')
         self.assertContains(response, self.income.incomes_sum)
+
+    def test_incomes_statistic_page_view_with_cost(self):
+        category = Category.objects.create(
+            title='test category', owner=self.user
+        )
+        cost = Cost.objects.create(
+            title='Test cost', costs_sum='35.00',
+            category=category, owner=self.user
+        )
+        response = self.client.get(
+            reverse('incomes_statistic_for_this_month')
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'incomes/incomes_statistic.html')
+        self.assertContains(response, self.income.incomes_sum)
+        self.assertContains(
+            response,
+            Decimal(self.income.incomes_sum) - Decimal(cost.costs_sum)
+        )
+        self.assertContains(response, 'canvas')
+        self.assertContains(response, 'profit')
 
     def test_incomes_statistic_page_view_with_date(self):
         response = self.client.get(
