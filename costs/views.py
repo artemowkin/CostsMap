@@ -149,13 +149,16 @@ class CreateCostView(LoginRequiredMixin, View):
     template_name = 'costs/add_cost.html'
     login_url = reverse_lazy('account_login')
     service = CostService()
+    category_service = CategoryService()
 
     def get(self, request):
         form = self.form_class()
+        self.category_service.set_form_user_categories(form, request.user)
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
         form = self.form_class(request.POST)
+        self.category_service.set_form_user_categories(form, request.user)
         if form.is_valid():
             cost = self.service.create(form.cleaned_data, request.user)
             return redirect(cost.get_absolute_url())
