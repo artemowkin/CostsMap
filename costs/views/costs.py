@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 
 from ..forms import CostForm
 from ..services.categories import CategoryService
-from ..services.costs import CostService
+from ..services import CostService
 from ..services.commands import GetCostsStatisticCommand
 from incomes.services import IncomeService
 from utils.views import (

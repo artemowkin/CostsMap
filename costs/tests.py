@@ -9,7 +9,7 @@ from utils.date import MonthContextDate
 from incomes.models import Income
 from incomes.services import IncomeService
 from .services.categories import CategoryService, DEFAULT_CATEGORIES
-from .services.costs import CostService
+from .services import CostService
 from .services.commands import GetCostsStatisticCommand
 from .models import Cost, Category
 from .forms import CostForm
@@ -24,6 +24,9 @@ class CostServiceTests(TestCase):
         self.today = datetime.date.today()
         self.user = User.objects.create_superuser(
             username='testuser', password='testpass'
+        )
+        self.bad_user = User.objects.create_user(
+            username='testuser2', password='testpass'
         )
         self.category = Category.objects.create(
             title='Test category', owner=self.user
@@ -131,11 +134,8 @@ class CostsViewsTests(TestCase):
         self.assertNotContains(response, self.cost.title)
 
     def test_create_cost_view(self):
-        second_user = User.objects.create(
-            username='testuser2', password='testpass'
-        )
         second_category = Category.objects.create(
-            title='testcategory', owner=second_user
+            title='testcategory', owner=self.bad_user
         )
         response = self.client.get(reverse('create_cost'))
         self.assertEqual(response.status_code, 200)
@@ -152,11 +152,8 @@ class CostsViewsTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_change_cost_view(self):
-        second_user = User.objects.create(
-            username='testuser2', password='testpass'
-        )
         second_category = Category.objects.create(
-            title='testcategory', owner=second_user
+            title='testcategory', owner=self.bad_user
         )
         response = self.client.get(
             reverse('change_cost', args=[self.cost.pk])

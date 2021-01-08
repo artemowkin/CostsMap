@@ -1,6 +1,6 @@
 from django.urls import reverse_lazy
 
-from costs.services.costs import CostService
+from costs.services import CostService
 from .forms import IncomeForm
 from .services import IncomeService
 from .services.commands import GetIncomesStatisticCommand

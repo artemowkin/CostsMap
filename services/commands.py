@@ -3,7 +3,7 @@ import datetime
 from django.contrib.auth import get_user_model
 
 from utils.date import MonthContextDate
-from costs.services.costs import CostService
+from costs.services import CostService
 from incomes.services import IncomeService
 
 

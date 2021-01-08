@@ -9,7 +9,7 @@ from .models import Income
 from .services import IncomeService
 from .services.commands import GetIncomesStatisticCommand
 from utils.date import MonthContextDate
-from costs.services.costs import CostService
+from costs.services import CostService
 from costs.models import Cost, Category
 
 

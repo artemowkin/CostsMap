@@ -4,7 +4,7 @@ from django.db import IntegrityError
 
 from ..forms import CategoryForm
 from ..services.categories import CategoryService
-from ..services.costs import CostService
+from ..services import CostService
 from utils.views import CreateGenericView, DeleteGenericView, DefaultView
 
 

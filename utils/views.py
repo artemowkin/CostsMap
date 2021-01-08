@@ -38,23 +38,23 @@ class DefaultView(LoginRequiredMixin, View):
             raise
 
 
-class BaseGenericListView(DefaultView):
-    """Base view for generic views that render list of model entries
+class BaseServicesView(DefaultView):
+    """Base view for all views working with services
 
     Attributes
     ----------
-    model : Type[Model]
-        Model that using to getting entries
+    service
+        Service view works with
     template_name : str
         Name of rendering template
     context_object_name : str
-        Name of QuerySet with model entries in template
+        Name of object rendering on page. By default it's `object`
 
     """
 
     service = None
     template_name = ''
-    context_object_name = 'object_list'
+    context_object_name = 'object'
 
     def __init__(self, *args, **kwargs):
         if not self.service:
@@ -70,7 +70,7 @@ class BaseGenericListView(DefaultView):
         super().__init__(*args, **kwargs)
 
 
-class DateGenericView(BaseGenericListView):
+class DateGenericView(BaseServicesView):
     """Base generic view to display entries for the date"""
 
     def get_context_data(self, request, date=None) -> dict:
@@ -90,7 +90,7 @@ class DateGenericView(BaseGenericListView):
         return render(request, self.template_name, context)
 
 
-class HistoryGenericView(BaseGenericListView):
+class HistoryGenericView(BaseServicesView):
     """Base generic view to display all entries"""
 
     def get_context_data(self, request) -> dict:
@@ -147,29 +147,22 @@ class StatisticPageGenericView(View):
         return render(request, self.template_name, statistic)
 
 
-class CreateGenericView(DefaultView):
-    """Base view to create entries"""
+class BaseCRUDView(BaseServicesView):
+    """Base view for CRUD views"""
 
     form_class = None
-    template_name = ''
-    service = None
 
     def __init__(self, *args, **kwargs):
         if not self.form_class:
             raise ImproperlyConfigured(
                 f"{self.__class__.__name__} must have `form_class` attribute"
             )
-        if not self.template_name:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have "
-                "`template_name` attribute"
-            )
-        if not self.service:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have `service` attribute"
-            )
 
         super().__init__(*args, **kwargs)
+
+
+class CreateGenericView(BaseCRUDView):
+    """Base view to create entries"""
 
     def get(self, request):
         form = self.form_class()
@@ -184,30 +177,8 @@ class CreateGenericView(DefaultView):
         return render(request, self.template_name, {'form': form})
 
 
-class ChangeGenericView(DefaultView):
+class ChangeGenericView(BaseCRUDView):
     """Base view to change entries"""
-
-    form_class = None
-    template_name = ''
-    context_object_name = 'object'
-    service = None
-
-    def __init__(self, *args, **kwargs):
-        if not self.form_class:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have `form_class` attribute"
-            )
-        if not self.template_name:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have "
-                "`template_name` attribute"
-            )
-        if not self.service:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have `service` attribute"
-            )
-
-        super().__init__(*args, **kwargs)
 
     def get(self, request, pk):
         entry = self.service.get_concrete(pk, request.user)
@@ -232,26 +203,10 @@ class ChangeGenericView(DefaultView):
         )
 
 
-class DeleteGenericView(DefaultView):
+class DeleteGenericView(BaseServicesView):
     """Base view to delete entries"""
 
-    template_name = ''
-    context_object_name = 'object'
     success_url = '/'
-    service = None
-
-    def __init__(self, *args, **kwargs):
-        if not self.template_name:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have "
-                "`template_name` attribute"
-            )
-        if not self.service:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have `service` attribute"
-            )
-
-        super().__init__(*args, **kwargs)
 
     def get(self, request, pk):
         entry = self.service.get_concrete(pk, request.user)
