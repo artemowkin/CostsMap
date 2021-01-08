@@ -2,6 +2,17 @@
     box-sizing: border-box;
 }
 
+@font-face {
+    font-family: "Roboto Regular";
+    src: url("/static/fonts/Roboto-Regular.ttf");
+}
+
+@font-face {
+    font-family: "Roboto Bold";
+    src: url("/static/fonts/Roboto-Bold.ttf");
+    font-weight: bold;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -62,7 +73,7 @@ header {
 }
 
 .logo {
-    font-family: sans-serif;
+    font-family: "Roboto Bold";
     color: #333;
     font-weight: bold;
     font-size: 30px;
@@ -75,7 +86,7 @@ header {
 }
 
 .header_nav_link {
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     color: #333;
     font-size: 20px;
     padding: 30px 30px;
@@ -130,20 +141,20 @@ header {
 
 .costs_title, .incomes_title {
     color: #333;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1.15rem;
     margin-bottom: .25rem;
 }
 
 .costs_sum,  {
     font-size: 1.1rem;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     color: #333;
 }
 
 .costs_category, .incomes_subtitle {
     color: #808080;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: .8rem;
 }
 
@@ -162,17 +173,16 @@ header {
 }
 
 .dates_current_date {
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1.1rem;
     color: #333;
 }
 
 .dates_right_button a, .dates_left_button a {
-    font-family: sans-serif;
+    font-family: "Roboto Bold";
     font-size: 1.1rem;
     font-weight: bold;
     color: white;
-    font-family: bold;
     padding: .75rem 1rem;
     background: #333;
     border-radius: 5px;
@@ -193,7 +203,7 @@ header {
     padding: .75rem 1.5rem;
     border-radius: 5px;
     border: 3px solid #333;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1rem;
     margin-bottom: 2rem;
     margin-left: .5rem;
@@ -213,7 +223,7 @@ header {
     padding: .75rem 1.5rem;
     border-radius: 5px;
     border: 3px solid #333;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1rem;
     margin-bottom: 5rem;
     transition: background ease-in-out .25s, color ease-in-out .25s;
@@ -235,7 +245,7 @@ header {
 .total_sum {
     color: #808080;
     font-size: 1rem;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     padding-right: 10px;
 }
 
@@ -258,7 +268,7 @@ header {
 }
 
 .history_header, .categories_header {
-    font-family: sans-serif;
+    font-family: "Roboto Bold";
     font-size: 3rem;
     color: #333;
     font-weight: bold;
@@ -267,7 +277,7 @@ header {
 form p label {
     display: block;
     margin-bottom: 10px;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 15px;
     color: #333;
 }
@@ -306,7 +316,7 @@ form p select:focus {
 .form_submit {
     background: #333;
     color: white;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1rem;
     border: 3px solid #333;
     border-radius: 5px;
@@ -327,7 +337,7 @@ form p select:focus {
     background: #dc3545;
     color: white;
     text-align: center;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1rem;
     border: 3px solid #dc3545;
     border-radius: 5px;
@@ -347,7 +357,7 @@ form p select:focus {
     background: #333;
     color: white;
     text-align: center;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1rem;
     border: 3px solid #333;
     border-radius: 5px;
@@ -363,7 +373,7 @@ form p select:focus {
 }
 
 .form_title {
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 2rem;
     color: #333;
     margin-bottom: 2rem;
@@ -371,14 +381,14 @@ form p select:focus {
 
 .form_or {
     display: inline-block;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1rem;
     color: #333;
     padding-right: .5rem;
 }
 
 .delete_cost_text {
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1rem;
     color: #333;
 }
@@ -389,7 +399,7 @@ form p select:focus {
     padding: .75rem 1.25rem;
     border: 1px solid #f5c6cb;
     border-radius: .25rem;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1rem;
     width: 20rem;
 }
@@ -397,7 +407,7 @@ form p select:focus {
 .category {
     display: inline-block;
     position: relative;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1rem;
     background: #333;
     color: white;
@@ -431,11 +441,17 @@ canvas {
 }
 
 .empty_text {
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1rem;
     color: #333;
     margin-left: .5rem;
     margin-bottom: 3rem;
+}
+
+.logout_text {
+    font-family: "Roboto Regular";
+    font-size: 1rem;
+    color: #333;
 }
 
 .changer {
@@ -449,7 +465,7 @@ canvas {
 .changer_current {
     display: block;
     font-size: 1.25rem;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     text-align: center;
     color: #333;
     padding: 1rem 2rem;
@@ -459,7 +475,7 @@ canvas {
 .changer_link {
     display: block;
     font-size: 1.25rem;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     text-align: center;
     color: #333;
     padding: 1rem 2rem;
@@ -474,7 +490,7 @@ canvas {
 .profit h2 {
     width: 100%;
     text-align: center;
-    font-family: sans-serif;
+    font-family: "Roboto Regular";
     font-size: 1.5rem;
     color: #333;
 }
@@ -483,7 +499,7 @@ canvas {
     width: 100%;
     text-align: center;
     color: #333;
-    font-family: sans-serif;
+    font-family: "Roboto Bold";
     font-size: 3rem;
     font-weight: bold;
     margin-top: 0;
