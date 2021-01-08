@@ -1,21 +1,18 @@
 from django.shortcuts import render, redirect
-from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.db import IntegrityError
 
 from ..forms import CategoryForm
 from ..services.categories import CategoryService
 from ..services.costs import CostService
-from utils.views import CreateGenericView, DeleteGenericView
+from utils.views import CreateGenericView, DeleteGenericView, DefaultView
 
 
-class CategoryListView(LoginRequiredMixin, View):
+class CategoryListView(DefaultView):
     """View to render all user categories"""
 
     template_name = 'costs/category_list.html'
     context_object_name = 'categories'
-    login_url = reverse_lazy('account_login')
     service = CategoryService()
 
     def get(self, request):
@@ -27,12 +24,11 @@ class CategoryListView(LoginRequiredMixin, View):
         )
 
 
-class CostsByCategoryView(LoginRequiredMixin, View):
+class CostsByCategoryView(DefaultView):
     """View to render all user category costs"""
 
     template_name = 'costs/costs_by_category.html'
     context_object_name = 'costs'
-    login_url = reverse_lazy('account_login')
     service = CategoryService()
     cost_service = CostService()
 
@@ -56,12 +52,11 @@ class CreateCategoryView(CreateGenericView):
     service = CategoryService()
 
 
-class ChangeCategoryView(LoginRequiredMixin, View):
+class ChangeCategoryView(DefaultView):
     """View to change a category"""
 
     form_class = CategoryForm
     template_name = 'costs/change_category.html'
-    login_url = reverse_lazy('account_login')
     service = CategoryService()
 
     def get(self, request, pk):

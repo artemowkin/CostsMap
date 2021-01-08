@@ -1,13 +1,44 @@
+import logging
+
 from django.views import View
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
+from django.http import Http404
 
 from .date import ContextDate
 
 
-class BaseGenericListView(LoginRequiredMixin, View):
+logger = logging.getLogger('filelogger')
+
+
+class DefaultView(LoginRequiredMixin, View):
+    """Base view for all views. Handle exceptions and logs them"""
+
+    login_url = reverse_lazy('account_login')
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            logger.info(
+                f"{request.user} requesting {request.get_full_path()} "
+                f"with method {request.method}, GET: {request.GET},"
+                f" POST: {request.POST}, FILES: {request.FILES}, "
+                f"cookies: {request.COOKIES}"
+            )
+            return super().dispatch(request, *args, **kwargs)
+        except Http404:
+            logger.error(f"404 HTTP Not Found on {request.get_full_path()}")
+            raise
+        except Exception as e:
+            logger.exception(
+                f"{e.__class__.__name__} exception on "
+                "{request.get_full_path()}"
+            )
+            raise
+
+
+class BaseGenericListView(DefaultView):
     """Base view for generic views that render list of model entries
 
     Attributes
@@ -21,12 +52,11 @@ class BaseGenericListView(LoginRequiredMixin, View):
 
     """
 
-    login_url = reverse_lazy('account_login')
     service = None
     template_name = ''
     context_object_name = 'object_list'
 
-    def dispatch(self, request, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         if not self.service:
             raise ImproperlyConfigured(
                 f"{self.__class__.__name__} must have `service` attribute"
@@ -37,7 +67,7 @@ class BaseGenericListView(LoginRequiredMixin, View):
                 "`template_name` attribute"
             )
 
-        return super().dispatch(request, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class DateGenericView(BaseGenericListView):
@@ -86,7 +116,7 @@ class StatisticPageGenericView(View):
     income_service = None
     command = None
 
-    def dispatch(self, request, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         if not self.cost_service:
             raise ImproperlyConfigured(
                 f"{self.__class__.__name__} must have "
@@ -107,7 +137,7 @@ class StatisticPageGenericView(View):
                 "`template_name` attribute"
             )
 
-        return super().dispatch(request, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get(self, request, date=None):
         command = self.command(
@@ -117,12 +147,11 @@ class StatisticPageGenericView(View):
         return render(request, self.template_name, statistic)
 
 
-class CreateGenericView(LoginRequiredMixin, View):
+class CreateGenericView(DefaultView):
     """Base view to create entries"""
 
     form_class = None
     template_name = ''
-    login_url = reverse_lazy('account_login')
     service = None
 
     def __init__(self, *args, **kwargs):
@@ -155,13 +184,12 @@ class CreateGenericView(LoginRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 
-class ChangeGenericView(LoginRequiredMixin, View):
+class ChangeGenericView(DefaultView):
     """Base view to change entries"""
 
     form_class = None
     template_name = ''
     context_object_name = 'object'
-    login_url = reverse_lazy('account_login')
     service = None
 
     def __init__(self, *args, **kwargs):
@@ -204,13 +232,12 @@ class ChangeGenericView(LoginRequiredMixin, View):
         )
 
 
-class DeleteGenericView(LoginRequiredMixin, View):
+class DeleteGenericView(DefaultView):
     """Base view to delete entries"""
 
     template_name = ''
     context_object_name = 'object'
     success_url = '/'
-    login_url = reverse_lazy('account_login')
     service = None
 
     def __init__(self, *args, **kwargs):

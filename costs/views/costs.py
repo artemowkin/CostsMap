@@ -1,7 +1,5 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 
 from ..forms import CostForm
@@ -11,7 +9,7 @@ from ..services.commands import GetCostsStatisticCommand
 from incomes.services import IncomeService
 from utils.views import (
     DateGenericView, HistoryGenericView, StatisticPageGenericView,
-    DeleteGenericView
+    DeleteGenericView, DefaultView
 )
 
 
@@ -31,12 +29,11 @@ class CostsHistoryView(HistoryGenericView):
     context_object_name = 'costs'
 
 
-class CreateCostView(LoginRequiredMixin, View):
+class CreateCostView(DefaultView):
     """View to create a new cost"""
 
     form_class = CostForm
     template_name = 'costs/add_cost.html'
-    login_url = reverse_lazy('account_login')
     service = CostService()
     category_service = CategoryService()
 
@@ -55,14 +52,13 @@ class CreateCostView(LoginRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 
-class ChangeCostView(LoginRequiredMixin, View):
+class ChangeCostView(DefaultView):
     """View to change a cost"""
 
     service = CostService()
     category_service = CategoryService()
     form_class = CostForm
     template_name = 'costs/change_cost.html'
-    login_url = reverse_lazy('account_login')
 
     def get(self, request, pk):
         cost = self.service.get_concrete(pk, request.user)
@@ -94,10 +90,9 @@ class DeleteCostView(DeleteGenericView):
     context_object_name = 'cost'
 
 
-class StatisticView(LoginRequiredMixin, View):
+class StatisticView(DefaultView):
     """View to return json with costs statistic"""
 
-    login_url = reverse_lazy('account_login')
     service = CostService()
 
     def get(self, request, date):
@@ -114,12 +109,11 @@ class CostsStatisticPageView(StatisticPageGenericView):
     command = GetCostsStatisticCommand
 
 
-class CostStatisticForTheLastYear(LoginRequiredMixin, View):
+class CostStatisticForTheLastYear(DefaultView):
     """View to return json statistic with costs by months
     for the last year
     """
 
-    login_url = reverse_lazy('account_login')
     service = CostService()
 
     def get(self, request, date):
