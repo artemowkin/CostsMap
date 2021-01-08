@@ -131,9 +131,19 @@ class CostsViewsTests(TestCase):
         self.assertNotContains(response, self.cost.title)
 
     def test_create_cost_view(self):
+        second_user = User.objects.create(
+            username='testuser2', password='testpass'
+        )
+        second_category = Category.objects.create(
+            title='testcategory', owner=second_user
+        )
         response = self.client.get(reverse('create_cost'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'costs/add_cost.html')
+        self.assertContains(response, self.category.title)
+        self.assertEqual(
+            response.content.decode().count(self.category.title), 1
+        )
         response = self.client.post(reverse('create_cost'), {
             'title': 'some_title',
             'costs_sum': '100',
@@ -142,11 +152,21 @@ class CostsViewsTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_change_cost_view(self):
+        second_user = User.objects.create(
+            username='testuser2', password='testpass'
+        )
+        second_category = Category.objects.create(
+            title='testcategory', owner=second_user
+        )
         response = self.client.get(
             reverse('change_cost', args=[self.cost.pk])
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'costs/change_cost.html')
+        self.assertContains(response, self.category.title)
+        self.assertEqual(
+            response.content.decode().count(self.category.title), 1
+        )
         response = self.client.post(
             reverse('change_cost', args=[self.cost.pk]), {
                 'title': 'some_title',
@@ -167,6 +187,7 @@ class CostsViewsTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'costs/delete_cost.html')
+        self.assertContains(response, self.cost.title)
         response = self.client.post(
             reverse('delete_cost', args=[self.cost.pk])
         )
