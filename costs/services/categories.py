@@ -1,39 +1,39 @@
 from __future__ import annotations
 
 from django.contrib.auth import get_user_model
-from django.forms import Form
+from django import forms
 from django.db.models import QuerySet
-from djservices import UserCRUDService
+from service_objects.services import Service
 
-from services.strategies import CreateUniqueCRUDStrategy
 from ..models import Category
 
 
 User = get_user_model()
 
-DEFAULT_CATEGORIES = [
-    'Еда', 'Здоровье', 'Развлечения', 'Транспорт', 'Одежда'
-]
 
+class SetUserDefaultCategoriesService(Service):
+    """Service to create default categories for user"""
 
-class CategoryService(UserCRUDService):
-    """CRUD service with categories business logic"""
+    DEFAULT_CATEGORIES = [
+        'Еда', 'Здоровье', 'Развлечения', 'Транспорт', 'Одежда'
+    ]
 
-    model = Category
-    strategy_class = CreateUniqueCRUDStrategy
-    user_field_name = 'owner'
+    owner = forms.ModelChoiceField(queryset=User.objects.all())
+    _model = Category
 
-    def get_category_costs(self, category: Category) -> QuerySet:
-        """Return all category costs"""
-        costs = category.costs.all()
-        return costs
-
-    def set_user_default_categories(self, user: User) -> None:
+    def process(self) -> None:
         """Create categories from DEFAULT_CATEGORIES for user"""
-        for category in DEFAULT_CATEGORIES:
-            Category.objects.create(title=category, owner=user)
+        owner = self.cleaned_data['owner']
 
-    def set_form_user_categories(self, form: Form, user: User) -> None:
-        """Set queryset for `category` field in form"""
-        user_categories = self.get_all(user)
-        form.fields['category'].queryset = user_categories
+        for category in self.DEFAULT_CATEGORIES:
+            self._model.objects.create(title=category, owner=owner)
+
+
+def get_category_costs(category: Category) -> QuerySet:
+    """Return all costs in category"""
+    return category.costs.all()
+
+
+def set_form_categories(form: Form, categories: QuerySet) -> None:
+    """Set queryset for `category` field in form"""
+    form.fields['category'].queryset = categories

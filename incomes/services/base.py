@@ -1,10 +1,9 @@
-from services.common import DateCRUDService
+from decimal import Decimal
+
+from django.db.models import QuerySet, Sum
 from ..models import Income
 
 
-class IncomeService(DateCRUDService):
-    """CRUD strategy with incomes logic"""
-
-    model = Income
-    user_field_name = 'owner'
-    sum_field_name = 'incomes_sum'
+def get_total_sum(incomes: QuerySet) -> Decimal:
+    total_sum = incomes.aggregate(total_sum=Sum('incomes_sum'))
+    return total_sum['total_sum'] or Decimal('0')

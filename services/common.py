@@ -1,47 +1,56 @@
 import datetime
-from decimal import Decimal
+from typing import Type, Optional
+from uuid import UUID
 
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from django.db.models import QuerySet, Sum
-from djservices import UserCRUDService
+from django.db.models import QuerySet, Model
 
 
 User = get_user_model()
 
 
-class DateCRUDService(UserCRUDService):
-    """CRUD service with getting by dates functionality"""
+def get_concrete_user_entry(
+        model: Type[Model], pk: UUID, owner: User) -> QuerySet:
+    """Return a concrete user entry with pk"""
+    return get_object_or_404(model, pk=pk, owner=owner)
 
-    sum_field_name = ''
 
-    def __init__(self):
-        if not self.sum_field_name:
-            raise AttributeError(
-                f"{self.__class__.__name__} must have "
-                "`sum_field_name` attribute"
-            )
+def get_all_user_entries(model: Type[Model], user: User) -> QuerySet:
+    """Return all user entries"""
+    return model.objects.filter(owner=user)
 
-        super().__init__()
 
-    def get_total_sum(self, queryset: QuerySet) -> Decimal:
-        """Return sum of costs or incomes in queryset"""
-        total_sum = queryset.aggregate(total_sum=Sum(self.sum_field_name))
-        return total_sum['total_sum'] or Decimal('0')
+def create_entry(model: Type[Model], entry_data: dict) -> Model:
+    """Create a new model entry using entry_data"""
+    entry = model.objects.create(**entry_data)
+    return entry
 
-    def get_for_the_month(
-            self, user: User, date: datetime.date = None) -> QuerySet:
-        """Return user entries for the month"""
-        date = date or datetime.date.today()
-        user_kwarg = self.strategy._get_user_kwarg(user)
-        return self.model.objects.filter(
-            date__month=date.month, date__year=date.year, **user_kwarg
-        )
 
-    def get_for_the_date(
-            self, user: User, date: datetime.date = None) -> QuerySet:
-        """Return user entries for the concrete date"""
-        date = date or datetime.date.today()
-        user_kwarg = self.strategy._get_user_kwarg(user)
-        return self.model.objects.filter(
-            date=date, **user_kwarg
-        )
+def change_entry(entry: Model, entry_data: dict) -> None:
+    """Change a concrete model entry using entry_data"""
+    for field in entry_data:
+        setattr(entry, field, entry_data[field])
+
+
+def delete_entry(entry):
+    """Delete a concrete model entry"""
+    entry.delete()
+
+
+def get_for_the_month(
+        model: Type[Model],
+        user: User, date: Optional[datetime.date] = None) -> QuerySet:
+    """Return user entries for the month"""
+    date = date or datetime.date.today()
+    return model.objects.filter(
+        date__month=date.month, date__year=date.year, owner=user
+    )
+
+
+def get_for_the_date(
+        model: Type[Model],
+        user: User, date: Optional[datetime.date] = None) -> QuerySet:
+    """Return user entries for the concrete date"""
+    date = date or datetime.date.today()
+    return model.objects.filter(date=date, owner=user)

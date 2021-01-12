@@ -3,10 +3,11 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 
 from ..forms import CostForm
-from ..services.categories import CategoryService
-from ..services import CostService
+from ..models import Cost, Category
 from ..services.commands import GetCostsStatisticCommand
-from incomes.services import IncomeService
+import costs.services as cost_services
+import costs.services.categories as category_services
+import services.common as common_services
 from utils.views import (
     DateGenericView, HistoryGenericView, StatisticPageGenericView,
     DeleteGenericView, DefaultView
@@ -16,37 +17,52 @@ from utils.views import (
 class CostsForTheDateView(DateGenericView):
     """View to render costs for the date"""
 
-    service = CostService()
     template_name = 'costs/costs.html'
     context_object_name = 'costs'
+    model = Cost
+
+    def get_total_sum(self, costs):
+        return cost_services.get_total_sum(costs)
 
 
 class CostsHistoryView(HistoryGenericView):
     """View to render all costs for all time."""
 
-    service = CostService()
     template_name = 'costs/history_costs.html'
     context_object_name = 'costs'
+    model = Cost
+
+    def get_total_sum(self, costs):
+        return cost_services.get_total_sum(costs)
 
 
 class CreateCostView(DefaultView):
     """View to create a new cost"""
 
+    model = Cost
+    category_model = Category
     form_class = CostForm
     template_name = 'costs/add_cost.html'
-    service = CostService()
-    category_service = CategoryService()
 
     def get(self, request):
         form = self.form_class()
-        self.category_service.set_form_user_categories(form, request.user)
+        user_categories = common_services.get_all_user_entries(
+            self.category_model, request.user
+        )
+        category_services.set_form_categories(form, user_categories)
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
         form = self.form_class(request.POST)
-        self.category_service.set_form_user_categories(form, request.user)
+        user_categories = common_services.get_all_user_entries(
+            self.category_model, request.user
+        )
+        category_services.set_form_categories(form, user_categories)
         if form.is_valid():
-            cost = self.service.create(form.cleaned_data, request.user)
+            form.cleaned_data.update({'owner': request.user})
+            cost = common_services.create_entry(
+                self.model, form.cleaned_data
+            )
             return redirect(cost.get_absolute_url())
 
         return render(request, self.template_name, {'form': form})
@@ -55,25 +71,35 @@ class CreateCostView(DefaultView):
 class ChangeCostView(DefaultView):
     """View to change a cost"""
 
-    service = CostService()
-    category_service = CategoryService()
+    model = Cost
+    category_model = Category
     form_class = CostForm
     template_name = 'costs/change_cost.html'
 
     def get(self, request, pk):
-        cost = self.service.get_concrete(pk, request.user)
+        cost = common_services.get_concrete_user_entry(
+            self.model, pk, request.user
+        )
         form = self.form_class(instance=cost)
-        self.category_service.set_form_user_categories(form, request.user)
+        user_categories = common_services.get_all_user_entries(
+            self.category_model, request.user
+        )
+        category_services.set_form_categories(form, user_categories)
         return render(
             request, self.template_name, {'form': form, 'cost': cost}
         )
 
     def post(self, request, pk):
-        cost = self.service.get_concrete(pk, request.user)
+        cost = common_services.get_concrete_user_entry(
+            self.model, pk, request.user
+        )
         form = self.form_class(request.POST, instance=cost)
-        self.category_service.set_form_user_categories(form, request.user)
+        user_categories = common_services.get_all_user_entries(
+            self.category_model, request.user
+        )
+        category_services.set_form_categories(form, user_categories)
         if form.is_valid():
-            cost = self.service.change(cost, form)
+            common_services.change_entry(cost, form.cleaned_data)
             return redirect(cost.get_absolute_url())
 
         return render(
@@ -84,19 +110,20 @@ class ChangeCostView(DefaultView):
 class DeleteCostView(DeleteGenericView):
     """View to delete a cost"""
 
+    model = Cost
     template_name = 'costs/delete_cost.html'
     success_url = reverse_lazy('today_costs')
-    service = CostService()
     context_object_name = 'cost'
 
 
 class StatisticView(DefaultView):
     """View to return json with costs statistic"""
 
-    service = CostService()
-
     def get(self, request, date):
-        data = self.service.get_statistic_for_the_month(request.user, date)
+        data = cost_services.GetStatisticForTheMonthService.execute({
+            'user': request.user,
+            'date': date
+        })
         return JsonResponse(data, safe=False)
 
 
@@ -104,8 +131,6 @@ class CostsStatisticPageView(StatisticPageGenericView):
     """View to render statistic with costs for the month"""
 
     template_name = 'costs/costs_statistic.html'
-    cost_service = CostService()
-    income_service = IncomeService()
     command = GetCostsStatisticCommand
 
 
@@ -114,8 +139,9 @@ class CostStatisticForTheLastYear(DefaultView):
     for the last year
     """
 
-    service = CostService()
-
     def get(self, request, date):
-        data = self.service.get_statistic_for_the_year(request.user, date)
+        data = cost_services.GetStatisticForTheYearService.execute({
+            'user': request.user,
+            'date': date
+        })
         return JsonResponse(data, safe=False)

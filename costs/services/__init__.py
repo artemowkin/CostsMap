@@ -1,4 +1,10 @@
-from .costs import CostService
+from .costs import (
+    GetStatisticForTheMonthService, GetStatisticForTheYearService,
+    GetAverageCostsForTheDayService, get_total_sum
+)
 
 
-__all__ = ['CostService']
+__all__ = [
+    'GetStatisticForTheMonthService', 'GetStatisticForTheYearService',
+    'GetAverageCostsForTheDayService', 'get_total_sum'
+]

@@ -1,9 +1,9 @@
 from django.urls import reverse_lazy
 
-from costs.services import CostService
 from .forms import IncomeForm
-from .services import IncomeService
+from .models import Income
 from .services.commands import GetIncomesStatisticCommand
+import incomes.services as income_services
 from utils.views import (
     DateGenericView, HistoryGenericView, StatisticPageGenericView,
     CreateGenericView, ChangeGenericView, DeleteGenericView
@@ -13,23 +13,26 @@ from utils.views import (
 class IncomesForTheDateView(DateGenericView):
     """View to render user incomes for the date"""
 
-    service = IncomeService()
+    model = Income
     template_name = 'incomes/incomes.html'
     context_object_name = 'incomes'
+
+    def get_total_sum(self, incomes):
+        return income_services.get_total_sum(incomes)
 
 
 class CreateIncomeView(CreateGenericView):
     """View to create a new income"""
 
+    model = Income
     form_class = IncomeForm
     template_name = 'incomes/add_income.html'
-    service = IncomeService()
 
 
 class ChangeIncomeView(ChangeGenericView):
     """View to change an income"""
 
-    service = IncomeService()
+    model = Income
     form_class = IncomeForm
     template_name = 'incomes/change_income.html'
     context_object_name = 'income'
@@ -38,23 +41,25 @@ class ChangeIncomeView(ChangeGenericView):
 class DeleteIncomeView(DeleteGenericView):
     """View to delete an income"""
 
+    model = Income
     template_name = 'incomes/delete_income.html'
+    context_object_name = 'income'
     success_url = reverse_lazy('today_incomes')
-    service = IncomeService()
 
 
 class IncomesHistoryView(HistoryGenericView):
     """View to render all user incomes"""
 
-    service = IncomeService()
+    model = Income
     template_name = 'incomes/history_incomes.html'
     context_object_name = 'incomes'
+
+    def get_total_sum(self, incomes):
+        return income_services.get_total_sum(incomes)
 
 
 class IncomesStatisticPageView(StatisticPageGenericView):
     """View to return statistic with user incomes for the month"""
 
     template_name = 'incomes/incomes_statistic.html'
-    cost_service = CostService()
-    income_service = IncomeService()
     command = GetIncomesStatisticCommand

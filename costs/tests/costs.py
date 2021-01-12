@@ -7,8 +7,8 @@ from django.urls import reverse
 
 from utils.date import MonthContextDate
 from incomes.models import Income
-from incomes.services import IncomeService
-from ..services import CostService
+import costs.services as cost_services
+import services.common as common_services
 from ..services.commands import GetCostsStatisticCommand
 from ..models import Cost, Category
 
@@ -36,17 +36,16 @@ class CostServiceTests(TestCase):
             title='Test cost', costs_sum='35.00',
             category=self.category, owner=self.user
         )
-        self.service = CostService()
-        self.income_service = IncomeService()
 
     def test_get_statistic_for_the_month(self):
         correct_statistic = [{
             'category': self.category.title,
             'costs': Decimal(self.instance.costs_sum)
         }]
-        statistic = self.service.get_statistic_for_the_month(
-            self.user, self.today
-        )
+        statistic = cost_services.GetStatisticForTheMonthService.execute({
+            'user': self.user,
+            'date': self.today
+        })
 
         self.assertEqual(statistic, correct_statistic)
 
@@ -55,38 +54,44 @@ class CostServiceTests(TestCase):
             'cost_month': self.today.month,
             'cost_sum': Decimal(self.instance.costs_sum)
         }]
-        statistic = self.service.get_statistic_for_the_year(
-            self.user, self.today
-        )
+        statistic = cost_services.GetStatisticForTheYearService.execute({
+            'user': self.user,
+            'date': self.today
+        })
 
         self.assertEqual(statistic, correct_statistic)
 
     def test_get_average_costs_for_the_day(self):
-        avg = self.service.get_average_costs_for_the_day(self.user)
+        avg = cost_services.GetAverageCostsForTheDayService.execute({
+            'user': self.user,
+        })
+
         self.assertEqual(avg, Decimal(self.instance.costs_sum))
 
     def test_get_total_sum(self):
-        costs = self.service.get_all(self.user)
-        costs_sum = self.service.get_total_sum(costs)
+        costs = common_services.get_all_user_entries(Cost, self.user)
+        costs_sum = cost_services.get_total_sum(costs)
 
         self.assertEqual(costs_sum, Decimal(self.instance.costs_sum))
 
     def test_get_for_the_month(self):
-        costs = self.service.get_for_the_month(self.user, self.today)
+        costs = common_services.get_for_the_month(Cost, self.user, self.today)
         self.assertEqual(costs[0].date.month, self.today.month)
 
     def test_get_for_the_date(self):
-        costs = self.service.get_for_the_date(self.user, self.today)
+        costs = common_services.get_for_the_date(Cost, self.user, self.today)
         self.assertEqual(costs[0].date, self.today)
 
     def test_get_costs_statistic_command(self):
         command = GetCostsStatisticCommand(
-            self.service, self.income_service, self.user, self.today
+            self.user, self.today
         )
         statistic = command.execute()
 
-        month_costs = self.service.get_for_the_month(self.user, self.today)
-        costs_sum = self.service.get_total_sum(month_costs)
+        month_costs = common_services.get_for_the_month(
+            Cost, self.user, self.today
+        )
+        costs_sum = cost_services.get_total_sum(month_costs)
         incomes_sum = Decimal(self.income.incomes_sum)
         profit = incomes_sum - costs_sum
         right_statistic = {
@@ -127,7 +132,6 @@ class CostsViewsTests(TestCase):
             owner=self.user, category=self.category
         )
         self.client.login(username='testuser', password='testpass')
-        self.service = CostService()
 
     def test_costs_for_the_date_view(self):
         response = self.client.get(reverse('today_costs'))
@@ -170,7 +174,7 @@ class CostsViewsTests(TestCase):
             'costs_sum': '100',
             'category': self.category.pk
         })
-        all_costs = self.service.get_all(self.user)
+        all_costs = common_services.get_all_user_entries(Cost, self.user)
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(len(all_costs), 2)
