@@ -32,6 +32,8 @@ def change_entry(entry: Model, entry_data: dict) -> None:
     for field in entry_data:
         setattr(entry, field, entry_data[field])
 
+    entry.save()
+
 
 def delete_entry(entry):
     """Delete a concrete model entry"""

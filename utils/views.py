@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
 from django.http import Http404
+from django.db import IntegrityError
 
 from .date import ContextDate
 import services.common as common_services
@@ -183,7 +184,7 @@ class CreateGenericView(DefaultView):
             return self.form_invalid(form)
 
     def form_invalid(self, form):
-        return render(request, self.template_name, {'form': form})
+        return render(self.request, self.template_name, {'form': form})
 
 
 class ChangeGenericView(DefaultView):
