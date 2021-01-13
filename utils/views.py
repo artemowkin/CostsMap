@@ -18,12 +18,6 @@ class DefaultView(LoginRequiredMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
         try:
-            logger.info(
-                f"{request.user} requesting {request.get_full_path()} "
-                f"with method {request.method}, GET: {request.GET},"
-                f" POST: {request.POST}, FILES: {request.FILES}, "
-                f"cookies: {request.COOKIES}"
-            )
             return super().dispatch(request, *args, **kwargs)
         except Http404:
             logger.error(f"404 HTTP Not Found on {request.get_full_path()}")
