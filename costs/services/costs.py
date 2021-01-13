@@ -140,6 +140,8 @@ class GetStatisticForTheMonthService(Service):
 
 
 class GetStatisticForTheYearService(Service):
+    """Service returning statistic for the year"""
+
     SQL_GET_STATISTIC_FOR_THE_YEAR = (
         "SELECT EXTRACT(month FROM date), SUM(costs_sum) FROM cost "
         "WHERE EXTRACT(year FROM cost.date) = %s "
@@ -182,6 +184,8 @@ class GetStatisticForTheYearService(Service):
 
 
 class GetAverageCostsForTheDayService(Service):
+    """Service returning average costs for the day"""
+
     SQL_GET_AVERAGE_COSTS_FOR_THE_DAY = (
         "SELECT AVG(costs_per_date) FROM ("
         "    SELECT SUM(costs_sum) AS costs_per_date"
