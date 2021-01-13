@@ -2,13 +2,16 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 
 from .forms import IncomeForm
-from .services.commands import GetIncomesStatisticCommand
+from .services.commands import (
+    GetIncomesStatisticCommand, GetIncomesForTheDateCommand,
+    GetIncomesHistoryCommand
+)
 from incomes.services import (
     GetIncomesForTheDateService, GetIncomesTotalSumService, GetIncomesService,
     DeleteIncomeService, CreateIncomeService, ChangeIncomeService,
 )
 from utils.views import (
-    DateGenericView, HistoryGenericView, StatisticPageGenericView,
+    StatisticPageGenericView, DateGenericView, HistoryGenericView,
     DeleteGenericView, DefaultView
 )
 
@@ -18,8 +21,7 @@ class IncomesForTheDateView(DateGenericView):
 
     template_name = 'incomes/incomes.html'
     context_object_name = 'incomes'
-    date_service = GetIncomesForTheDateService
-    total_sum_service = GetIncomesTotalSumService
+    command = GetIncomesForTheDateCommand
 
 
 class CreateIncomeView(DefaultView):
@@ -83,8 +85,7 @@ class IncomesHistoryView(HistoryGenericView):
 
     template_name = 'incomes/history_incomes.html'
     context_object_name = 'incomes'
-    get_service = GetIncomesService
-    total_sum_service = GetIncomesTotalSumService
+    command = GetIncomesHistoryCommand
 
 
 class IncomesStatisticPageView(StatisticPageGenericView):

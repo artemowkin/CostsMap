@@ -5,10 +5,13 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-from utils.date import MonthContextDate
+from utils.date import MonthContextDate, ContextDate
 from incomes.models import Income
 import costs.services as cost_services
-from ..services.commands import GetCostsStatisticCommand
+from ..services.commands import (
+    GetCostsStatisticCommand, GetCostsHistoryCommand,
+    GetCostsForTheDateCommand
+)
 from ..models import Cost, Category
 
 
@@ -146,6 +149,33 @@ class CostServicesTests(TestCase):
         self.assertEqual(
             statistic['average_costs'], right_statistic['average_costs']
         )
+
+    def test_get_costs_history_command(self):
+        right_data = {
+            'costs': Cost.objects.all(),
+            'total_sum': Decimal(self.cost.costs_sum)
+        }
+
+        command = GetCostsHistoryCommand(self.user)
+        data = command.execute()
+
+        self.assertEqual(len(right_data['costs']), len(data['costs']))
+        self.assertEqual(right_data['costs'][0], data['costs'][0])
+        self.assertEqual(right_data['total_sum'], data['total_sum'])
+
+    def test_get_costs_for_the_date_command(self):
+        right_data = {
+            'costs': Cost.objects.all(),
+            'total_sum': Decimal(self.cost.costs_sum),
+            'date': ContextDate(self.today)
+        }
+
+        command = GetCostsForTheDateCommand(self.user, self.today)
+        data = command.execute()
+
+        self.assertEqual(len(right_data['costs']), len(data['costs']))
+        self.assertEqual(right_data['costs'][0], data['costs'][0])
+        self.assertEqual(right_data['total_sum'], data['total_sum'])
 
 
 class CostsViewsTests(TestCase):

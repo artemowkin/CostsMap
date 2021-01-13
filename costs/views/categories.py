@@ -3,12 +3,12 @@ from django.urls import reverse_lazy
 from django.db import IntegrityError
 
 from costs.services.categories import (
-    GetCategoriesService, get_category_costs,
-    CreateCategoryService, ChangeCategoryService, DeleteCategoryService
+    GetCategoriesService, CreateCategoryService, ChangeCategoryService,
+    DeleteCategoryService
 )
-from costs.services import GetCostsTotalSumService
 from ..forms import CategoryForm
 from utils.views import DefaultView, DeleteGenericView
+from costs.services.commands import GetCategoryCostsCommand
 
 
 class CategoryListView(DefaultView):
@@ -30,18 +30,12 @@ class CostsByCategoryView(DefaultView):
     """View to render all user category costs"""
 
     template_name = 'costs/costs_by_category.html'
-    context_object_name = 'costs'
+    command = GetCategoryCostsCommand
 
     def get(self, request, pk):
-        category = GetCategoriesService.get_concrete(pk, request.user)
-        costs = get_category_costs(category)
-        total_sum = GetCostsTotalSumService.execute(costs)
-        return render(
-            request, self.template_name, {
-                self.context_object_name: costs,
-                'category': category, 'total_sum': total_sum
-            }
-        )
+        command = self.command(pk, request.user)
+        context = command.execute()
+        return render(request, self.template_name, context)
 
 
 class CreateCategoryView(DefaultView):

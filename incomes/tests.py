@@ -7,8 +7,11 @@ from django.urls import reverse
 
 from .models import Income
 import incomes.services as income_services
-from .services.commands import GetIncomesStatisticCommand
-from utils.date import MonthContextDate
+from .services.commands import (
+    GetIncomesStatisticCommand, GetIncomesForTheDateCommand,
+    GetIncomesHistoryCommand
+)
+from utils.date import MonthContextDate, ContextDate
 import costs.services as cost_services
 from costs.models import Cost, Category
 
@@ -105,6 +108,33 @@ class IncomeServiceTests(TestCase):
             'profit': incomes_sum,
             'average_costs': Decimal('0.00'),
         }
+
+    def test_get_incomes_history_command(self):
+        right_data = {
+            'incomes': Income.objects.all(),
+            'total_sum': Decimal(self.income.incomes_sum)
+        }
+
+        command = GetIncomesHistoryCommand(self.user)
+        data = command.execute()
+
+        self.assertEqual(len(right_data['incomes']), len(data['incomes']))
+        self.assertEqual(right_data['incomes'][0], data['incomes'][0])
+        self.assertEqual(right_data['total_sum'], data['total_sum'])
+
+    def test_get_costs_for_the_date_command(self):
+        right_data = {
+            'incomes': Income.objects.all(),
+            'total_sum': Decimal(self.income.incomes_sum),
+            'date': ContextDate(self.today)
+        }
+
+        command = GetIncomesForTheDateCommand(self.user, self.today)
+        data = command.execute()
+
+        self.assertEqual(len(right_data['incomes']), len(data['incomes']))
+        self.assertEqual(right_data['incomes'][0], data['incomes'][0])
+        self.assertEqual(right_data['total_sum'], data['total_sum'])
 
 
 class IncomesViewsTests(TestCase):

@@ -1,10 +1,12 @@
 import datetime
+from decimal import Decimal
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 import costs.services.categories as category_services
+from costs.services.commands import GetCategoryCostsCommand
 from ..models import Cost, Category
 from ..forms import CostForm
 
@@ -93,6 +95,20 @@ class CategoryServicesTests(TestCase):
         )
         for entry in form_queryset:
             self.assertIn(entry, all_user_categories)
+
+    def test_get_category_costs_command(self):
+        right_context = {
+            'category': self.category, 'costs': self.category.costs.all(),
+            'total_sum': Decimal(self.cost.costs_sum)
+        }
+
+        command = GetCategoryCostsCommand(self.category.pk, self.user)
+        context = command.execute()
+
+        self.assertEqual(context['category'], right_context['category'])
+        self.assertEqual(len(context['costs']), len(right_context['costs']))
+        self.assertEqual(context['costs'][0], right_context['costs'][0])
+        self.assertEqual(context['total_sum'], right_context['total_sum'])
 
 
 class CategoriesViewsTests(TestCase):

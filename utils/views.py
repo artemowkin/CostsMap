@@ -7,8 +7,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
 from django.http import Http404
 
-from .date import ContextDate
-
 
 logger = logging.getLogger('filelogger')
 
@@ -38,123 +36,68 @@ class DefaultView(LoginRequiredMixin, View):
             raise
 
 
-class RenderView(DefaultView):
-    """Default view with template_name attribute"""
-
-    template_name = ''
-
-    def __init__(self, *args, **kwargs):
-        if not self.template_name:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have "
-                "`template_name` attribute"
-            )
-
-        super().__init__(*args, **kwargs)
-
-
-class DateGenericView(RenderView):
-    """Base generic view to display entries for the date"""
-
-    date_service = None
-    total_sum_service = None
-    context_object_name = 'object_list'
-
-    def __init__(self, *args, **kwargs):
-        if not self.date_service:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have "
-                "`date_service` attribute"
-            )
-        if not self.total_sum_service:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have "
-                "`total_sum_service` attribute"
-            )
-
-        super().__init__(*args, **kwargs)
-
-    def get(self, request, date=None):
-        context_date = ContextDate(date)
-        date_entries = self.date_service.get_for_the_date(
-            request.user, date
-        )
-        total_sum = self.total_sum_service.execute(date_entries)
-        context = {
-            self.context_object_name: date_entries,
-            'total_sum': total_sum,
-            'date': context_date,
-        }
-        return render(request, self.template_name, context)
-
-
-class HistoryGenericView(RenderView):
-    """Base generic view to display all entries"""
-
-    context_object_name = 'object_list'
-    get_service = None
-    total_sum_service = None
-
-    def __init__(self, *args, **kwargs):
-        if not self.get_service:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have "
-                "`get_service` attribute"
-            )
-        if not self.total_sum_service:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have "
-                "`total_sum_service` attribute"
-            )
-
-        super().__init__(*args, **kwargs)
-
-    def get(self, request):
-        all_entries = self.get_service.get_all(request.user)
-        total_sum = self.total_sum_service.execute(all_entries)
-        context = {
-            self.context_object_name: all_entries,
-            'total_sum': total_sum
-        }
-        return render(request, self.template_name, context)
-
-
-class StatisticPageGenericView(View):
-    """Generic view to render statistic page"""
+class CommandView(DefaultView):
+    """Default view using commands"""
 
     template_name = ''
     command = None
 
     def __init__(self, *args, **kwargs):
-        if not self.command:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have `command` attribute"
-            )
         if not self.template_name:
             raise ImproperlyConfigured(
                 f"{self.__class__.__name__} must have "
                 "`template_name` attribute"
             )
+        if not self.command:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} must have `command` attribute"
+            )
 
         super().__init__(*args, **kwargs)
 
+
+class DateGenericView(CommandView):
+    """Base generic view to display entries for the date"""
+
     def get(self, request, date=None):
-        command = self.command(
-            request.user, date
-        )
+        command = self.command(request.user, date)
+        context = command.execute()
+        return render(request, self.template_name, context)
+
+
+class HistoryGenericView(CommandView):
+    """Base generic view to display all entries"""
+
+    def get(self, request):
+        command = self.command(request.user)
+        context = command.execute()
+        return render(request, self.template_name, context)
+
+
+class StatisticPageGenericView(CommandView):
+    """Generic view to render statistic page"""
+
+    def get(self, request, date=None):
+        command = self.command(request.user, date)
         statistic = command.execute()
         return render(request, self.template_name, statistic)
 
 
-class DeleteGenericView(RenderView):
+class DeleteGenericView(DefaultView):
     """Base view to delete entries"""
 
+    template_name = ''
     success_url = '/'
     context_object_name = 'object'
     get_service = None
     delete_service = None
 
     def __init__(self, *args, **kwargs):
+        if not self.template_name:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} must have "
+                "`template_name` attribute"
+            )
         if not self.get_service:
             raise ImproperlyConfigured(
                 f"{self.__class__.__name__} must have `get_service` attribute"

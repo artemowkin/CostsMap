@@ -5,16 +5,18 @@ from django.urls import reverse_lazy
 from ..forms import CostForm
 from ..services.commands import GetCostsStatisticCommand
 from costs.services import (
-    GetCostsForTheDateService, GetCostsTotalSumService, GetCostsService,
-    CreateCostService, ChangeCostService, DeleteCostService,
+    GetCostsService, CreateCostService, ChangeCostService, DeleteCostService,
     GetStatisticForTheMonthService, GetStatisticForTheYearService
 )
 from costs.services.categories import (
     GetCategoriesService, set_form_categories
 )
+from costs.services.commands import (
+    GetCostsForTheDateCommand, GetCostsHistoryCommand
+)
 from utils.views import (
-    StatisticPageGenericView, DefaultView, DateGenericView,
-    HistoryGenericView, DeleteGenericView
+    DefaultView, DeleteGenericView, StatisticPageGenericView,
+    DateGenericView, HistoryGenericView
 )
 
 
@@ -22,18 +24,14 @@ class CostsForTheDateView(DateGenericView):
     """View to render costs for the date"""
 
     template_name = 'costs/costs.html'
-    context_object_name = 'costs'
-    date_service = GetCostsForTheDateService
-    total_sum_service = GetCostsTotalSumService
+    command = GetCostsForTheDateCommand
 
 
 class CostsHistoryView(HistoryGenericView):
     """View to render all costs for all time."""
 
     template_name = 'costs/history_costs.html'
-    context_object_name = 'costs'
-    get_service = GetCostsService
-    total_sum_service = GetCostsTotalSumService
+    command = GetCostsHistoryCommand
 
 
 class CreateCostView(DefaultView):
