@@ -3,10 +3,8 @@ import datetime
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from django.shortcuts import get_object_or_404
 
 import costs.services.categories as category_services
-import services.common as common_services
 from ..models import Cost, Category
 from ..forms import CostForm
 
@@ -14,7 +12,7 @@ from ..forms import CostForm
 User = get_user_model()
 
 
-class CategoryServiceTests(TestCase):
+class CategoryServicesTests(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_superuser(
@@ -28,38 +26,44 @@ class CategoryServiceTests(TestCase):
             owner=self.user, category=self.category
         )
 
-    def test_get_concrete_user_entry_with_category_model(self):
-        category = common_services.get_concrete_user_entry(
-            Category, self.category.pk, self.user
+    def test_get_categories_service_get_concrete(self):
+        category = category_services.GetCategoriesService.get_concrete(
+            self.category.pk, self.user
         )
 
         self.assertEqual(category, self.category)
 
-    def test_get_all_user_entries_with_category_model(self):
-        all_categories = common_services.get_all_user_entries(
-            Category, self.user
+    def test_get_categories_service_get_all(self):
+        all_categories = category_services.GetCategoriesService.get_all(
+            self.user
         )
 
         self.assertEqual(len(all_categories), 1)
         self.assertEqual(all_categories[0], self.category)
 
-    def test_create_entry_with_category_model(self):
+    def test_create_category_service(self):
         category_data = {'title': 'new_category', 'owner': self.user}
 
-        category = common_services.create_entry(Category, category_data)
+        category = category_services.CreateCategoryService.execute(
+            category_data
+        )
 
         self.assertEqual(category.title, category_data['title'])
         self.assertEqual(category.owner, category_data['owner'])
 
-    def test_change_entry_with_category_model(self):
-        category_data = {'title': 'new_title'}
+    def test_change_category_service(self):
+        category_data = {'title': 'new_title', 'category': self.category}
 
-        common_services.change_entry(self.category, category_data)
+        category = category_services.ChangeCategoryService.execute(
+            category_data
+        )
 
-        self.assertEqual(self.category.title, category_data['title'])
+        self.assertEqual(category.title, category_data['title'])
 
-    def test_delete_entry_with_category_model(self):
-        common_services.delete_entry(self.category)
+    def test_delete_category_service(self):
+        category_services.DeleteCategoryService.execute({
+            'category': self.category
+        })
         all_categories = Category.objects.all()
 
         self.assertEqual(len(all_categories), 0)

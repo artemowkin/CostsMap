@@ -5,13 +5,89 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django import forms
-from django.db.models import QuerySet, Sum
 from service_objects.services import Service
-
+from services.common import (
+    GetTotalSumService, GetUserEntriesService, GetForTheDateService
+)
+from ..models import Cost, Category
 from utils.db import execute_sql_command
 
 
 User = get_user_model()
+
+
+class GetCostsForTheDateService(GetForTheDateService):
+    """Service to get costs for the date"""
+
+    model = Cost
+
+
+class GetCostsService(GetUserEntriesService):
+    """Service to get user costs"""
+
+    model = Cost
+
+
+class GetCostsTotalSumService(GetTotalSumService):
+    """Service to get total sum of costs in queryset"""
+
+    sum_field_name = 'costs_sum'
+
+
+class CreateCostService(Service):
+    """Service to create new costs"""
+
+    title = forms.CharField(max_length=255)
+    costs_sum = forms.DecimalField(max_digits=7, decimal_places=2)
+    category = forms.ModelChoiceField(queryset=Category.objects.all())
+    owner = forms.ModelChoiceField(queryset=User.objects.all())
+    _model = Cost
+
+    def process(self) -> Cost:
+        """Create a new cost"""
+        title = self.cleaned_data['title']
+        costs_sum = self.cleaned_data['costs_sum']
+        category = self.cleaned_data['category']
+        owner = self.cleaned_data['owner']
+
+        cost = self._model.objects.create(
+            title=title, costs_sum=costs_sum, category=category, owner=owner
+        )
+        return cost
+
+
+class ChangeCostService(Service):
+    """Service to change a concrete cost"""
+
+    cost = forms.ModelChoiceField(queryset=Cost.objects.all())
+    title = forms.CharField(max_length=255)
+    costs_sum = forms.DecimalField(max_digits=7, decimal_places=2)
+    category = forms.ModelChoiceField(queryset=Category.objects.all())
+
+    def process(self) -> Cost:
+        """Change a concrete cost from `cost` attribute"""
+        cost = self.cleaned_data['cost']
+        title = self.cleaned_data['title']
+        costs_sum = self.cleaned_data['costs_sum']
+        category = self.cleaned_data['category']
+
+        cost.title = title
+        cost.costs_sum = costs_sum
+        cost.category = category
+
+        cost.save()
+        return cost
+
+
+class DeleteCostService(Service):
+    """Service to delete a concrete cost"""
+
+    cost = forms.ModelChoiceField(queryset=Cost.objects.all())
+
+    def process(self) -> None:
+        """Delete a concrete cost from `cost` attribute"""
+        cost = self.cleaned_data['cost']
+        cost.delete()
 
 
 class GetStatisticForTheMonthService(Service):
@@ -120,14 +196,12 @@ class GetAverageCostsForTheDayService(Service):
         result = execute_sql_command(
             self.SQL_GET_AVERAGE_COSTS_FOR_THE_DAY, (user.pk,)
         )[0][0]
+        return self._normalize_fetch_result(result)
+
+    def _normalize_fetch_result(self, result):
         if isinstance(result, Decimal):
             result = result.quantize(Decimal("1.00"))
         else:
             result = Decimal("0.00")
 
         return result
-
-
-def get_total_sum(costs) -> QuerySet:
-    total_sum = costs.aggregate(total_sum=Sum('costs_sum'))
-    return total_sum['total_sum'] or Decimal('0')

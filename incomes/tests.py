@@ -7,7 +7,6 @@ from django.urls import reverse
 
 from .models import Income
 import incomes.services as income_services
-import services.common as common_services
 from .services.commands import GetIncomesStatisticCommand
 from utils.date import MonthContextDate
 import costs.services as cost_services
@@ -28,36 +27,76 @@ class IncomeServiceTests(TestCase):
             incomes_sum='35.00', owner=self.user
         )
 
-    def test_get_total_sum(self):
-        incomes = common_services.get_all_user_entries(Income, self.user)
-        incomes_sum = income_services.get_total_sum(incomes)
+    def test_get_incomes_service_get_all(self):
+        all_incomes = income_services.GetIncomesService.get_all(self.user)
+
+        self.assertEqual(len(all_incomes), 1)
+        self.assertEqual(all_incomes[0], self.income)
+
+    def test_get_incomes_service_get_concrete(self):
+        income = income_services.GetIncomesService.get_concrete(
+            self.income.pk, self.user
+        )
+
+        self.assertEqual(income, self.income)
+
+    def test_get_incomes_total_sum_service(self):
+        incomes = income_services.GetIncomesService.get_all(self.user)
+        incomes_sum = income_services.GetIncomesTotalSumService.execute(
+            incomes
+        )
 
         self.assertEqual(incomes_sum, Decimal(self.income.incomes_sum))
 
-    def test_get_for_the_month(self):
-        incomes = common_services.get_for_the_month(
-            Income, self.user, self.today
-        )
+    def test_get_incomes_for_the_date_service_get_for_the_month(self):
+        income_date_service = income_services.GetIncomesForTheDateService
+        incomes = income_date_service.get_for_the_month(self.user, self.today)
 
         self.assertEqual(incomes[0].date.month, self.today.month)
 
-    def test_get_for_the_date(self):
-        incomes = common_services.get_for_the_date(
-            Income, self.user, self.today
-        )
+    def test_get_incomes_for_the_date_service_get_for_the_date(self):
+        income_date_service = income_services.GetIncomesForTheDateService
+        incomes = income_date_service.get_for_the_date(self.user, self.today)
 
         self.assertEqual(incomes[0].date, self.today)
+
+    def test_create_income_service(self):
+        income_data = {'incomes_sum': Decimal('100.00'), 'owner': self.user}
+
+        income = income_services.CreateIncomeService.execute(income_data)
+
+        self.assertEqual(income.incomes_sum, income_data['incomes_sum'])
+        self.assertEqual(income.owner, income_data['owner'])
+
+    def test_change_income_service(self):
+        change_data = {
+            'incomes_sum': Decimal('100.00'), 'income': self.income
+        }
+
+        income = income_services.ChangeIncomeService.execute(change_data)
+
+        self.assertEqual(income.incomes_sum, change_data['incomes_sum'])
+
+    def test_delete_cost_service(self):
+        income_services.DeleteIncomeService.execute({'income': self.income})
+        all_incomes = Income.objects.all()
+
+        self.assertEqual(len(all_incomes), 0)
 
     def test_get_incomes_statistic_command(self):
         command = GetIncomesStatisticCommand(self.user, self.today)
         statistic = command.execute()
-        month_incomes = common_services.get_for_the_month(
-            Income, self.user, self.today
+        income_date_service = income_services.GetIncomesForTheDateService
+        cost_date_service = cost_services.GetCostsForTheDateService
+        month_incomes = income_date_service.get_for_the_month(
+            self.user, self.today
         )
-        month_costs = common_services.get_for_the_month(
-            Cost, self.user, self.today
+        month_costs = cost_date_service.get_for_the_month(
+            self.user, self.today
         )
-        incomes_sum = income_services.get_total_sum(month_incomes)
+        incomes_sum = income_services.GetIncomesTotalSumService.execute(
+            month_incomes
+        )
         right_statistic = {
             'incomes': month_incomes,
             'costs': month_costs,

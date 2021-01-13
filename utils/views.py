@@ -6,10 +6,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
 from django.http import Http404
-from django.db import IntegrityError
 
 from .date import ContextDate
-import services.common as common_services
 
 
 logger = logging.getLogger('filelogger')
@@ -40,70 +38,84 @@ class DefaultView(LoginRequiredMixin, View):
             raise
 
 
-class DateGenericView(DefaultView):
-    """Base generic view to display entries for the date"""
+class RenderView(DefaultView):
+    """Default view with template_name attribute"""
 
-    model = None
+    template_name = ''
 
     def __init__(self, *args, **kwargs):
-        if not self.model:
+        if not self.template_name:
             raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have `model` attribute"
+                f"{self.__class__.__name__} must have "
+                "`template_name` attribute"
             )
 
         super().__init__(*args, **kwargs)
 
-    def get_context_data(self, request, date=None) -> dict:
-        """Return context for the template"""
+
+class DateGenericView(RenderView):
+    """Base generic view to display entries for the date"""
+
+    date_service = None
+    total_sum_service = None
+    context_object_name = 'object_list'
+
+    def __init__(self, *args, **kwargs):
+        if not self.date_service:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} must have "
+                "`date_service` attribute"
+            )
+        if not self.total_sum_service:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} must have "
+                "`total_sum_service` attribute"
+            )
+
+        super().__init__(*args, **kwargs)
+
+    def get(self, request, date=None):
         context_date = ContextDate(date)
-        date_entries = common_services.get_for_the_date(
-            self.model, request.user, date
+        date_entries = self.date_service.get_for_the_date(
+            request.user, date
         )
-        total_sum = self.get_total_sum(date_entries)
+        total_sum = self.total_sum_service.execute(date_entries)
         context = {
             self.context_object_name: date_entries,
             'total_sum': total_sum,
             'date': context_date,
         }
-        return context
-
-    def get(self, request, date=None):
-        context = self.get_context_data(request, date)
         return render(request, self.template_name, context)
 
 
-class HistoryGenericView(DefaultView):
+class HistoryGenericView(RenderView):
     """Base generic view to display all entries"""
 
-    model = None
+    context_object_name = 'object_list'
+    get_service = None
+    total_sum_service = None
 
     def __init__(self, *args, **kwargs):
-        if not self.model:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have `model` attribute"
-            )
-        if not self.get_total_sum:
+        if not self.get_service:
             raise ImproperlyConfigured(
                 f"{self.__class__.__name__} must have "
-                "`get_total_sum` attribute"
+                "`get_service` attribute"
+            )
+        if not self.total_sum_service:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} must have "
+                "`total_sum_service` attribute"
             )
 
         super().__init__(*args, **kwargs)
 
-    def get_context_data(self, request) -> dict:
-        """Return dict with context variables"""
-        all_entries = common_services.get_all_user_entries(
-            self.model, request.user
-        )
-        total_sum = self.get_total_sum(all_entries)
+    def get(self, request):
+        all_entries = self.get_service.get_all(request.user)
+        total_sum = self.total_sum_service.execute(all_entries)
         context = {
             self.context_object_name: all_entries,
             'total_sum': total_sum
         }
-        return context
-
-    def get(self, request):
-        context = self.get_context_data(request)
         return render(request, self.template_name, context)
 
 
@@ -134,122 +146,34 @@ class StatisticPageGenericView(View):
         return render(request, self.template_name, statistic)
 
 
-class CreateGenericView(DefaultView):
-    """Base view to create entries"""
+class DeleteGenericView(RenderView):
+    """Base view to delete entries"""
 
-    form_class = None
-    template_name = ''
-    model = None
+    success_url = '/'
+    context_object_name = 'object'
+    get_service = None
+    delete_service = None
 
     def __init__(self, *args, **kwargs):
-        if not self.form_class:
+        if not self.get_service:
             raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have `form_class` attribute"
+                f"{self.__class__.__name__} must have `get_service` attribute"
             )
-        if not self.template_name:
+        if not self.delete_service:
             raise ImproperlyConfigured(
                 f"{self.__class__.__name__} must have "
-                "`template_name` attribute"
-            )
-        if not self.model:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have `model` attribute"
+                "`delete_service` attribute"
             )
 
         super().__init__(*args, **kwargs)
 
-    def get(self, request):
-        form = self.form_class()
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            return self.form_valid(form)
-
-        return self.form_invalid(form)
-
-    def form_valid(self, form):
-        form.cleaned_data.update({'owner': self.request.user})
-        try:
-            entry = common_services.create_entry(
-                self.model, form.cleaned_data
-            )
-            return redirect(entry.get_absolute_url())
-        except IntegrityError:
-            form.add_error(
-                None,
-                f"The same {self.model._meta.verbose_name} already exists"
-            )
-            return self.form_invalid(form)
-
-    def form_invalid(self, form):
-        return render(self.request, self.template_name, {'form': form})
-
-
-class ChangeGenericView(DefaultView):
-    """Base view to change entries"""
-
-    context_object_name = 'object'
-
     def get(self, request, pk):
-        self.entry = common_services.get_concrete_user_entry(
-            self.model, pk, request.user
-        )
-        form = self.form_class(instance=self.entry)
-        return self._render_page(form)
-
-    def post(self, request, pk):
-        self.entry = common_services.get_concrete_user_entry(
-            self.model, pk, request.user
-        )
-        form = self.form_class(request.POST, instance=self.entry)
-        if form.is_valid():
-            return self.form_valid(form)
-
-        return self.form_invalid(form)
-
-    def form_valid(self, form):
-        try:
-            common_services.change_entry(self.entry, form.cleaned_data)
-            return redirect(self.entry.get_absolute_url())
-        except IntegrityError:
-            form.add_error(
-                None,
-                f"The same {self.model._meta.verbose_name} already exists"
-            )
-            self.entry = common_services.get_concrete_user_entry(
-                self.model, self.entry.pk, self.request.user
-            )
-            return self.form_invalid(form)
-
-    def form_invalid(self, form):
-        return self._render_page(form)
-
-    def _render_page(self, form):
-        return render(
-            self.request, self.template_name, {
-                'form': form, self.context_object_name: self.entry
-            }
-        )
-
-
-class DeleteGenericView(DefaultView):
-    """Base view to delete entries"""
-
-    success_url = '/'
-
-    def get(self, request, pk):
-        entry = common_services.get_concrete_user_entry(
-            self.model, pk, request.user
-        )
+        entry = self.get_service.get_concrete(pk, request.user)
         return render(
             request, self.template_name, {self.context_object_name: entry}
         )
 
     def post(self, request, pk):
-        entry = common_services.get_concrete_user_entry(
-            self.model, pk, request.user
-        )
-        common_services.delete_entry(entry)
+        entry = self.get_service.get_concrete(pk, request.user)
+        self.delete_service.execute({self.context_object_name: entry})
         return redirect(self.success_url)

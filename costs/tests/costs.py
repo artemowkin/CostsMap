@@ -8,7 +8,6 @@ from django.urls import reverse
 from utils.date import MonthContextDate
 from incomes.models import Income
 import costs.services as cost_services
-import services.common as common_services
 from ..services.commands import GetCostsStatisticCommand
 from ..models import Cost, Category
 
@@ -16,7 +15,7 @@ from ..models import Cost, Category
 User = get_user_model()
 
 
-class CostServiceTests(TestCase):
+class CostServicesTests(TestCase):
 
     def setUp(self):
         self.today = datetime.date.today()
@@ -32,15 +31,46 @@ class CostServiceTests(TestCase):
         self.income = Income.objects.create(
             incomes_sum='50.00', owner=self.user
         )
-        self.instance = Cost.objects.create(
+        self.cost = Cost.objects.create(
             title='Test cost', costs_sum='35.00',
             category=self.category, owner=self.user
         )
 
+    def test_create_cost_service(self):
+        cost_data = {
+            'title': 'new_cost', 'costs_sum': Decimal('100.00'),
+            'category': self.category, 'owner': self.user
+        }
+
+        cost = cost_services.CreateCostService.execute(cost_data)
+
+        self.assertEqual(cost.title, cost_data['title'])
+        self.assertEqual(cost.costs_sum, cost_data['costs_sum'])
+        self.assertEqual(cost.category, cost_data['category'])
+        self.assertEqual(cost.owner, cost_data['owner'])
+
+    def test_change_cost_service(self):
+        change_data = {
+            'title': 'new_cost', 'costs_sum': Decimal('100.00'),
+            'category': self.category, 'cost': self.cost
+        }
+
+        cost = cost_services.ChangeCostService.execute(change_data)
+
+        self.assertEqual(cost.title, change_data['title'])
+        self.assertEqual(cost.costs_sum, change_data['costs_sum'])
+        self.assertEqual(cost.category, change_data['category'])
+
+    def test_delete_cost_service(self):
+        cost_services.DeleteCostService.execute({'cost': self.cost})
+        all_costs = Cost.objects.all()
+
+        self.assertEqual(len(all_costs), 0)
+
     def test_get_statistic_for_the_month(self):
         correct_statistic = [{
             'category': self.category.title,
-            'costs': Decimal(self.instance.costs_sum)
+            'costs': Decimal(self.cost.costs_sum)
         }]
         statistic = cost_services.GetStatisticForTheMonthService.execute({
             'user': self.user,
@@ -52,7 +82,7 @@ class CostServiceTests(TestCase):
     def test_get_statistic_for_the_year(self):
         correct_statistic = [{
             'cost_month': self.today.month,
-            'cost_sum': Decimal(self.instance.costs_sum)
+            'cost_sum': Decimal(self.cost.costs_sum)
         }]
         statistic = cost_services.GetStatisticForTheYearService.execute({
             'user': self.user,
@@ -66,20 +96,24 @@ class CostServiceTests(TestCase):
             'user': self.user,
         })
 
-        self.assertEqual(avg, Decimal(self.instance.costs_sum))
+        self.assertEqual(avg, Decimal(self.cost.costs_sum))
 
     def test_get_total_sum(self):
-        costs = common_services.get_all_user_entries(Cost, self.user)
-        costs_sum = cost_services.get_total_sum(costs)
+        costs = cost_services.GetCostsService.get_all(self.user)
+        costs_sum = cost_services.GetCostsTotalSumService.execute(costs)
 
-        self.assertEqual(costs_sum, Decimal(self.instance.costs_sum))
+        self.assertEqual(costs_sum, Decimal(self.cost.costs_sum))
 
     def test_get_for_the_month(self):
-        costs = common_services.get_for_the_month(Cost, self.user, self.today)
+        costs = cost_services.GetCostsForTheDateService.get_for_the_month(
+            self.user, self.today
+        )
         self.assertEqual(costs[0].date.month, self.today.month)
 
     def test_get_for_the_date(self):
-        costs = common_services.get_for_the_date(Cost, self.user, self.today)
+        costs = cost_services.GetCostsForTheDateService.get_for_the_date(
+            self.user, self.today
+        )
         self.assertEqual(costs[0].date, self.today)
 
     def test_get_costs_statistic_command(self):
@@ -88,18 +122,18 @@ class CostServiceTests(TestCase):
         )
         statistic = command.execute()
 
-        month_costs = common_services.get_for_the_month(
-            Cost, self.user, self.today
+        costs = cost_services.GetCostsForTheDateService.get_for_the_month(
+            self.user, self.today
         )
-        costs_sum = cost_services.get_total_sum(month_costs)
+        costs_sum = cost_services.GetCostsTotalSumService.execute(costs)
         incomes_sum = Decimal(self.income.incomes_sum)
         profit = incomes_sum - costs_sum
         right_statistic = {
-            'costs': month_costs,
+            'costs': costs,
             'date': MonthContextDate(self.today),
             'total_sum': costs_sum,
             'profit': profit,
-            'average_costs': Decimal(self.instance.costs_sum)
+            'average_costs': Decimal(self.cost.costs_sum)
         }
 
         self.assertEqual(
@@ -174,7 +208,7 @@ class CostsViewsTests(TestCase):
             'costs_sum': '100',
             'category': self.category.pk
         })
-        all_costs = common_services.get_all_user_entries(Cost, self.user)
+        all_costs = cost_services.GetCostsService.get_all(self.user)
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(len(all_costs), 2)

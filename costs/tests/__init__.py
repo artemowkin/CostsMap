@@ -1,9 +1,9 @@
-from .categories import CategoryServiceTests, CategoriesViewsTests
+from .categories import CategoryServicesTests, CategoriesViewsTests
 
-from .costs import CostServiceTests, CostsViewsTests
+from .costs import CostServicesTests, CostsViewsTests
 
 
 __all__ = [
-    'CategoryServiceTests', 'CategoriesViewsTests', 'CostServiceTests',
+    'CategoryServicesTests', 'CategoriesViewsTests', 'CostServicesTests',
     'CostViewsTests'
 ]

@@ -1,58 +1,79 @@
 import datetime
-from typing import Type, Optional
+from typing import Optional
 from uuid import UUID
+from decimal import Decimal
 
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from django.db.models import QuerySet, Model
+from django.db.models import QuerySet, Model, Sum
+from django.core.exceptions import ImproperlyConfigured
 
 
 User = get_user_model()
 
 
-def get_concrete_user_entry(
-        model: Type[Model], pk: UUID, owner: User) -> QuerySet:
-    """Return a concrete user entry with pk"""
-    return get_object_or_404(model, pk=pk, owner=owner)
+class ModelService:
+    """Abstract base class with model attribute"""
+
+    model = None
+
+    def __init__(self):
+        if not self.model:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} must have `model` attribute"
+            )
 
 
-def get_all_user_entries(model: Type[Model], user: User) -> QuerySet:
-    """Return all user entries"""
-    return model.objects.filter(owner=user)
+class GetForTheDateService(ModelService):
+    """Service to get entries for the date"""
+
+    @classmethod
+    def get_for_the_month(
+            cls, user: User,
+            date: Optional[datetime.date] = None) -> QuerySet:
+        """Return user entries for the month"""
+        date = date or datetime.date.today()
+        return cls.model.objects.filter(
+            date__month=date.month, date__year=date.year, owner=user
+        )
+
+    @classmethod
+    def get_for_the_date(
+            cls, user: User,
+            date: Optional[datetime.date] = None) -> QuerySet:
+        """Return user entries for the concrete date"""
+        date = date or datetime.date.today()
+        return cls.model.objects.filter(date=date, owner=user)
 
 
-def create_entry(model: Type[Model], entry_data: dict) -> Model:
-    """Create a new model entry using entry_data"""
-    entry = model.objects.create(**entry_data)
-    return entry
+class GetUserEntriesService(ModelService):
+    """Service to get user entries"""
+
+    @classmethod
+    def get_concrete(cls, pk: UUID, owner: User) -> Model:
+        """Return a concrete user entry with pk"""
+        return get_object_or_404(cls.model, pk=pk, owner=owner)
+
+    @classmethod
+    def get_all(cls, user: User) -> QuerySet:
+        """Return all user entries"""
+        return cls.model.objects.filter(owner=user)
 
 
-def change_entry(entry: Model, entry_data: dict) -> None:
-    """Change a concrete model entry using entry_data"""
-    for field in entry_data:
-        setattr(entry, field, entry_data[field])
+class GetTotalSumService:
+    """Service to get total sum of queryset entries"""
 
-    entry.save()
+    sum_field_name = ''
 
+    def __init__(self):
+        if not self.sum_field_name:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} must have "
+                "`sum_field_name` attribute"
+            )
 
-def delete_entry(entry):
-    """Delete a concrete model entry"""
-    entry.delete()
-
-
-def get_for_the_month(
-        model: Type[Model],
-        user: User, date: Optional[datetime.date] = None) -> QuerySet:
-    """Return user entries for the month"""
-    date = date or datetime.date.today()
-    return model.objects.filter(
-        date__month=date.month, date__year=date.year, owner=user
-    )
-
-
-def get_for_the_date(
-        model: Type[Model],
-        user: User, date: Optional[datetime.date] = None) -> QuerySet:
-    """Return user entries for the concrete date"""
-    date = date or datetime.date.today()
-    return model.objects.filter(date=date, owner=user)
+    @classmethod
+    def execute(cls, queryset: QuerySet) -> Decimal:
+        """Return sum of queryset entries sums"""
+        total_sum = queryset.aggregate(total_sum=Sum(cls.sum_field_name))
+        return total_sum['total_sum'] or Decimal('0')
