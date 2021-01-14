@@ -8,7 +8,7 @@ from django.urls import reverse
 import costs.services.categories as category_services
 from costs.services.commands import GetCategoryCostsCommand
 from ..models import Cost, Category
-from ..forms import CostForm
+from ..serializers import CostSerializer
 
 
 User = get_user_model()
@@ -84,30 +84,20 @@ class CategoryServicesTests(TestCase):
 
         self.assertGreater(len(new_categories), 1)
 
-    def test_set_form_categories(self):
-        form = CostForm()
-        all_user_categories = Category.objects.filter(owner=self.user)
-        category_services.set_form_categories(form, all_user_categories)
-        form_queryset = form.fields['category'].queryset
-
-        self.assertEqual(
-            len(form_queryset), len(all_user_categories)
-        )
-        for entry in form_queryset:
-            self.assertIn(entry, all_user_categories)
-
     def test_get_category_costs_command(self):
         right_context = {
-            'category': self.category, 'costs': self.category.costs.all(),
+            'category': self.category.title,
+            'costs': self.category.costs.all(),
             'total_sum': Decimal(self.cost.costs_sum)
         }
+        serialized_cost = CostSerializer(self.cost).data
 
         command = GetCategoryCostsCommand(self.category.pk, self.user)
         context = command.execute()
 
         self.assertEqual(context['category'], right_context['category'])
         self.assertEqual(len(context['costs']), len(right_context['costs']))
-        self.assertEqual(context['costs'][0], right_context['costs'][0])
+        self.assertEqual(context['costs'][0], serialized_cost)
         self.assertEqual(context['total_sum'], right_context['total_sum'])
 
 
@@ -134,7 +124,6 @@ class CategoriesViewsTests(TestCase):
         response = self.client.get(reverse('category_list'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'costs/category_list.html')
         self.assertContains(response, self.category.title)
 
     def test_costs_by_category_view(self):
@@ -143,62 +132,42 @@ class CategoriesViewsTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'costs/costs_by_category.html')
         self.assertContains(response, self.cost.title)
         self.assertContains(response, self.category.title)
 
-    def test_create_category_view_get(self):
-        response = self.client.get(reverse('create_category'))
-        self.assertEqual(response.status_code, 200)
-
-    def test_create_category_view_post(self):
+    def test_create_category_view(self):
         response = self.client.post(reverse('create_category'), {
             'title': 'some_title',
         })
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 201)
 
-    def test_change_category_view_get(self):
-        response = self.client.get(
-            reverse('change_category', args=[self.category.pk])
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'costs/change_category.html')
-
-    def test_change_category_view_post(self):
+    def test_change_category_view(self):
         response = self.client.post(
             reverse('change_category', args=[self.category.pk]), {
                 'title': 'some_title',
             }
         )
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 201)
 
     def test_change_category_view_bad_user(self):
         self.client.login(username='baduser', password='badpass')
-        bad_response = self.client.get(
+        bad_response = self.client.post(
             reverse('change_category', args=[self.category.pk])
         )
 
         self.assertEqual(bad_response.status_code, 404)
 
-    def test_delete_category_view_get(self):
-        response = self.client.get(
-            reverse('delete_category', args=[self.category.pk])
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'costs/delete_category.html')
-
-    def test_delete_category_view_post(self):
+    def test_delete_category_view(self):
         response = self.client.post(
             reverse('delete_category', args=[self.category.pk])
         )
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
     def test_delete_category_view_bad_user(self):
         self.client.login(username='baduser', password='badpass')
-        bad_response = self.client.get(
+        bad_response = self.client.post(
             reverse('delete_category', args=[self.category.pk])
         )
         self.assertEqual(bad_response.status_code, 404)

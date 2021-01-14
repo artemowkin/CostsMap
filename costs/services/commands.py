@@ -5,11 +5,10 @@ from django.contrib.auth import get_user_model
 
 from services.commands import GetStatisticBaseCommand
 from .categories import GetCategoriesService, get_category_costs
+from ..serializers import CostSerializer
 from .costs import (
     GetCostsTotalSumService, GetCostsForTheDateService, GetCostsService
 )
-
-from utils.date import ContextDate
 
 
 User = get_user_model()
@@ -24,8 +23,9 @@ class GetCostsHistoryCommand:
     def execute(self) -> dict:
         all_costs = GetCostsService.get_all(self._user)
         total_sum = GetCostsTotalSumService.execute(all_costs)
+        serializer = CostSerializer(all_costs, many=True)
         context = {
-            'costs': all_costs,
+            'costs': serializer.data,
             'total_sum': total_sum
         }
         return context
@@ -36,18 +36,18 @@ class GetCostsForTheDateCommand:
 
     def __init__(self, user: User, date: datetime.date):
         self._user = user
-        self._date = date
+        self._date = date or datetime.date.today()
 
     def execute(self):
-        context_date = ContextDate(self._date)
         date_costs = GetCostsForTheDateService.get_for_the_date(
             self._user, self._date
         )
         total_sum = GetCostsTotalSumService.execute(date_costs)
+        serializer = CostSerializer(date_costs, many=True)
         context = {
-            'costs': date_costs,
+            'costs': serializer.data,
             'total_sum': total_sum,
-            'date': context_date,
+            'date': self._date,
         }
         return context
 
@@ -68,7 +68,13 @@ class GetCategoryCostsCommand:
         )
         costs = get_category_costs(category)
         total_sum = GetCostsTotalSumService.execute(costs)
-        return {'costs': costs, 'category': category, 'total_sum': total_sum}
+        serializer = CostSerializer(costs, many=True)
+        data = {
+            'category': category.title,
+            'total_sum': total_sum,
+            'costs': serializer.data
+        }
+        return data
 
 
 class GetCostsStatisticCommand(GetStatisticBaseCommand):
@@ -76,9 +82,10 @@ class GetCostsStatisticCommand(GetStatisticBaseCommand):
 
     def get_dict_statistic(self):
         """Return costs statistic in dict format"""
+        serializer = CostSerializer(self.month_costs, many=True)
         return {
-            'costs': self.month_costs,
-            'date': self.context_date,
+            'costs': serializer.data,
+            'date': self._date,
             'total_sum': self.total_costs,
             'profit': self.profit,
             'average_costs': self.average_costs,

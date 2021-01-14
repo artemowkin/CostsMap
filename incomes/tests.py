@@ -6,13 +6,12 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 from .models import Income
+from .serializers import IncomeSerializer
 import incomes.services as income_services
 from .services.commands import (
     GetIncomesStatisticCommand, GetIncomesForTheDateCommand,
     GetIncomesHistoryCommand
 )
-from utils.date import MonthContextDate, ContextDate
-import costs.services as cost_services
 from costs.models import Cost, Category
 
 
@@ -89,25 +88,32 @@ class IncomeServiceTests(TestCase):
     def test_get_incomes_statistic_command(self):
         command = GetIncomesStatisticCommand(self.user, self.today)
         statistic = command.execute()
-        income_date_service = income_services.GetIncomesForTheDateService
-        cost_date_service = cost_services.GetCostsForTheDateService
-        month_incomes = income_date_service.get_for_the_month(
-            self.user, self.today
-        )
-        month_costs = cost_date_service.get_for_the_month(
-            self.user, self.today
-        )
+        incomes = Income.objects.all()
+        costs = Cost.objects.all()
         incomes_sum = income_services.GetIncomesTotalSumService.execute(
-            month_incomes
+            incomes
         )
         right_statistic = {
-            'incomes': month_incomes,
-            'costs': month_costs,
-            'date': MonthContextDate(self.today),
+            'incomes': incomes,
+            'costs': costs,
+            'date': self.today,
             'total_sum': incomes_sum,
             'profit': incomes_sum,
             'average_costs': Decimal('0.00'),
         }
+        serialized_income = IncomeSerializer(self.income).data
+
+        self.assertEqual(
+            len(statistic['incomes']), len(right_statistic['incomes'])
+        )
+        self.assertEqual(statistic['incomes'][0], serialized_income)
+        self.assertEqual(len(statistic['costs']), 0)
+        self.assertEqual(statistic['date'], right_statistic['date'])
+        self.assertEqual(statistic['total_sum'], right_statistic['total_sum'])
+        self.assertEqual(statistic['profit'], right_statistic['profit'])
+        self.assertEqual(
+            statistic['average_costs'], right_statistic['average_costs']
+        )
 
     def test_get_incomes_history_command(self):
         right_data = {
@@ -117,23 +123,25 @@ class IncomeServiceTests(TestCase):
 
         command = GetIncomesHistoryCommand(self.user)
         data = command.execute()
+        serialized_income = IncomeSerializer(self.income).data
 
         self.assertEqual(len(right_data['incomes']), len(data['incomes']))
-        self.assertEqual(right_data['incomes'][0], data['incomes'][0])
+        self.assertEqual(serialized_income, data['incomes'][0])
         self.assertEqual(right_data['total_sum'], data['total_sum'])
 
     def test_get_costs_for_the_date_command(self):
         right_data = {
             'incomes': Income.objects.all(),
             'total_sum': Decimal(self.income.incomes_sum),
-            'date': ContextDate(self.today)
+            'date': self.today
         }
 
         command = GetIncomesForTheDateCommand(self.user, self.today)
         data = command.execute()
+        serialized_income = IncomeSerializer(self.income).data
 
         self.assertEqual(len(right_data['incomes']), len(data['incomes']))
-        self.assertEqual(right_data['incomes'][0], data['incomes'][0])
+        self.assertEqual(serialized_income, data['incomes'][0])
         self.assertEqual(right_data['total_sum'], data['total_sum'])
 
 
@@ -154,78 +162,69 @@ class IncomesViewsTests(TestCase):
 
     def test_incomes_for_the_date_view(self):
         response = self.client.get(reverse('today_incomes'))
+
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'incomes/incomes.html')
         self.assertContains(response, self.income.incomes_sum)
 
-    def test_incomes_for_the_date_view_with_dates(self):
-        response = self.client.get(
-            reverse('incomes_for_the_date', args=[self.today.isoformat()])
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'incomes/incomes.html')
-        self.assertContains(response, self.income.incomes_sum)
+    def test_incomes_for_the_date_view_with_date(self):
         response = self.client.get(
             reverse('incomes_for_the_date', args=['2020-01-01'])
         )
+
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'incomes/incomes.html')
         self.assertNotContains(response, self.income.incomes_sum)
 
     def test_create_income_view(self):
-        response = self.client.get(reverse('create_income'))
-        self.assertEqual(response.status_code, 200)
         response = self.client.post(reverse('create_income'), {
             'incomes_sum': '100'
         })
-        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(response.status_code, 201)
 
     def test_change_income_view(self):
-        response = self.client.get(
-            reverse('change_income', args=[self.income.pk])
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'incomes/change_income.html')
         response = self.client.post(
             reverse('change_income', args=[self.income.pk]), {
                 'incomes_sum': '100'
             }
         )
-        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_change_income_view_bad_user(self):
         self.client.login(username='baduser', password='badpass')
-        bad_response = self.client.get(
+        bad_response = self.client.post(
             reverse('change_income', args=[self.income.pk])
         )
+
         self.assertEqual(bad_response.status_code, 404)
 
     def test_delete_income_view(self):
-        response = self.client.get(
-            reverse('delete_income', args=[self.income.pk])
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'incomes/delete_income.html')
         response = self.client.post(
             reverse('delete_income', args=[self.income.pk])
         )
-        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_income_view_bad_user(self):
         self.client.login(username='baduser', password='badpass')
-        bad_response = self.client.get(
+        bad_response = self.client.post(
             reverse('delete_income', args=[self.income.pk])
         )
+
         self.assertEqual(bad_response.status_code, 404)
 
     def test_incomes_history_view(self):
         response = self.client.get(reverse('incomes_history'))
+
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'incomes/history_incomes.html')
         self.assertContains(response, self.income.incomes_sum)
 
     def test_incomes_statistic_page_view(self):
         response = self.client.get(
             reverse('incomes_statistic_for_this_month')
         )
+
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'incomes/incomes_statistic.html')
         self.assertContains(response, self.income.incomes_sum)
 
     def test_incomes_statistic_page_view_with_cost(self):
@@ -239,22 +238,18 @@ class IncomesViewsTests(TestCase):
         response = self.client.get(
             reverse('incomes_statistic_for_this_month')
         )
+
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'incomes/incomes_statistic.html')
         self.assertContains(response, self.income.incomes_sum)
         self.assertContains(
             response,
-            Decimal(self.income.incomes_sum) - Decimal(cost.costs_sum)
+            float(self.income.incomes_sum) - float(cost.costs_sum)
         )
-        self.assertContains(response, 'canvas')
-        self.assertContains(response, 'profit')
 
     def test_incomes_statistic_page_view_with_date(self):
         response = self.client.get(
             reverse('incomes_statistic_page', args=['2020-01'])
         )
+
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'incomes/incomes_statistic.html')
         self.assertNotContains(response, self.income.incomes_sum)
-        self.assertNotContains(response, 'canvas')
-        self.assertNotContains(response, 'profit')

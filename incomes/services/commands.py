@@ -2,11 +2,12 @@ import datetime
 
 from django.contrib.auth import get_user_model
 
+from costs.serializers import CostSerializer
 from services.commands import GetStatisticBaseCommand
 from .base import (
     GetIncomesService, GetIncomesTotalSumService, GetIncomesForTheDateService
 )
-from utils.date import ContextDate
+from ..serializers import IncomeSerializer
 
 
 User = get_user_model()
@@ -21,8 +22,9 @@ class GetIncomesHistoryCommand:
     def execute(self) -> dict:
         all_incomes = GetIncomesService.get_all(self._user)
         total_sum = GetIncomesTotalSumService.execute(all_incomes)
+        serializer = IncomeSerializer(all_incomes, many=True)
         context = {
-            'incomes': all_incomes,
+            'incomes': serializer.data,
             'total_sum': total_sum
         }
         return context
@@ -33,18 +35,18 @@ class GetIncomesForTheDateCommand:
 
     def __init__(self, user: User, date: datetime.date):
         self._user = user
-        self._date = date
+        self._date = date or datetime.date.today()
 
     def execute(self) -> dict:
-        context_date = ContextDate(self._date)
         date_incomes = GetIncomesForTheDateService.get_for_the_date(
             self._user, self._date
         )
         total_sum = GetIncomesTotalSumService.execute(date_incomes)
+        serializer = IncomeSerializer(date_incomes, many=True)
         context = {
-            'incomes': date_incomes,
+            'incomes': serializer.data,
             'total_sum': total_sum,
-            'date': context_date,
+            'date': self._date,
         }
         return context
 
@@ -54,10 +56,12 @@ class GetIncomesStatisticCommand(GetStatisticBaseCommand):
 
     def get_dict_statistic(self):
         """Return incomes statistic in dict format"""
+        income_serializer = IncomeSerializer(self.month_incomes, many=True)
+        cost_serializer = CostSerializer(self.month_costs, many=True)
         return {
-            'incomes': self.month_incomes,
-            'costs': self.month_costs,
-            'date': self.context_date,
+            'incomes': income_serializer.data,
+            'costs': cost_serializer.data,
+            'date': self._date,
             'total_sum': self.total_incomes,
             'profit': self.profit,
             'average_costs': self.average_costs,

@@ -4,14 +4,15 @@ from .categories import (
 )
 from .costs import (
     CostsForTheDateView, CostsHistoryView, CreateCostView, ChangeCostView,
-    DeleteCostView, StatisticView, CostsStatisticPageView,
-    CostStatisticForTheLastYear
+    DeleteCostView, CostsStatisticForTheMonthView, CostsStatisticPageView,
+    CostsStatisticForTheYear
 )
 
 
-__all__ =[
+__all__ = [
     'CategoryListView', 'CostsByCategoryView', 'CreateCategoryView',
     'ChangeCategoryView', 'DeleteCategoryView', 'CostsForTheDateView',
     'CostsHistoryView', 'CreateCostView', 'ChangeCostView', 'DeleteCostView',
-    'StatisticView', 'CostsStatisticPageView', 'CostStatisticForTheLastYear'
+    'CostsStatisticForTheMonthView', 'CostsStatisticPageView',
+    'CostsStatisticForTheYear'
 ]

@@ -31,11 +31,14 @@ urlpatterns = [
          name='costs_statistic_for_this_month'),
     path('costs/<month:date>/statistic/',
          views.CostsStatisticPageView.as_view(), name='costs_statistic_page'),
-    path('costs/<month:date>/statistic/json/', views.StatisticView.as_view(),
-         name='statistic'),
     path(
-        'costs/<year:date>/statistic/json/',
-        views.CostStatisticForTheLastYear.as_view(),
+        'costs/<month:date>/statistic/graph/',
+        views.CostsStatisticForTheMonthView.as_view(),
+        name='statistic_for_the_month'
+    ),
+    path(
+        'costs/<year:date>/statistic/graph/',
+        views.CostsStatisticForTheYear.as_view(),
         name='statistic_for_the_year'
     ),
 

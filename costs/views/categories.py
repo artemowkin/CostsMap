@@ -1,101 +1,83 @@
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
 from django.db import IntegrityError
+from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
 
 from costs.services.categories import (
     GetCategoriesService, CreateCategoryService, ChangeCategoryService,
     DeleteCategoryService
 )
-from ..forms import CategoryForm
+from ..serializers import (
+    CategorySerializer, PostCategorySerializer
+)
 from utils.views import DefaultView, DeleteGenericView
 from costs.services.commands import GetCategoryCostsCommand
 
 
 class CategoryListView(DefaultView):
-    """View to render all user categories"""
+    """View to return all user categories"""
 
-    template_name = 'costs/category_list.html'
-    context_object_name = 'categories'
+    serializer = CategorySerializer
 
     def get(self, request):
         categories = GetCategoriesService.get_all(request.user)
-        return render(
-            request, self.template_name, {
-                self.context_object_name: categories
-            }
-        )
+        serializer = self.serializer(categories, many=True)
+        return Response(serializer.data)
 
 
 class CostsByCategoryView(DefaultView):
-    """View to render all user category costs"""
+    """View to return all user category costs"""
 
-    template_name = 'costs/costs_by_category.html'
     command = GetCategoryCostsCommand
 
     def get(self, request, pk):
         command = self.command(pk, request.user)
-        context = command.execute()
-        return render(request, self.template_name, context)
+        data = command.execute()
+        return Response(data)
 
 
 class CreateCategoryView(DefaultView):
     """View to create a new category"""
 
-    form_class = CategoryForm
-    template_name = 'costs/add_category.html'
-
-    def get(self, request):
-        form = self.form_class()
-        return render(request, self.template_name, {'form': form})
+    serializer = PostCategorySerializer
 
     def post(self, request):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            form.cleaned_data.update({'owner': request.user})
-            try:
-                category = CreateCategoryService.execute(form.cleaned_data)
-                return redirect(category.get_absolute_url())
-            except IntegrityError:
-                form.add_error(None, "The same category already exists")
-
-        return render(request, self.template_name, {'form': form})
+        request_data = request.data.copy()
+        request_data.update({'owner': request.user.pk})
+        serializer = self.serializer(data=request_data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            category = CreateCategoryService.execute(request_data)
+            return Response(serializer.data, status=201)
+        except IntegrityError:
+            raise ValidationError({
+                "base": "The same category already exists"
+            })
 
 
 class ChangeCategoryView(DefaultView):
     """View to change a category"""
 
-    form_class = CategoryForm
-    template_name = 'costs/change_category.html'
-
-    def get(self, request, pk):
-        category = GetCategoriesService.get_concrete(pk, request.user)
-        form = self.form_class(instance=category)
-        return render(
-            request, self.template_name, {'form': form, 'category': category}
-        )
+    serializer = PostCategorySerializer
 
     def post(self, request, pk):
+        request_data = request.data.copy()
+        request_data.update({'owner': request.user.pk})
         category = GetCategoriesService.get_concrete(pk, request.user)
-        form = self.form_class(request.POST, instance=category)
-        if form.is_valid():
-            form.cleaned_data.update({'category': category})
-            try:
-                category = ChangeCategoryService.execute(form.cleaned_data)
-                return redirect(category.get_absolute_url())
-            except IntegrityError:
-                form.add_error(None, 'The same category already exists')
-                category = GetCategoriesService.get_concrete(pk, request.user)
-
-        return render(
-            request, self.template_name, {'form': form, 'category': category}
-        )
+        serializer = self.serializer(data=request_data)
+        serializer.is_valid(raise_exception=True)
+        request_data.update({'category': category})
+        try:
+            category = ChangeCategoryService.execute(request_data)
+            return Response(serializer.data, status=201)
+        except IntegrityError:
+            raise ValidationError({
+                "base": "The same category already exists"
+            })
 
 
 class DeleteCategoryView(DeleteGenericView):
     """View to delete a category"""
 
-    template_name = 'costs/delete_category.html'
-    context_object_name = 'category'
-    success_url = reverse_lazy('category_list')
+    object_name = 'category'
     get_service = GetCategoriesService
     delete_service = DeleteCategoryService

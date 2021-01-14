@@ -2,7 +2,6 @@ import datetime
 
 from django.contrib.auth import get_user_model
 
-from utils.date import MonthContextDate
 import costs.services as cost_services
 import incomes.services as income_services
 
@@ -15,7 +14,7 @@ class GetStatisticBaseCommand:
 
     def __init__(self, user: User, date: datetime.date):
         self._user = user
-        self._date = date
+        self._date = date or datetime.date.today()
         self._cost_date_service = cost_services.GetCostsForTheDateService
         self._income_date_service = income_services.GetIncomesForTheDateService
 
@@ -27,7 +26,6 @@ class GetStatisticBaseCommand:
 
     def execute(self) -> dict:
         """Return costs statistic in context dict format"""
-        self.context_date = MonthContextDate(self._date)
         self.month_costs = self._cost_date_service.get_for_the_month(
             self._user, self._date
         )

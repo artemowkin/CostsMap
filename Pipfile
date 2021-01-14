@@ -19,6 +19,9 @@ whitenoise = "*"
 python-dateutil = "*"
 djangorestframework = "*"
 django-service-objects = "*"
+dj-rest-auth = "*"
+pyyaml = "*"
+uritemplate = "*"
 
 [requires]
 python_version = "3.8"

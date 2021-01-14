@@ -1,17 +1,18 @@
 import logging
 
-from django.views import View
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
 from django.http import Http404
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 
 logger = logging.getLogger('filelogger')
 
 
-class DefaultView(LoginRequiredMixin, View):
+class DefaultView(LoginRequiredMixin, APIView):
     """Base view for all views. Handle exceptions and logs them"""
 
     login_url = reverse_lazy('account_login')
@@ -37,11 +38,6 @@ class CommandView(DefaultView):
     command = None
 
     def __init__(self, *args, **kwargs):
-        if not self.template_name:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have "
-                "`template_name` attribute"
-            )
         if not self.command:
             raise ImproperlyConfigured(
                 f"{self.__class__.__name__} must have `command` attribute"
@@ -55,8 +51,8 @@ class DateGenericView(CommandView):
 
     def get(self, request, date=None):
         command = self.command(request.user, date)
-        context = command.execute()
-        return render(request, self.template_name, context)
+        data = command.execute()
+        return Response(data)
 
 
 class HistoryGenericView(CommandView):
@@ -64,8 +60,8 @@ class HistoryGenericView(CommandView):
 
     def get(self, request):
         command = self.command(request.user)
-        context = command.execute()
-        return render(request, self.template_name, context)
+        data = command.execute()
+        return Response(data)
 
 
 class StatisticPageGenericView(CommandView):
@@ -74,24 +70,17 @@ class StatisticPageGenericView(CommandView):
     def get(self, request, date=None):
         command = self.command(request.user, date)
         statistic = command.execute()
-        return render(request, self.template_name, statistic)
+        return Response(statistic)
 
 
 class DeleteGenericView(DefaultView):
     """Base view to delete entries"""
 
-    template_name = ''
-    success_url = '/'
-    context_object_name = 'object'
+    object_name = 'object'
     get_service = None
     delete_service = None
 
     def __init__(self, *args, **kwargs):
-        if not self.template_name:
-            raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have "
-                "`template_name` attribute"
-            )
         if not self.get_service:
             raise ImproperlyConfigured(
                 f"{self.__class__.__name__} must have `get_service` attribute"
@@ -104,13 +93,7 @@ class DeleteGenericView(DefaultView):
 
         super().__init__(*args, **kwargs)
 
-    def get(self, request, pk):
-        entry = self.get_service.get_concrete(pk, request.user)
-        return render(
-            request, self.template_name, {self.context_object_name: entry}
-        )
-
     def post(self, request, pk):
         entry = self.get_service.get_concrete(pk, request.user)
-        self.delete_service.execute({self.context_object_name: entry})
-        return redirect(self.success_url)
+        self.delete_service.execute({self.object_name: entry})
+        return Response({'status': 'ok'})

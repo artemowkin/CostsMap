@@ -1,9 +1,8 @@
-# CostsMap
+# CostsMap API
 
 CostsMap is a site for costs accounting. On this site you can add your
-costs and incomes, sort them by category and see monthly statistic
-
-![CostsMap Site](/images/preview.png)
+costs and incomes, sort them by category and see monthly statistic. This
+branch is a site REST API
 
 ## Summary
 
