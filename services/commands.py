@@ -39,12 +39,10 @@ class GetStatisticBaseCommand:
         self.month_incomes = self._income_date_service.get_for_the_month(
             self._date
         )
-        self.total_costs = cost_services.GetCostsTotalSumService.execute(
-            self.month_costs
-        )
-        self.total_incomes = income_services.GetIncomesTotalSumService.execute(
-            self.month_incomes
-        )
+        total_costs_service = cost_services.GetCostsTotalSumService()
+        total_incomes_service = income_services.GetIncomesTotalSumService()
+        self.total_costs = total_costs_service.execute(self.month_costs)
+        self.total_incomes = total_incomes_service.execute(self.month_incomes)
         self.profit = self.total_incomes - self.total_costs
         self.average_costs = (
             cost_services.GetAverageCostsForTheDayService.execute({
@@ -76,12 +74,13 @@ class BaseGetForTheDateCommand:
 
         self._user = user
         self._date = date
-        self._service = self.get_service_class(self._user)
+        self._get_service = self.get_service_class(self._user)
+        self._total_sum_service = self.total_sum_service_class()
 
     def execute(self):
         context_date = ContextDate
-        date_entries = self._service.get_for_the_date(self._date)
-        total_sum = self.total_sum_service_class.execute(date_entries)
+        date_entries = self._get_service.get_for_the_date(self._date)
+        total_sum = self._total_sum_service.execute(date_entries)
         context = {
             self.context_object_name: date_entries,
             'total_sum': total_sum,

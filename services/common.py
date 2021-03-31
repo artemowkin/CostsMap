@@ -74,8 +74,7 @@ class GetTotalSumService:
                 "`sum_field_name` attribute"
             )
 
-    @classmethod
-    def execute(cls, queryset: QuerySet) -> Decimal:
+    def execute(self, queryset: QuerySet) -> Decimal:
         """Return sum of queryset entries sums"""
-        total_sum = queryset.aggregate(total_sum=Sum(cls.sum_field_name))
+        total_sum = queryset.aggregate(total_sum=Sum(self.sum_field_name))
         return total_sum['total_sum'] or Decimal('0')

@@ -23,7 +23,8 @@ class GetIncomesHistoryCommand:
 
     def execute(self) -> dict:
         all_incomes = self._get_service.get_all()
-        total_sum = GetIncomesTotalSumService.execute(all_incomes)
+        total_incomes_service = GetIncomesTotalSumService()
+        total_sum = total_incomes_service.execute(all_incomes)
         context = {
             'incomes': all_incomes,
             'total_sum': total_sum

@@ -9,6 +9,7 @@ class GetCategoryCostsCommand:
         self._category_pk = category_pk
         self._user = user
         self._get_service = GetCategoriesService(user)
+        self._total_sum_service = GetCostsTotalSumService()
 
     def execute(self) -> dict:
         """Return category costs, costs total sum and category itself
@@ -16,5 +17,5 @@ class GetCategoryCostsCommand:
         """
         category = self._get_service.get_concrete(self._category_pk)
         costs = get_category_costs(category)
-        total_sum = GetCostsTotalSumService.execute(costs)
+        total_sum = self._total_sum_service.execute(costs)
         return {'costs': costs, 'category': category, 'total_sum': total_sum}

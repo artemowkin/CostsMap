@@ -46,9 +46,8 @@ class IncomeServiceTests(TestCase):
     def test_get_incomes_total_sum_service(self):
         get_service = income_services.GetIncomesService(self.user)
         incomes = get_service.get_all()
-        incomes_sum = income_services.GetIncomesTotalSumService.execute(
-            incomes
-        )
+        total_incomes_service = income_services.GetIncomesTotalSumService()
+        incomes_sum = total_incomes_service.execute(incomes)
 
         self.assertEqual(incomes_sum, Decimal(self.income.incomes_sum))
 
@@ -102,9 +101,8 @@ class IncomeServiceTests(TestCase):
         )
         month_incomes = income_date_service.get_for_the_month(self.today)
         month_costs = cost_date_service.get_for_the_month(self.today)
-        incomes_sum = income_services.GetIncomesTotalSumService.execute(
-            month_incomes
-        )
+        total_incomes_service = income_services.GetIncomesTotalSumService()
+        incomes_sum = total_incomes_service.execute(month_incomes)
         right_statistic = {
             'incomes': month_incomes,
             'costs': month_costs,

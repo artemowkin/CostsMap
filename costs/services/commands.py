@@ -19,10 +19,11 @@ class GetCostsHistoryCommand:
     def __init__(self, user: User):
         self._user = user
         self._get_costs_service = GetCostsService(self._user)
+        self._total_sum_service = GetCostsTotalSumService()
 
     def execute(self) -> dict:
         all_costs = self._get_costs_service.get_all()
-        total_sum = GetCostsTotalSumService.execute(all_costs)
+        total_sum = self._total_sum_service.execute(all_costs)
         context = {
             'costs': all_costs,
             'total_sum': total_sum
