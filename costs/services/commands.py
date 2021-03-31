@@ -3,7 +3,7 @@ import datetime
 from django.contrib.auth import get_user_model
 
 from services.commands import (
-    GetStatisticBaseCommand, BaseGetForTheDateCommand
+    GetStatisticBaseCommand, BaseGetForTheDateCommand, BaseGetHistoryCommand
 )
 from .costs import (
     GetCostsTotalSumService, GetCostsForTheDateService, GetCostsService
@@ -13,22 +13,12 @@ from .costs import (
 User = get_user_model()
 
 
-class GetCostsHistoryCommand:
+class GetCostsHistoryCommand(BaseGetHistoryCommand):
     """Command to return costs history"""
 
-    def __init__(self, user: User):
-        self._user = user
-        self._get_costs_service = GetCostsService(self._user)
-        self._total_sum_service = GetCostsTotalSumService()
-
-    def execute(self) -> dict:
-        all_costs = self._get_costs_service.get_all()
-        total_sum = self._total_sum_service.execute(all_costs)
-        context = {
-            'costs': all_costs,
-            'total_sum': total_sum
-        }
-        return context
+    get_service_class = GetCostsService
+    total_sum_service_class = GetCostsTotalSumService
+    context_object_name = 'costs'
 
 
 class GetCostsForTheDateCommand(BaseGetForTheDateCommand):

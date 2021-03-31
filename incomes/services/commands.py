@@ -3,7 +3,7 @@ import datetime
 from django.contrib.auth import get_user_model
 
 from services.commands import (
-    GetStatisticBaseCommand, BaseGetForTheDateCommand
+    GetStatisticBaseCommand, BaseGetForTheDateCommand, BaseGetHistoryCommand
 )
 from .base import (
     GetIncomesService, GetIncomesTotalSumService, GetIncomesForTheDateService
@@ -14,22 +14,12 @@ from utils.date import ContextDate
 User = get_user_model()
 
 
-class GetIncomesHistoryCommand:
+class GetIncomesHistoryCommand(BaseGetHistoryCommand):
     """Command to return incomes history"""
 
-    def __init__(self, user: User):
-        self._user = user
-        self._get_service = GetIncomesService(user)
-
-    def execute(self) -> dict:
-        all_incomes = self._get_service.get_all()
-        total_incomes_service = GetIncomesTotalSumService()
-        total_sum = total_incomes_service.execute(all_incomes)
-        context = {
-            'incomes': all_incomes,
-            'total_sum': total_sum
-        }
-        return context
+    get_service_class = GetIncomesService
+    total_sum_service_class = GetIncomesTotalSumService
+    context_object_name = 'incomes'
 
 
 class GetIncomesForTheDateCommand(BaseGetForTheDateCommand):
