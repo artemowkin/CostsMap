@@ -1,6 +1,6 @@
 from allauth.account.views import SignupView
 
-from costs.services.categories import SetUserDefaultCategoriesService
+from categories.services.categories import SetUserDefaultCategoriesService
 
 
 class SignupWithCategoriesView(SignupView):

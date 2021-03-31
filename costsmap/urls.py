@@ -9,7 +9,11 @@ urlpatterns = [
     # Django AllAuth
     path('accounts/', include('accounts.urls')),
 
+    # Redirect
+    path('', RedirectView.as_view(url='costs/')),
+
     # Local
-    path('', include('costs.urls')),
+    path('costs/', include('costs.urls')),
+    path('categories/', include('categories.urls')),
     path('incomes/', include('incomes.urls')),
 ]

@@ -1,14 +1,7 @@
 from django import forms
 
-from .models import Category, Cost
-
-
-class CategoryForm(forms.ModelForm):
-    """Category form to create/update categories"""
-
-    class Meta:
-        model = Category
-        fields = ('title', )
+from categories.models import Category
+from .models import Cost
 
 
 class CostForm(forms.ModelForm):

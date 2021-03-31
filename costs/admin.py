@@ -1,12 +1,6 @@
 from django.contrib import admin
 
-from .models import Cost, Category
-
-
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('title', 'owner')
-    search_fields = ('title',)
+from .models import Cost
 
 
 @admin.register(Cost)

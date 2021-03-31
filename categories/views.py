@@ -2,13 +2,13 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.db import IntegrityError
 
-from costs.services.categories import (
+from .services.categories import (
     GetCategoriesService, CreateCategoryService, ChangeCategoryService,
     DeleteCategoryService
 )
-from ..forms import CategoryForm
+from .forms import CategoryForm
 from utils.views import DefaultView, DeleteGenericView
-from costs.services.commands import GetCategoryCostsCommand
+from categories.services.commands import GetCategoryCostsCommand
 
 
 class CategoryListView(DefaultView):

@@ -5,10 +5,11 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-import costs.services.categories as category_services
-from costs.services.commands import GetCategoryCostsCommand
-from ..models import Cost, Category
-from ..forms import CostForm
+import categories.services.categories as category_services
+from .services.commands import GetCategoryCostsCommand
+from .models import Category
+from costs.models import Cost
+from costs.forms import CostForm
 
 
 User = get_user_model()

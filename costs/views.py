@@ -2,13 +2,13 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 
-from ..forms import CostForm
-from ..services.commands import GetCostsStatisticCommand
+from .forms import CostForm
+from .services.commands import GetCostsStatisticCommand
 from costs.services import (
     GetCostsService, CreateCostService, ChangeCostService, DeleteCostService,
     GetStatisticForTheMonthService, GetStatisticForTheYearService
 )
-from costs.services.categories import (
+from categories.services.categories import (
     GetCategoriesService, set_form_categories
 )
 from costs.services.commands import (

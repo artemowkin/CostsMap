@@ -7,12 +7,13 @@ from django.urls import reverse
 
 from utils.date import MonthContextDate, ContextDate
 from incomes.models import Income
+from categories.models import Category
 import costs.services as cost_services
-from ..services.commands import (
+from .services.commands import (
     GetCostsStatisticCommand, GetCostsHistoryCommand,
     GetCostsForTheDateCommand
 )
-from ..models import Cost, Category
+from .models import Cost
 
 
 User = get_user_model()

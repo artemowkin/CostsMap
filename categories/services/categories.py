@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from django.contrib.auth import get_user_model
 from django import forms
 from django.db.models import QuerySet
@@ -84,6 +82,6 @@ def get_category_costs(category: Category) -> QuerySet:
     return category.costs.all()
 
 
-def set_form_categories(form: Form, categories: QuerySet) -> None:
+def set_form_categories(form: forms.Form, categories: QuerySet) -> None:
     """Set queryset for `category` field in form"""
     form.fields['category'].queryset = categories
