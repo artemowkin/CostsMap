@@ -19,9 +19,10 @@ class GetIncomesHistoryCommand:
 
     def __init__(self, user: User):
         self._user = user
+        self._get_service = GetIncomesService(user)
 
     def execute(self) -> dict:
-        all_incomes = GetIncomesService.get_all(self._user)
+        all_incomes = self._get_service.get_all()
         total_sum = GetIncomesTotalSumService.execute(all_incomes)
         context = {
             'incomes': all_incomes,

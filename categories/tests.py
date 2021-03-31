@@ -30,16 +30,14 @@ class CategoryServicesTests(TestCase):
         )
 
     def test_get_categories_service_get_concrete(self):
-        category = category_services.GetCategoriesService.get_concrete(
-            self.category.pk, self.user
-        )
+        get_service = category_services.GetCategoriesService(self.user)
+        category = get_service.get_concrete(self.category.pk)
 
         self.assertEqual(category, self.category)
 
     def test_get_categories_service_get_all(self):
-        all_categories = category_services.GetCategoriesService.get_all(
-            self.user
-        )
+        get_service = category_services.GetCategoriesService(self.user)
+        all_categories = get_service.get_all()
 
         self.assertEqual(len(all_categories), 1)
         self.assertEqual(all_categories[0], self.category)

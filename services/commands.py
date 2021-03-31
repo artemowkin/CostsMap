@@ -18,10 +18,10 @@ class GetStatisticBaseCommand:
         self._user = user
         self._date = date
         self._cost_date_service = cost_services.GetCostsForTheDateService(
-            user, date
+            user
         )
         self._income_date_service = income_services.GetIncomesForTheDateService(
-            user, date
+            user
         )
 
     def get_dict_statistic(self) -> dict:
@@ -33,8 +33,12 @@ class GetStatisticBaseCommand:
     def execute(self) -> dict:
         """Return costs statistic in context dict format"""
         self.context_date = MonthContextDate(self._date)
-        self.month_costs = self._cost_date_service.get_for_the_month()
-        self.month_incomes = self._income_date_service.get_for_the_month()
+        self.month_costs = self._cost_date_service.get_for_the_month(
+            self._date
+        )
+        self.month_incomes = self._income_date_service.get_for_the_month(
+            self._date
+        )
         self.total_costs = cost_services.GetCostsTotalSumService.execute(
             self.month_costs
         )
@@ -72,11 +76,11 @@ class BaseGetForTheDateCommand:
 
         self._user = user
         self._date = date
-        self._service = self.get_service_class(self._user, self._date)
+        self._service = self.get_service_class(self._user)
 
     def execute(self):
         context_date = ContextDate
-        date_entries = self._service.get_for_the_date()
+        date_entries = self._service.get_for_the_date(self._date)
         total_sum = self.total_sum_service_class.execute(date_entries)
         context = {
             self.context_object_name: date_entries,

@@ -27,34 +27,39 @@ class ModelService:
 class GetForTheDateService(ModelService):
     """Service to get entries for the date"""
 
-    def __init__(self, owner: User, date: Optional[datetime.date] = None):
+    def __init__(self, owner: User):
+        super().__init__()
         self.owner = owner
-        self.date = date or datetime.date.today()
 
-    def get_for_the_month(self) -> QuerySet:
+    def get_for_the_month(
+            self, date: Optional[datetime.date] = None) -> QuerySet:
         """Return user entries for the month"""
+        date = date or datetime.date.today()
         return self.model.objects.filter(
-            date__month=self.date.month, date__year=self.date.year,
-            owner=self.owner
+            date__month=date.month, date__year=date.year, owner=self.owner
         )
 
-    def get_for_the_date(self) -> QuerySet:
+    def get_for_the_date(
+            self, date: Optional[datetime.date] = None) -> QuerySet:
         """Return user entries for the concrete date"""
-        return self.model.objects.filter(date=self.date, owner=self.owner)
+        date = date or datetime.date.today()
+        return self.model.objects.filter(date=date, owner=self.owner)
 
 
 class GetUserEntriesService(ModelService):
     """Service to get user entries"""
 
-    @classmethod
-    def get_concrete(cls, pk: UUID, owner: User) -> Model:
-        """Return a concrete user entry with pk"""
-        return get_object_or_404(cls.model, pk=pk, owner=owner)
+    def __init__(self, owner: User):
+        super().__init__()
+        self._owner = owner
 
-    @classmethod
-    def get_all(cls, user: User) -> QuerySet:
+    def get_concrete(self, pk: UUID) -> Model:
+        """Return a concrete user entry with pk"""
+        return get_object_or_404(self.model, pk=pk, owner=self._owner)
+
+    def get_all(self) -> QuerySet:
         """Return all user entries"""
-        return cls.model.objects.filter(owner=user)
+        return self.model.objects.filter(owner=self._owner)
 
 
 class GetTotalSumService:

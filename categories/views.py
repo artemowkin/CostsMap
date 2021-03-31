@@ -15,7 +15,8 @@ class CategoryListView(DefaultView):
     """View to render all user categories"""
 
     def get(self, request):
-        categories = GetCategoriesService.get_all(request.user)
+        get_service = GetCategoriesService(request.user)
+        categories = get_service.get_all()
         return render(
             request, 'costs/category_list.html', {'categories': categories}
         )
@@ -54,14 +55,16 @@ class ChangeCategoryView(DefaultView):
     """View to change a category"""
 
     def get(self, request, pk):
-        category = GetCategoriesService.get_concrete(pk, request.user)
+        get_service = GetCategoriesService(request.user)
+        category = get_service.get_concrete(pk)
         form = CategoryForm(instance=category)
         return render(request, 'costs/change_category.html', {
             'form': form, 'category': category
         })
 
     def post(self, request, pk):
-        category = GetCategoriesService.get_concrete(pk, request.user)
+        get_service = GetCategoriesService(request.user)
+        category = get_service.get_concrete(pk)
         form = CategoryForm(request.POST, instance=category)
         if form.is_valid():
             form.cleaned_data.update({'category': category})
@@ -83,5 +86,5 @@ class DeleteCategoryView(DeleteGenericView):
     template_name = 'costs/delete_category.html'
     context_object_name = 'category'
     success_url = reverse_lazy('category_list')
-    get_service = GetCategoriesService
+    get_service_class = GetCategoriesService
     delete_service = DeleteCategoryService

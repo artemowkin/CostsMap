@@ -42,13 +42,15 @@ class CreateCostView(DefaultView):
 
     def get(self, request):
         form = self.form_class()
-        user_categories = GetCategoriesService.get_all(request.user)
+        get_categories_service = GetCategoriesService(request.user)
+        user_categories = get_categories_service.get_all()
         set_form_categories(form, user_categories)
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
         form = self.form_class(request.POST)
-        user_categories = GetCategoriesService.get_all(request.user)
+        get_categories_service = GetCategoriesService(request.user)
+        user_categories = get_categories_service.get_all()
         set_form_categories(form, user_categories)
         if form.is_valid():
             form.cleaned_data.update({'owner': request.user})
@@ -65,18 +67,22 @@ class ChangeCostView(DefaultView):
     template_name = 'costs/change_cost.html'
 
     def get(self, request, pk):
-        cost = GetCostsService.get_concrete(pk, request.user)
+        get_costs_service = GetCostsService(request.user)
+        get_categories_service = GetCategoriesService(request.user)
+        cost = get_costs_service.get_concrete(pk)
         form = self.form_class(instance=cost)
-        user_categories = GetCategoriesService.get_all(request.user)
+        user_categories = get_categories_service.get_all()
         set_form_categories(form, user_categories)
         return render(
             request, self.template_name, {'form': form, 'cost': cost}
         )
 
     def post(self, request, pk):
-        cost = GetCostsService.get_concrete(pk, request.user)
+        get_costs_service = GetCostsService(request.user)
+        get_categories_service = GetCategoriesService(request.user)
+        cost = get_costs_service.get_concrete(pk)
         form = self.form_class(request.POST, instance=cost)
-        user_categories = GetCategoriesService.get_all(request.user)
+        user_categories = get_categories_service.get_all()
         set_form_categories(form, user_categories)
         if form.is_valid():
             form.cleaned_data.update({'cost': cost})
@@ -94,7 +100,7 @@ class DeleteCostView(DeleteGenericView):
     template_name = 'costs/delete_cost.html'
     success_url = reverse_lazy('today_costs')
     context_object_name = 'cost'
-    get_service = GetCostsService
+    get_service_class = GetCostsService
     delete_service = DeleteCostService
 
 

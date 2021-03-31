@@ -31,20 +31,21 @@ class IncomeServiceTests(TestCase):
         )
 
     def test_get_incomes_service_get_all(self):
-        all_incomes = income_services.GetIncomesService.get_all(self.user)
+        get_service = income_services.GetIncomesService(self.user)
+        all_incomes = get_service.get_all()
 
         self.assertEqual(len(all_incomes), 1)
         self.assertEqual(all_incomes[0], self.income)
 
     def test_get_incomes_service_get_concrete(self):
-        income = income_services.GetIncomesService.get_concrete(
-            self.income.pk, self.user
-        )
+        get_service = income_services.GetIncomesService(self.user)
+        income = get_service.get_concrete(self.income.pk)
 
         self.assertEqual(income, self.income)
 
     def test_get_incomes_total_sum_service(self):
-        incomes = income_services.GetIncomesService.get_all(self.user)
+        get_service = income_services.GetIncomesService(self.user)
+        incomes = get_service.get_all()
         incomes_sum = income_services.GetIncomesTotalSumService.execute(
             incomes
         )
@@ -53,17 +54,17 @@ class IncomeServiceTests(TestCase):
 
     def test_get_incomes_for_the_date_service_get_for_the_month(self):
         income_date_service = income_services.GetIncomesForTheDateService(
-            self.user, self.today
+            self.user
         )
-        incomes = income_date_service.get_for_the_month()
+        incomes = income_date_service.get_for_the_month(self.today)
 
         self.assertEqual(incomes[0].date.month, self.today.month)
 
     def test_get_incomes_for_the_date_service_get_for_the_date(self):
         income_date_service = income_services.GetIncomesForTheDateService(
-            self.user, self.today
+            self.user
         )
-        incomes = income_date_service.get_for_the_date()
+        incomes = income_date_service.get_for_the_date(self.today)
 
         self.assertEqual(incomes[0].date, self.today)
 
@@ -94,13 +95,13 @@ class IncomeServiceTests(TestCase):
         command = GetIncomesStatisticCommand(self.user, self.today)
         statistic = command.execute()
         income_date_service = income_services.GetIncomesForTheDateService(
-            self.user, self.today
+            self.user
         )
         cost_date_service = cost_services.GetCostsForTheDateService(
-            self.user, self.today
+            self.user
         )
-        month_incomes = income_date_service.get_for_the_month()
-        month_costs = cost_date_service.get_for_the_month()
+        month_incomes = income_date_service.get_for_the_month(self.today)
+        month_costs = cost_date_service.get_for_the_month(self.today)
         incomes_sum = income_services.GetIncomesTotalSumService.execute(
             month_incomes
         )

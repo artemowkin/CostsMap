@@ -83,7 +83,7 @@ class DeleteGenericView(DefaultView):
     template_name = ''
     success_url = '/'
     context_object_name = 'object'
-    get_service = None
+    get_service_class = None
     delete_service = None
 
     def __init__(self, *args, **kwargs):
@@ -92,9 +92,10 @@ class DeleteGenericView(DefaultView):
                 f"{self.__class__.__name__} must have "
                 "`template_name` attribute"
             )
-        if not self.get_service:
+        if not self.get_service_class:
             raise ImproperlyConfigured(
-                f"{self.__class__.__name__} must have `get_service` attribute"
+                f"{self.__class__.__name__} must have "
+                "`get_service_class` attribute"
             )
         if not self.delete_service:
             raise ImproperlyConfigured(
@@ -105,12 +106,14 @@ class DeleteGenericView(DefaultView):
         super().__init__(*args, **kwargs)
 
     def get(self, request, pk):
-        entry = self.get_service.get_concrete(pk, request.user)
+        get_service = self.get_service_class(request.user)
+        entry = get_service.get_concrete(pk)
         return render(
             request, self.template_name, {self.context_object_name: entry}
         )
 
     def post(self, request, pk):
-        entry = self.get_service.get_concrete(pk, request.user)
+        get_service = self.get_service_class(request.user)
+        entry = get_service.get_concrete(pk)
         self.delete_service.execute({self.context_object_name: entry})
         return redirect(self.success_url)

@@ -103,24 +103,21 @@ class CostServicesTests(TestCase):
         self.assertEqual(avg, Decimal(self.cost.costs_sum))
 
     def test_get_total_sum(self):
-        costs = cost_services.GetCostsService.get_all(self.user)
+        get_costs_service = cost_services.GetCostsService(self.user)
+        costs = get_costs_service.get_all()
         costs_sum = cost_services.GetCostsTotalSumService.execute(costs)
 
         self.assertEqual(costs_sum, Decimal(self.cost.costs_sum))
 
     def test_get_for_the_month(self):
-        get_service = cost_services.GetCostsForTheDateService(
-            self.user, self.today
-        )
-        costs = get_service.get_for_the_month()
+        get_service = cost_services.GetCostsForTheDateService(self.user)
+        costs = get_service.get_for_the_month(self.today)
 
         self.assertEqual(costs[0].date.month, self.today.month)
 
     def test_get_for_the_date(self):
-        get_service = cost_services.GetCostsForTheDateService(
-            self.user, self.today
-        )
-        costs = get_service.get_for_the_date()
+        get_service = cost_services.GetCostsForTheDateService(self.user)
+        costs = get_service.get_for_the_date(self.today)
 
         self.assertEqual(costs[0].date, self.today)
 
@@ -130,10 +127,8 @@ class CostServicesTests(TestCase):
         )
         statistic = command.execute()
 
-        get_service = cost_services.GetCostsForTheDateService(
-            self.user, self.today
-        )
-        costs = get_service.get_for_the_month()
+        get_service = cost_services.GetCostsForTheDateService(self.user)
+        costs = get_service.get_for_the_month(self.today)
         costs_sum = cost_services.GetCostsTotalSumService.execute(costs)
         incomes_sum = Decimal(self.income.incomes_sum)
         profit = incomes_sum - costs_sum
@@ -244,7 +239,8 @@ class CostsViewsTests(TestCase):
             'costs_sum': '100',
             'category': self.category.pk
         })
-        all_costs = cost_services.GetCostsService.get_all(self.user)
+        get_costs_service = cost_services.GetCostsService(self.user)
+        all_costs = get_costs_service.get_all()
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(len(all_costs), 2)

@@ -51,14 +51,16 @@ class ChangeIncomeView(DefaultView):
     template_name = 'incomes/change_income.html'
 
     def get(self, request, pk):
-        income = GetIncomesService.get_concrete(pk, request.user)
+        get_service = GetIncomesService(request.user)
+        income = get_service.get_concrete(pk)
         form = self.form_class(instance=income)
         return render(
             request, self.template_name, {'form': form, 'income': income}
         )
 
     def post(self, request, pk):
-        income = GetIncomesService.get_concrete(pk, request.user)
+        get_service = GetIncomesService(request.user)
+        income = get_service.get_concrete(pk)
         form = self.form_class(request.POST, instance=income)
         if form.is_valid():
             form.cleaned_data.update({'income': income})
@@ -76,7 +78,7 @@ class DeleteIncomeView(DeleteGenericView):
     template_name = 'incomes/delete_income.html'
     context_object_name = 'income'
     success_url = reverse_lazy('today_incomes')
-    get_service = GetIncomesService
+    get_service_class = GetIncomesService
     delete_service = DeleteIncomeService
 
 
