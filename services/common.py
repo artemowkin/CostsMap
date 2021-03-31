@@ -27,23 +27,20 @@ class ModelService:
 class GetForTheDateService(ModelService):
     """Service to get entries for the date"""
 
-    @classmethod
-    def get_for_the_month(
-            cls, user: User,
-            date: Optional[datetime.date] = None) -> QuerySet:
+    def __init__(self, owner: User, date: Optional[datetime.date] = None):
+        self.owner = owner
+        self.date = date or datetime.date.today()
+
+    def get_for_the_month(self) -> QuerySet:
         """Return user entries for the month"""
-        date = date or datetime.date.today()
-        return cls.model.objects.filter(
-            date__month=date.month, date__year=date.year, owner=user
+        return self.model.objects.filter(
+            date__month=self.date.month, date__year=self.date.year,
+            owner=self.owner
         )
 
-    @classmethod
-    def get_for_the_date(
-            cls, user: User,
-            date: Optional[datetime.date] = None) -> QuerySet:
+    def get_for_the_date(self) -> QuerySet:
         """Return user entries for the concrete date"""
-        date = date or datetime.date.today()
-        return cls.model.objects.filter(date=date, owner=user)
+        return self.model.objects.filter(date=self.date, owner=self.owner)
 
 
 class GetUserEntriesService(ModelService):

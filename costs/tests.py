@@ -109,15 +109,19 @@ class CostServicesTests(TestCase):
         self.assertEqual(costs_sum, Decimal(self.cost.costs_sum))
 
     def test_get_for_the_month(self):
-        costs = cost_services.GetCostsForTheDateService.get_for_the_month(
+        get_service = cost_services.GetCostsForTheDateService(
             self.user, self.today
         )
+        costs = get_service.get_for_the_month()
+
         self.assertEqual(costs[0].date.month, self.today.month)
 
     def test_get_for_the_date(self):
-        costs = cost_services.GetCostsForTheDateService.get_for_the_date(
+        get_service = cost_services.GetCostsForTheDateService(
             self.user, self.today
         )
+        costs = get_service.get_for_the_date()
+
         self.assertEqual(costs[0].date, self.today)
 
     def test_get_costs_statistic_command(self):
@@ -126,9 +130,10 @@ class CostServicesTests(TestCase):
         )
         statistic = command.execute()
 
-        costs = cost_services.GetCostsForTheDateService.get_for_the_month(
+        get_service = cost_services.GetCostsForTheDateService(
             self.user, self.today
         )
+        costs = get_service.get_for_the_month()
         costs_sum = cost_services.GetCostsTotalSumService.execute(costs)
         incomes_sum = Decimal(self.income.incomes_sum)
         profit = incomes_sum - costs_sum

@@ -2,7 +2,9 @@ import datetime
 
 from django.contrib.auth import get_user_model
 
-from services.commands import GetStatisticBaseCommand
+from services.commands import (
+    GetStatisticBaseCommand, BaseGetForTheDateCommand
+)
 from .base import (
     GetIncomesService, GetIncomesTotalSumService, GetIncomesForTheDateService
 )
@@ -28,25 +30,12 @@ class GetIncomesHistoryCommand:
         return context
 
 
-class GetIncomesForTheDateCommand:
+class GetIncomesForTheDateCommand(BaseGetForTheDateCommand):
     """Command to return incomes for the concrete date"""
 
-    def __init__(self, user: User, date: datetime.date):
-        self._user = user
-        self._date = date
-
-    def execute(self) -> dict:
-        context_date = ContextDate(self._date)
-        date_incomes = GetIncomesForTheDateService.get_for_the_date(
-            self._user, self._date
-        )
-        total_sum = GetIncomesTotalSumService.execute(date_incomes)
-        context = {
-            'incomes': date_incomes,
-            'total_sum': total_sum,
-            'date': context_date,
-        }
-        return context
+    get_service_class = GetIncomesForTheDateService
+    total_sum_service_class = GetIncomesTotalSumService
+    context_object_name = 'incomes'
 
 
 class GetIncomesStatisticCommand(GetStatisticBaseCommand):

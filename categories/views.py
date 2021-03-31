@@ -14,42 +14,31 @@ from categories.services.commands import GetCategoryCostsCommand
 class CategoryListView(DefaultView):
     """View to render all user categories"""
 
-    template_name = 'costs/category_list.html'
-    context_object_name = 'categories'
-
     def get(self, request):
         categories = GetCategoriesService.get_all(request.user)
         return render(
-            request, self.template_name, {
-                self.context_object_name: categories
-            }
+            request, 'costs/category_list.html', {'categories': categories}
         )
 
 
 class CostsByCategoryView(DefaultView):
     """View to render all user category costs"""
 
-    template_name = 'costs/costs_by_category.html'
-    command = GetCategoryCostsCommand
-
     def get(self, request, pk):
-        command = self.command(pk, request.user)
+        command = GetCategoryCostsCommand(pk, request.user)
         context = command.execute()
-        return render(request, self.template_name, context)
+        return render(request, 'costs/costs_by_category.html', context)
 
 
 class CreateCategoryView(DefaultView):
     """View to create a new category"""
 
-    form_class = CategoryForm
-    template_name = 'costs/add_category.html'
-
     def get(self, request):
-        form = self.form_class()
-        return render(request, self.template_name, {'form': form})
+        form = CategoryForm()
+        return render(request, 'costs/add_category.html', {'form': form})
 
     def post(self, request):
-        form = self.form_class(request.POST)
+        form = CategoryForm(request.POST)
         if form.is_valid():
             form.cleaned_data.update({'owner': request.user})
             try:
@@ -58,25 +47,22 @@ class CreateCategoryView(DefaultView):
             except IntegrityError:
                 form.add_error(None, "The same category already exists")
 
-        return render(request, self.template_name, {'form': form})
+        return render(request, 'costs/add_category.html', {'form': form})
 
 
 class ChangeCategoryView(DefaultView):
     """View to change a category"""
 
-    form_class = CategoryForm
-    template_name = 'costs/change_category.html'
-
     def get(self, request, pk):
         category = GetCategoriesService.get_concrete(pk, request.user)
-        form = self.form_class(instance=category)
-        return render(
-            request, self.template_name, {'form': form, 'category': category}
-        )
+        form = CategoryForm(instance=category)
+        return render(request, 'costs/change_category.html', {
+            'form': form, 'category': category
+        })
 
     def post(self, request, pk):
         category = GetCategoriesService.get_concrete(pk, request.user)
-        form = self.form_class(request.POST, instance=category)
+        form = CategoryForm(request.POST, instance=category)
         if form.is_valid():
             form.cleaned_data.update({'category': category})
             try:
@@ -86,9 +72,9 @@ class ChangeCategoryView(DefaultView):
                 form.add_error(None, 'The same category already exists')
                 category = GetCategoriesService.get_concrete(pk, request.user)
 
-        return render(
-            request, self.template_name, {'form': form, 'category': category}
-        )
+        return render(request, 'costs/change_category.html', {
+            'form': form, 'category': category
+        })
 
 
 class DeleteCategoryView(DeleteGenericView):

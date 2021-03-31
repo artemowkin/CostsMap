@@ -2,12 +2,12 @@ import datetime
 
 from django.contrib.auth import get_user_model
 
-from services.commands import GetStatisticBaseCommand
+from services.commands import (
+    GetStatisticBaseCommand, BaseGetForTheDateCommand
+)
 from .costs import (
     GetCostsTotalSumService, GetCostsForTheDateService, GetCostsService
 )
-
-from utils.date import ContextDate
 
 
 User = get_user_model()
@@ -29,25 +29,12 @@ class GetCostsHistoryCommand:
         return context
 
 
-class GetCostsForTheDateCommand:
+class GetCostsForTheDateCommand(BaseGetForTheDateCommand):
     """Command to return costs for the concrete date"""
 
-    def __init__(self, user: User, date: datetime.date):
-        self._user = user
-        self._date = date
-
-    def execute(self):
-        context_date = ContextDate(self._date)
-        date_costs = GetCostsForTheDateService.get_for_the_date(
-            self._user, self._date
-        )
-        total_sum = GetCostsTotalSumService.execute(date_costs)
-        context = {
-            'costs': date_costs,
-            'total_sum': total_sum,
-            'date': context_date,
-        }
-        return context
+    get_service_class = GetCostsForTheDateService
+    total_sum_service_class = GetCostsTotalSumService
+    context_object_name = 'costs'
 
 
 class GetCostsStatisticCommand(GetStatisticBaseCommand):
