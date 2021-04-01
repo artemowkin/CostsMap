@@ -25,7 +25,7 @@ class DefaultView(LoginRequiredMixin, View):
         except Exception as e:
             logger.exception(
                 f"{e.__class__.__name__} exception on "
-                "{request.get_full_path()}"
+                f"{request.get_full_path()}"
             )
             raise
 

@@ -80,7 +80,7 @@ class BaseGetForTheDateCommand:
         self._total_sum_service = self.total_sum_service_class()
 
     def execute(self):
-        context_date = ContextDate
+        context_date = ContextDate(self._date)
         date_entries = self._get_service.get_for_the_date(self._date)
         total_sum = self._total_sum_service.execute(date_entries)
         context = {

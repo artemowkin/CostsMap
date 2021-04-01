@@ -53,11 +53,14 @@ class CreateCostView(DefaultView):
         user_categories = get_categories_service.get_all()
         set_form_categories(form, user_categories)
         if form.is_valid():
-            form.cleaned_data.update({'owner': request.user})
-            cost = CreateCostService.execute(form.cleaned_data)
-            return redirect(cost.get_absolute_url())
+            return self.form_valid(request, form)
 
         return render(request, self.template_name, {'form': form})
+
+    def form_valid(self, request, form):
+        form.cleaned_data.update({'owner': request.user})
+        cost = CreateCostService.execute(form.cleaned_data)
+        return redirect(cost.get_absolute_url())
 
 
 class ChangeCostView(DefaultView):
@@ -80,18 +83,21 @@ class ChangeCostView(DefaultView):
     def post(self, request, pk):
         get_costs_service = GetCostsService(request.user)
         get_categories_service = GetCategoriesService(request.user)
-        cost = get_costs_service.get_concrete(pk)
-        form = self.form_class(request.POST, instance=cost)
+        self.cost = get_costs_service.get_concrete(pk)
+        form = self.form_class(request.POST, instance=self.cost)
         user_categories = get_categories_service.get_all()
         set_form_categories(form, user_categories)
         if form.is_valid():
-            form.cleaned_data.update({'cost': cost})
-            cost = ChangeCostService.execute(form.cleaned_data)
-            return redirect(cost.get_absolute_url())
+            return self.form_valid(request, form)
 
         return render(
-            request, self.template_name, {'form': form, 'cost': cost}
+            request, self.template_name, {'form': form, 'cost': self.cost}
         )
+
+    def form_valid(self, request, form):
+        form.cleaned_data.update({'cost': self.cost})
+        cost = ChangeCostService.execute(form.cleaned_data)
+        return redirect(cost.get_absolute_url())
 
 
 class DeleteCostView(DeleteGenericView):

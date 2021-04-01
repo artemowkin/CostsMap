@@ -37,11 +37,14 @@ class CreateIncomeView(DefaultView):
     def post(self, request):
         form = self.form_class(request.POST)
         if form.is_valid():
-            form.cleaned_data.update({'owner': request.user})
-            income = CreateIncomeService.execute(form.cleaned_data)
-            return redirect(income.get_absolute_url())
+            return self.form_valid(request, form)
 
         return render(request, self.template_name, {'form': form})
+
+    def form_valid(self, request, form):
+        form.cleaned_data.update({'owner': request.user})
+        income = CreateIncomeService.execute(form.cleaned_data)
+        return redirect(income.get_absolute_url())
 
 
 class ChangeIncomeView(DefaultView):
@@ -60,16 +63,19 @@ class ChangeIncomeView(DefaultView):
 
     def post(self, request, pk):
         get_service = GetIncomesService(request.user)
-        income = get_service.get_concrete(pk)
-        form = self.form_class(request.POST, instance=income)
+        self.income = get_service.get_concrete(pk)
+        form = self.form_class(request.POST, instance=self.income)
         if form.is_valid():
-            form.cleaned_data.update({'income': income})
-            income = ChangeIncomeService.execute(form.cleaned_data)
-            return redirect(income.get_absolute_url())
+            return self.form_valid(request, form)
 
         return render(
-            request, self.template_name, {'form': form, 'income': income}
+            request, self.template_name, {'form': form, 'income': self.income}
         )
+
+    def form_valid(self, request, form):
+        form.cleaned_data.update({'income': self.income})
+        income = ChangeIncomeService.execute(form.cleaned_data)
+        return redirect(income.get_absolute_url())
 
 
 class DeleteIncomeView(DeleteGenericView):
