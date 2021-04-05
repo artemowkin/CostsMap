@@ -1,11 +1,15 @@
 import time
 
-from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from django.test import LiveServerTestCase
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 
+from costs.models import Cost
+from categories.models import Category
 from .base import FunctionalTest
+
+
+User = get_user_model()
 
 
 class CategoriesTest(FunctionalTest):
@@ -43,16 +47,35 @@ class CategoriesTest(FunctionalTest):
         self.assertIn('Test Category', categories_titles)
 
     def test_category_costs_without_costs(self):
-        new_category = self.browser.find_elements_by_xpath(
+        category = self.browser.find_elements_by_xpath(
             "//*[contains(text(), 'Еда')]"
         )[0]
-        new_category.click()
+        category.click()
         self.assertEqual(self.browser.title, 'Еда')
         title = self.browser.find_element_by_class_name('history_header')
         self.assertEqual(title.text, 'Category: "Еда"')
         empty_text = self.browser.find_element_by_class_name('empty_text')
         self.assertEqual(
             empty_text.text, "You don't have any costs in this category"
+        )
+
+    def test_category_costs_with_costs(self):
+        user = User.objects.get(email="testuser@gmail.com")
+        food_category = Category.objects.get(title="Еда")
+        cost = Cost.objects.create(
+            title="testcost", costs_sum="100.00", category=food_category,
+            owner=user
+        )
+        category = self.browser.find_elements_by_xpath(
+            "//*[contains(text(), 'Еда')]"
+        )[0]
+        category.click()
+        self.assertEqual(self.browser.title, 'Еда')
+        title = self.browser.find_element_by_class_name('history_header')
+        self.assertEqual(title.text, 'Category: "Еда"')
+        cost_title = self.browser.find_element_by_class_name('costs_title')
+        self.assertEqual(
+            cost_title.text, cost.title
         )
 
     def test_change_category(self):
