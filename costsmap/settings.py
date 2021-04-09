@@ -102,11 +102,11 @@ WSGI_APPLICATION = 'costsmap.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': get_env('POSTGRES_NAME', 'costsmap'),
-        'USER': get_env('POSTGRES_USER', 'django'),
-        'PASSWORD': get_env('POSTGRES_PASSWORD', 'django'),
-        'HOST': get_env('POSTGRES_HOST', 'localhost'),
-        'PORT': get_env('POSTGRES_PORT', 5432)
+        'NAME': get_env('DJANGO_DB_NAME', 'costsmap'),
+        'USER': get_env('DJANGO_DB_USER', 'django'),
+        'PASSWORD': get_env('DJANGO_DB_PASSWORD', 'django'),
+        'HOST': get_env('DJANGO_DB_HOST', 'localhost'),
+        'PORT': get_env('DJANGO_DB_PORT', 5432)
     }
 }
 
