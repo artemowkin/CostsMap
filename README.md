@@ -22,56 +22,61 @@ for notes on how to deploy the project on a live system.
 
 To install this project you need to have:
 
-* `python-3.8`
-* `pipenv`
+* `docker`
+* `docker-compose`
 
 ### Installing
 
-First, you need to install dependencies
+First, you need to build the Docker image
+
+```
+$ docker-compose build
+```
+
+After that you need to up this image
+
+```
+$ docker-compose up -d
+```
+
+## Running the tests
+
+If you want to run the tests you need some prerequisites:
+
+* `python3.9`
+* `pipenv`
+* `postgresql`
+
+And you need to install dependencies from Pipfile:
 
 ```
 $ pipenv install --dev
 ```
 
-After that you need to create a `.env` file with the following content:
+And create a new database `costsmap` with user `django` with password `django`:
 
 ```
-ENVIRONMENT=<development|production>
-SECRET_KEY=<your_secret_key>
-DEBUG=<1|0>
-POSTGRES_NAME=<postgres_dbname>
-POSTGRES_USER=<postgres_dbuser>
-POSTGRES_PASSWORD=<postgres_dbuser_password>
-POSTGRES_HOST=<postgres_dbhost>
-POSTGRES_PORT=<postgres_dbport>
+$ psql -U postgres
+=> CREATE DATABASE costsmap;
+=> CREATE USER django WITH PASSWORD 'django';
+=> GRANT ALL PRIVILEGES ON DATABASE costsmap TO django;
 ```
 
-For example:
+That's all. Now you can run the tests. If you want to run all
+tests you can use the following command:
 
 ```
-ENVIRONMENT=development
-SECRET_KEY="qq&!mwvo2znv(t5^h$6w68*$@-c8-=ms_6efon6ntzwv@76txt"
-DEBUG=1
-POSTGRES_NAME=costsmap
-POSTGRES_USER=django
-POSTGRES_PASSWORD=django
-POSTGRES_HOST=localhost
-POSTGRES_PORT=""
+$ python manage.py test
 ```
 
-And now you can run pipenv environment:
+If you want to run only functional tests you can use the following command:
 
 ```
-$ pipenv shell
+$ python manage.py test functional_tests
 ```
 
-## Running the tests
-
-To run the tests you need to run the following command:
-
-```
-$ ./manage.py test
-```
+> This command will run the Firefox browser window. If you don't have this
+browser on your PC you need to install it
 
 ## Authors
 
