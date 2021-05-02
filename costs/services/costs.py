@@ -2,6 +2,7 @@ import datetime
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django import forms
 from service_objects.services import Service
 from services.common import (
@@ -32,6 +33,21 @@ class GetCostsTotalSumService(GetTotalSumService):
     sum_field_name = 'costs_sum'
 
 
+def _check_category_owner(category, owner):
+    if not category.owner == owner:
+        raise ValidationError(
+            f"Category `{category.title}` owner is not the "
+            "same as cost owner"
+        )
+
+
+def _check_cost_owner(cost, owner):
+    if not cost.owner == owner:
+        raise ValidationError(
+            f"User `{owner.username}` can't change not his cost"
+        )
+
+
 class CreateCostService(Service):
     """Service to create new costs"""
 
@@ -47,6 +63,7 @@ class CreateCostService(Service):
         costs_sum = self.cleaned_data['costs_sum']
         category = self.cleaned_data['category']
         owner = self.cleaned_data['owner']
+        _check_category_owner(category, owner)
 
         cost = self._model.objects.create(
             title=title, costs_sum=costs_sum, category=category, owner=owner
@@ -61,6 +78,7 @@ class ChangeCostService(Service):
     title = forms.CharField(max_length=255)
     costs_sum = forms.DecimalField(max_digits=7, decimal_places=2)
     category = forms.ModelChoiceField(queryset=Category.objects.all())
+    owner = forms.ModelChoiceField(queryset=User.objects.all())
 
     def process(self) -> Cost:
         """Change a concrete cost from `cost` attribute"""
@@ -68,6 +86,9 @@ class ChangeCostService(Service):
         title = self.cleaned_data['title']
         costs_sum = self.cleaned_data['costs_sum']
         category = self.cleaned_data['category']
+        owner = self.cleaned_data['owner']
+        _check_cost_owner(cost, owner)
+        _check_category_owner(category, cost.owner)
 
         cost.title = title
         cost.costs_sum = costs_sum
@@ -81,10 +102,14 @@ class DeleteCostService(Service):
     """Service to delete a concrete cost"""
 
     cost = forms.ModelChoiceField(queryset=Cost.objects.all())
+    owner = forms.ModelChoiceField(queryset=User.objects.all())
 
     def process(self) -> None:
         """Delete a concrete cost from `cost` attribute"""
         cost = self.cleaned_data['cost']
+        owner = self.cleaned_data['owner']
+        _check_cost_owner(cost, owner)
+
         cost.delete()
 
 

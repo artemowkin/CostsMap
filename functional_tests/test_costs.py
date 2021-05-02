@@ -61,3 +61,14 @@ class CostsAPIEndpointsTest(TestCase):
         response = self.client.delete(f'/costs/{self.cost.pk}/')
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Cost.objects.count(), 0)
+
+    def test_update_concrete_cost_endpoint(self):
+        response = self.client.put(
+            f'/costs/{self.cost.pk}/', {
+                'title': 'some_cost', 'costs_sum': '200.00',
+                'category': self.category.pk
+            }, content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 204)
+        cost = Cost.objects.get(pk=self.cost.pk)
+        self.assertEqual(str(cost.costs_sum), '200.00')

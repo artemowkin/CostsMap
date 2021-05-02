@@ -88,3 +88,22 @@ class GetUpdateDeleteCostViewTest(ViewTest):
             reverse('concrete_cost', args=[self.cost.pk])
         )
         self.assertEqual(response.status_code, 403)
+
+    def test_put_with_logged_in_user(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.put(
+            reverse('concrete_cost', args=[self.cost.pk]), {
+                'title': 'some_cost', 'costs_sum': '200.00',
+                'category': self.category.pk
+            }, content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 204)
+
+    def test_put_with_unlogged_in_user(self):
+        response = self.client.put(
+            reverse('concrete_cost', args=[self.cost.pk]), {
+                'title': 'some_cost', 'costs_sum': '200.00',
+                'category': self.category.pk
+            }, content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 403)
