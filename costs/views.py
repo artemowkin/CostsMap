@@ -1,141 +1,53 @@
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from django.urls import reverse_lazy
+import datetime
 
-from .forms import CostForm
-from .services.commands import GetCostsStatisticCommand
-from costs.services import (
-    GetCostsService, CreateCostService, ChangeCostService, DeleteCostService,
-    GetStatisticForTheMonthService, GetStatisticForTheYearService
-)
-from categories.services.categories import (
-    GetCategoriesService, set_form_categories
-)
-from costs.services.commands import (
-    GetCostsForTheDateCommand, GetCostsHistoryCommand
-)
-from utils.views import (
-    DefaultView, DeleteGenericView, StatisticPageGenericView,
-    DateGenericView, HistoryGenericView
-)
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from .services.costs import CreateCostService, GetCostsService
+from .serializers import CostSerializer
+from categories.models import Category
 
 
-class CostsForTheDateView(DateGenericView):
-    """View to render costs for the date"""
+class GetCreateCostsView(APIView):
+    """View to get all costs and create a new cost"""
 
-    template_name = 'costs/costs.html'
-    command = GetCostsForTheDateCommand
-
-
-class CostsHistoryView(HistoryGenericView):
-    """View to render all costs for all time."""
-
-    template_name = 'costs/history_costs.html'
-    command = GetCostsHistoryCommand
-
-
-class CreateCostView(DefaultView):
-    """View to create a new cost"""
-
-    form_class = CostForm
-    template_name = 'costs/add_cost.html'
+    get_service = GetCostsService
+    create_service = CreateCostService
+    serializer_class = CostSerializer
 
     def get(self, request):
-        form = self.form_class()
-        get_categories_service = GetCategoriesService(request.user)
-        user_categories = get_categories_service.get_all()
-        set_form_categories(form, user_categories)
-        return render(request, self.template_name, {'form': form})
+        service = self.get_service(request.user)
+        all_costs = service.get_all()
+        serializer = self.serializer_class(all_costs, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
-        form = self.form_class(request.POST)
-        get_categories_service = GetCategoriesService(request.user)
-        user_categories = get_categories_service.get_all()
-        set_form_categories(form, user_categories)
-        if form.is_valid():
-            return self.form_valid(request, form)
+        cost_data = request.data | {'owner': request.user}
+        serializer = self.serializer_class(data=cost_data)
+        if serializer.is_valid():
+            cost = self.create_service.execute(cost_data)
+            return Response({'cost': cost.pk}, status=201)
 
-        return render(request, self.template_name, {'form': form})
-
-    def form_valid(self, request, form):
-        form.cleaned_data.update({'owner': request.user})
-        cost = CreateCostService.execute(form.cleaned_data)
-        return redirect(cost.get_absolute_url())
+        return Response(serializer.errors, status=400)
 
 
-class ChangeCostView(DefaultView):
-    """View to change a cost"""
+class GetUpdateDeleteCost(APIView):
+    """View to get a concrete cost and change/delete an existing cost"""
 
-    form_class = CostForm
-    template_name = 'costs/change_cost.html'
-
-    def get(self, request, pk):
-        get_costs_service = GetCostsService(request.user)
-        get_categories_service = GetCategoriesService(request.user)
-        cost = get_costs_service.get_concrete(pk)
-        form = self.form_class(instance=cost)
-        user_categories = get_categories_service.get_all()
-        set_form_categories(form, user_categories)
-        return render(
-            request, self.template_name, {'form': form, 'cost': cost}
-        )
-
-    def post(self, request, pk):
-        get_costs_service = GetCostsService(request.user)
-        get_categories_service = GetCategoriesService(request.user)
-        self.cost = get_costs_service.get_concrete(pk)
-        form = self.form_class(request.POST, instance=self.cost)
-        user_categories = get_categories_service.get_all()
-        set_form_categories(form, user_categories)
-        if form.is_valid():
-            return self.form_valid(request, form)
-
-        return render(
-            request, self.template_name, {'form': form, 'cost': self.cost}
-        )
-
-    def form_valid(self, request, form):
-        form.cleaned_data.update({'cost': self.cost})
-        cost = ChangeCostService.execute(form.cleaned_data)
-        return redirect(cost.get_absolute_url())
+    pass
 
 
-class DeleteCostView(DeleteGenericView):
-    """View to delete a cost"""
+class GetForTheDateView(APIView):
+    """View to get costs for the date"""
 
-    template_name = 'costs/delete_cost.html'
-    success_url = reverse_lazy('today_costs')
-    context_object_name = 'cost'
-    get_service_class = GetCostsService
-    delete_service = DeleteCostService
+    pass
 
 
-class StatisticView(DefaultView):
-    """View to return json with costs statistic"""
+class CostsDateStatisticView(APIView):
+    """View to get costs statistic for the date"""
 
-    def get(self, request, date):
-        data = GetStatisticForTheMonthService.execute({
-            'user': request.user,
-            'date': date
-        })
-        return JsonResponse(data, safe=False)
+    pass
 
 
-class CostsStatisticPageView(StatisticPageGenericView):
-    """View to render statistic with costs for the month"""
-
-    template_name = 'costs/costs_statistic.html'
-    command = GetCostsStatisticCommand
-
-
-class CostStatisticForTheLastYear(DefaultView):
-    """View to return json statistic with costs by months
-    for the last year
-    """
-
-    def get(self, request, date):
-        data = GetStatisticForTheYearService.execute({
-            'user': request.user,
-            'date': date
-        })
-        return JsonResponse(data, safe=False)
+class AverageCostsView(APIView):
+    """View to get an average costs"""

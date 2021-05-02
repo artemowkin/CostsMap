@@ -20,6 +20,7 @@ python-dateutil = "*"
 djangorestframework = "*"
 django-service-objects = "*"
 selenium = "*"
+simplejson = "*"
 
 [requires]
 python_version = "3"
