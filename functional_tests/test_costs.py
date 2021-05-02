@@ -28,18 +28,19 @@ class CostsAPIEndpointsTest(TestCase):
             title='test_cost', costs_sum='100.00', category=self.category,
             owner=self.user
         )
+        self.serialized_cost = {
+            'pk': str(self.cost.pk), 'title': 'test_cost',
+            'costs_sum': '100.00',
+            'category': str(self.category.pk), 'owner': self.user.pk,
+            'date': datetime.date.today().isoformat(),
+        }
 
     def test_all_costs_endpoint(self):
         """Test: does /costs/ endpoint return all costs"""
         response = self.client.get('/costs/')
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
-        self.assertEqual(json_response, [{
-            'pk': str(self.cost.pk), 'title': 'test_cost',
-            'costs_sum': '100.00',
-            'category': str(self.category.pk), 'owner': self.user.pk,
-            'date': datetime.date.today().isoformat(),
-        }])
+        self.assertEqual(json_response, [self.serialized_cost])
 
     def test_create_cost_endpoint(self):
         response = self.client.post('/costs/', {
@@ -49,3 +50,9 @@ class CostsAPIEndpointsTest(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Cost.objects.count(), 2)
         self.assertEqual(Cost.objects.first().title, 'some_cost')
+
+    def test_get_concrete_cost_endpoint(self):
+        response = self.client.get(f'/costs/{self.cost.pk}/')
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.content)
+        self.assertEqual(json_response, self.serialized_cost)

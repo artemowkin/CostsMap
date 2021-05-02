@@ -34,7 +34,14 @@ class GetCreateCostsView(APIView):
 class GetUpdateDeleteCost(APIView):
     """View to get a concrete cost and change/delete an existing cost"""
 
-    pass
+    get_service = GetCostsService
+    serializer_class = CostSerializer
+
+    def get(self, request, pk):
+        service = GetCostsService(request.user)
+        cost = service.get_concrete(pk)
+        serializer = self.serializer_class(cost)
+        return Response(serializer.data)
 
 
 class GetForTheDateView(APIView):
@@ -51,3 +58,5 @@ class CostsDateStatisticView(APIView):
 
 class AverageCostsView(APIView):
     """View to get an average costs"""
+
+    pass

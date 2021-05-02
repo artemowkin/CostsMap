@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
+from ..models import Cost
 from categories.models import Category
 
 
@@ -9,14 +10,7 @@ User = get_user_model()
 
 
 class ViewTest(TestCase):
-    """Base test for views"""
-
-    def setUp(self):
-        self.client.login(username="testuser", password="testpass")
-
-
-class GetCreateCostsViewTest(TestCase):
-    """Case of testing GetCreateCostsView"""
+    """Base test class for views"""
 
     def setUp(self):
         self.user = User.objects.create_superuser(
@@ -25,6 +19,10 @@ class GetCreateCostsViewTest(TestCase):
         self.category = Category.objects.create(
             title="some_category", owner=self.user
         )
+
+
+class GetCreateCostsViewTest(ViewTest):
+    """Case of testing GetCreateCostsView"""
 
     def test_get_with_logged_in_user(self):
         self.client.login(username="testuser", password="testpass")
@@ -53,3 +51,21 @@ class GetCreateCostsViewTest(TestCase):
             }, content_type="application/json"
         )
         self.assertEqual(response.status_code, 403)
+
+
+class GetUpdateDeleteCostViewTest(ViewTest):
+    """Case of testing GetUpdateDeleteCostView"""
+
+    def setUp(self):
+        super().setUp()
+        self.cost = Cost.objects.create(
+            title='test_cost', costs_sum='100.00', category=self.category,
+            owner=self.user
+        )
+
+    def test_get_with_logged_in_user(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(
+            reverse('concrete_cost', args=[self.cost.pk])
+        )
+        self.assertEqual(response.status_code, 200)
