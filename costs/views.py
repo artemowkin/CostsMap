@@ -3,7 +3,9 @@ import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .services.costs import CreateCostService, GetCostsService
+from .services.costs import (
+    CreateCostService, GetCostsService, DeleteCostService
+)
 from .serializers import CostSerializer
 from categories.models import Category
 
@@ -35,13 +37,20 @@ class GetUpdateDeleteCost(APIView):
     """View to get a concrete cost and change/delete an existing cost"""
 
     get_service = GetCostsService
+    delete_service = DeleteCostService
     serializer_class = CostSerializer
 
     def get(self, request, pk):
-        service = GetCostsService(request.user)
+        service = self.get_service(request.user)
         cost = service.get_concrete(pk)
         serializer = self.serializer_class(cost)
         return Response(serializer.data)
+
+    def delete(self, request, pk):
+        get_concrete_service = self.get_service(request.user)
+        cost = get_concrete_service.get_concrete(pk)
+        self.delete_service.execute({'cost': cost})
+        return Response(status=204)
 
 
 class GetForTheDateView(APIView):

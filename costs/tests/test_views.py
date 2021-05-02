@@ -69,3 +69,22 @@ class GetUpdateDeleteCostViewTest(ViewTest):
             reverse('concrete_cost', args=[self.cost.pk])
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_get_with_unlogged_in_user(self):
+        response = self.client.get(
+            reverse('concrete_cost', args=[self.cost.pk])
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_with_logged_in_user(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.delete(
+            reverse('concrete_cost', args=[self.cost.pk])
+        )
+        self.assertEqual(response.status_code, 204)
+
+    def test_delete_with_unlogged_in_user(self):
+        response = self.client.delete(
+            reverse('concrete_cost', args=[self.cost.pk])
+        )
+        self.assertEqual(response.status_code, 403)
