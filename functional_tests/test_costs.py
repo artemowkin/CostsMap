@@ -56,3 +56,8 @@ class CostsAPIEndpointsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, self.serialized_cost)
+
+    def test_delete_concrete_cost_endpoint(self):
+        response = self.client.delete(f'/costs/{self.cost.pk}/')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(Cost.objects.count(), 0)
