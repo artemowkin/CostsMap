@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from .services.costs import (
     CreateCostService, GetCostsService, DeleteCostService, ChangeCostService,
+    GetCostsForTheDateService
 )
 from .serializers import CostSerializer
 from categories.models import Category
@@ -70,7 +71,20 @@ class GetUpdateDeleteCost(APIView):
 class GetForTheDateView(APIView):
     """View to get costs for the date"""
 
-    pass
+    get_service = GetCostsForTheDateService
+    serializer_class = CostSerializer
+
+    def get(self, request, year, month, day=None):
+        service = self.get_service(request.user)
+        if not day:
+            date = datetime.date(year, month, 1)
+            date_costs = service.get_for_the_date(date)
+        else:
+            date = datetime.date(year, month, day)
+            date_costs = service.get_for_the_month(date)
+
+        serializer = self.serializer_class(date_costs, many=True)
+        return Response(serializer.data)
 
 
 class CostsDateStatisticView(APIView):

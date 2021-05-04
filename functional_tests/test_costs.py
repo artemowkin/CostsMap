@@ -72,3 +72,21 @@ class CostsAPIEndpointsTest(TestCase):
         self.assertEqual(response.status_code, 204)
         cost = Cost.objects.get(pk=self.cost.pk)
         self.assertEqual(str(cost.costs_sum), '200.00')
+
+    def test_get_costs_for_the_today(self):
+        today = datetime.date.today()
+        response = self.client.get(
+            f'/costs/{today.year}/{today.month}/{today.day}/'
+        )
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.content)
+        self.assertEqual(json_response, [self.serialized_cost])
+
+    def test_get_costs_For_the_another_date(self):
+        random_date = datetime.date(2020, 1, 1)
+        response = self.client.get(
+            f'/costs/{random_date.year}/{random_date.month}/{random_date.day}/'
+        )
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.content)
+        self.assertEqual(json_response, [])
