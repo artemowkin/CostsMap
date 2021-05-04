@@ -68,21 +68,22 @@ class GetUpdateDeleteCost(APIView):
         return Response(serializer.errors, status=400)
 
 
+class GetForTheMonthView(APIView):
+    """View to get costs for the month"""
+
+    pass
+
+
 class GetForTheDateView(APIView):
     """View to get costs for the date"""
 
     get_service = GetCostsForTheDateService
     serializer_class = CostSerializer
 
-    def get(self, request, year, month, day=None):
+    def get(self, request, year, month, day):
         service = self.get_service(request.user)
-        if not day:
-            date = datetime.date(year, month, 1)
-            date_costs = service.get_for_the_date(date)
-        else:
-            date = datetime.date(year, month, day)
-            date_costs = service.get_for_the_month(date)
-
+        date = datetime.date(year, month, day)
+        date_costs = service.get_for_the_month(date)
         serializer = self.serializer_class(date_costs, many=True)
         return Response(serializer.data)
 
