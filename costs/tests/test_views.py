@@ -109,6 +109,23 @@ class GetUpdateDeleteCostViewTest(ViewTest):
         self.assertEqual(response.status_code, 403)
 
 
+class GetForTheMonthViewTest(ViewTest):
+    """Case of testing GetForTheMonthView"""
+
+    def test_get_with_logged_in_user(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(
+            reverse("month_costs", args=("2020", "01"))
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_with_unlogged_in_user(self):
+        response = self.client.get(
+            reverse("month_costs", args=("2020", "01"))
+        )
+        self.assertEqual(response.status_code, 403)
+
+
 class GetForTheDateViewTest(ViewTest):
     """Case of testing GetForTheDateView"""
 
