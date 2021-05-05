@@ -40,7 +40,10 @@ class CostsAPIEndpointsTest(TestCase):
         response = self.client.get('/costs/')
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
-        self.assertEqual(json_response, [self.serialized_cost])
+        self.assertEqual(json_response, {
+            'total_sum': float(self.cost.costs_sum),
+            'costs': [self.serialized_cost]
+        })
 
     def test_create_cost_endpoint(self):
         response = self.client.post('/costs/', {
@@ -78,7 +81,10 @@ class CostsAPIEndpointsTest(TestCase):
         response = self.client.get(f"/costs/{today.year}/{today.month}/")
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
-        self.assertEqual(json_response, [self.serialized_cost])
+        self.assertEqual(json_response, {
+            'total_sum': float(self.cost.costs_sum),
+            'costs': [self.serialized_cost]
+        })
 
     def test_get_costs_for_the_another_month(self):
         random_date = datetime.date(2020, 1, 1)
@@ -87,7 +93,7 @@ class CostsAPIEndpointsTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
-        self.assertEqual(json_response, [])
+        self.assertEqual(json_response, {'total_sum': 0.0, 'costs': []})
 
     def test_get_costs_for_the_today(self):
         today = datetime.date.today()
@@ -96,7 +102,10 @@ class CostsAPIEndpointsTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
-        self.assertEqual(json_response, [self.serialized_cost])
+        self.assertEqual(json_response, {
+            'total_sum': float(self.cost.costs_sum),
+            'costs': [self.serialized_cost]
+        })
 
     def test_get_costs_for_the_another_date(self):
         random_date = datetime.date(2020, 1, 1)
@@ -105,7 +114,7 @@ class CostsAPIEndpointsTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
-        self.assertEqual(json_response, [])
+        self.assertEqual(json_response, {'total_sum': 0.0, 'costs': []})
 
     def test_get_costs_statistic_for_the_month(self):
         today = datetime.date.today()
@@ -117,4 +126,16 @@ class CostsAPIEndpointsTest(TestCase):
         self.assertEqual(json_response, [{
             'category': self.category.title,
             'costs': float(self.cost.costs_sum)
+        }])
+
+    def test_get_costs_statistic_for_the_year(self):
+        today = datetime.date.today()
+        response = self.client.get(
+            f'/costs/statistic/{today.year}/'
+        )
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.content)
+        self.assertEqual(json_response, [{
+            'cost_month': float(self.cost.date.month),
+            'cost_sum': float(self.cost.costs_sum)
         }])

@@ -158,3 +158,20 @@ class CostsMonthStatisticView(ViewTest):
             reverse("costs_statistic_month", args=("2020", "01"))
         )
         self.assertEqual(response.status_code, 403)
+
+
+class CostsYearStatisticView(ViewTest):
+    """Case of testing CostsYearStatisticView"""
+
+    def test_get_with_logged_in_user(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(
+            reverse("costs_statistic_year", args=("2020",))
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_with_unlogged_in_user(self):
+        response = self.client.get(
+            reverse("costs_statistic_year", args=("2020",))
+        )
+        self.assertEqual(response.status_code, 403)

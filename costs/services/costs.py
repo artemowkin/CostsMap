@@ -181,7 +181,7 @@ class GetStatisticForTheYearService(Service):
         -------
         list:
             [{
-                'cost_date': <date_of_cost>,
+                'cost_month': <month_of_cost>,
                 'cost_sum': <sum_of_costs_for_this_month>
             }]
 
