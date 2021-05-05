@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from .services.costs import (
     CreateCostService, GetCostsService, DeleteCostService, ChangeCostService,
-    GetCostsForTheDateService
+    GetCostsForTheDateService, GetStatisticForTheMonthService
 )
 from .serializers import CostSerializer
 from categories.models import Category
@@ -96,8 +96,20 @@ class GetForTheDateView(APIView):
         return Response(serializer.data)
 
 
-class CostsDateStatisticView(APIView):
-    """View to get costs statistic for the date"""
+class CostsMonthStatisticView(APIView):
+    """View to get costs statistic for the month"""
+
+    service_class = GetStatisticForTheMonthService
+
+    def get(self, request, year, month):
+        date = datetime.date(year, month, 1)
+        service_data = {'user': request.user, 'date': date}
+        statistic = self.service_class.execute(service_data)
+        return Response(statistic)
+
+
+class CostsYearStatisticView(APIView):
+    """View to get costs statistic for the year"""
 
     pass
 

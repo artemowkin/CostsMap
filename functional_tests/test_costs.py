@@ -106,3 +106,15 @@ class CostsAPIEndpointsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, [])
+
+    def test_get_costs_statistic_for_the_month(self):
+        today = datetime.date.today()
+        response = self.client.get(
+            f'/costs/statistic/{today.year}/{today.month}/'
+        )
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.content)
+        self.assertEqual(json_response, [{
+            'category': self.category.title,
+            'costs': float(self.cost.costs_sum)
+        }])

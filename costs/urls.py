@@ -17,7 +17,11 @@ urlpatterns = [
     ),
     path(
         'statistic/<int:year>/<int:month>/',
-        views.CostsDateStatisticView.as_view(), name="costs_statistic"
+        views.CostsMonthStatisticView.as_view(), name="costs_statistic_month"
+    ),
+    path(
+        'statistic/<int:year>/',
+        views.CostsYearStatisticView.as_view(), name="costs_statistic_year"
     ),
     path(
         'statistic/average/',
