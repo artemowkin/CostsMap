@@ -139,3 +139,11 @@ class CostsAPIEndpointsTest(TestCase):
             'cost_month': float(self.cost.date.month),
             'cost_sum': float(self.cost.costs_sum)
         }])
+
+    def test_get_average_costs_statistic(self):
+        response = self.client.get('/costs/statistic/average/')
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.content)
+        self.assertEqual(json_response, {
+            'average_costs': float(self.cost.costs_sum)
+        })

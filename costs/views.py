@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from .services.costs import (
     CreateCostService, GetCostsService, DeleteCostService, ChangeCostService,
     GetCostsForTheDateService, GetStatisticForTheMonthService,
-    GetStatisticForTheYearService, GetCostsTotalSumService
+    GetStatisticForTheYearService, GetCostsTotalSumService,
+    GetAverageCostsForTheDayService
 )
 from .serializers import CostSerializer
 from categories.models import Category
@@ -139,4 +140,8 @@ class CostsYearStatisticView(APIView):
 class AverageCostsView(APIView):
     """View to get an average costs"""
 
-    pass
+    average_service = GetAverageCostsForTheDayService
+
+    def get(self, request):
+        average_costs = self.average_service.execute({'user': request.user})
+        return Response({'average_costs': average_costs})

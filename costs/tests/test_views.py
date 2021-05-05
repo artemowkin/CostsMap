@@ -175,3 +175,16 @@ class CostsYearStatisticView(ViewTest):
             reverse("costs_statistic_year", args=("2020",))
         )
         self.assertEqual(response.status_code, 403)
+
+
+class AverageCostsView(ViewTest):
+    """Case of testing AverageCostsView"""
+
+    def test_get_with_logged_in_user(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get('/costs/statistic/average/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_with_unlogged_in_user(self):
+        response = self.client.get('/costs/statistic/average/')
+        self.assertEqual(response.status_code, 403)
