@@ -1,0 +1,280 @@
+openapi: 3.0.2
+info:
+  title: 'CostsMap API'
+  version: '1.0.0'
+paths:
+  /costs/:
+    get:
+      operationId: listAllCosts
+      description: Return all user costs list
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCosts'
+          description: ''
+      tags:
+      - costs
+    post:
+        operationId: createCost
+        description: Create a new cost for user
+        parameters: []
+        requestBody:
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        items: []
+                        example:
+                            title: "New Cost"
+                            costs_sum: 100.0
+                            category: "c71caa23-909d-4ec7-90ab-aecc15f6a6f9"
+        responses:
+            '201':
+                content:
+                    application/json:
+                        type: object
+                        items: []
+                        example:
+                            cost: "df3f5157-d219-4844-98d4-9ea708dd6f7d"
+        tags:
+        - costs
+  /costs/{cost_id}/:
+      get:
+          operationId: concreteCost
+          description: Return a concrete cost using id
+          parameters:
+              - name: cost_id
+                in: path
+                required: true
+                description: "UUID of cost"
+                schema:
+                    type: string
+          responses:
+              '200':
+                  content:
+                      application/json:
+                          schema:
+                              $ref: '#/components/schemas/Cost'
+                  description: ''
+          tags:
+          - costs
+      put:
+          operationId: updateCost
+          description: Update the existing cost
+          parameters:
+              - name: cost_id
+                in: path
+                required: true
+                description: "UUID of updating cost"
+                schema:
+                    type: string
+          responses:
+              '204':
+                  description: 'The cost was changed successfully'
+          tags:
+          - costs
+      delete:
+          operationId: deleteCost
+          description: Delete the existing cost
+          parameters:
+              - name: cost_id
+                in: path
+                required: true
+                description: "UUID of deleting cost"
+                schema:
+                    type: string
+          responses:
+              '204':
+                  description: 'The cost was deleted successfully'
+          tags:
+          - costs
+  /costs/{year}/{month}/:
+    get:
+      operationId: listMonthCosts
+      description: Return user costs for the month
+      parameters:
+        - name: year
+          in: path
+          required: true
+          description: "year of cost date"
+          schema:
+            type: string
+        - name: month
+          in: path
+          required: true
+          description: "month of cost date"
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCosts'
+          description: ''
+      tags:
+      - costs
+  /costs/{year}/{month}/{day}/:
+    get:
+      operationId: listDayCosts
+      description: Return user costs for the concrete day
+      parameters:
+        - name: year
+          in: path
+          required: true
+          description: "year of cost date"
+          schema:
+            type: string
+        - name: month
+          in: path
+          required: true
+          description: "month of cost date"
+          schema:
+            type: string
+        - name: day
+          in: path
+          required: true
+          description: "day of cost date"
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCosts'
+          description: ''
+      tags:
+      - costs
+  /costs/statistic/{year}/{month}/:
+    get:
+      operationId: statisticMonthCosts
+      description: Statistic of costs for the month
+      parameters:
+        - name: year
+          in: path
+          required: true
+          description: "year of cost date"
+          schema:
+            type: string
+        - name: month
+          in: path
+          required: true
+          description: "month of cost date"
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                  type: array
+                  items:
+                      type: object
+                      properties:
+                          category:
+                              type: string
+                              minLength: 1
+                              maxLength: 255
+                              example: "Food"
+                          costs:
+                              type: number
+                              format: float
+                              example: 100.0
+          description: ''
+      tags:
+      - costs
+  /costs/statistic/{year}/:
+    get:
+      operationId: statisticYearCosts
+      description: Statistic of costs for the year
+      parameters:
+        - name: year
+          in: path
+          required: true
+          description: "year of cost date"
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                  type: array
+                  items:
+                      type: object
+                      properties:
+                          cost_month:
+                              type: number
+                              format: float
+                              example: 5.0
+                          cost_sum:
+                              type: number
+                              format: float
+                              example: 100.0
+          description: ''
+      tags:
+      - costs
+  /costs/statistic/average/:
+    get:
+      operationId: statisticAverageCosts
+      description: Average costs for the day
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                  type: object
+                  properties:
+                      average_costs:
+                          type: number
+                          format: float
+                          example: 100
+          description: ''
+      tags:
+      - costs
+components:
+    schemas:
+        Cost:
+            type: object
+            properties:
+                pk:
+                    type: string
+                    example: "c840ad15-0760-4e05-b510-31c71d49da3b"
+                    maxLength: 36
+                    minLength: 36
+                title:
+                    type: string
+                    example: Some cost
+                    maxLength: 255
+                    minLength: 1
+                costs_sum:
+                    type: number
+                    format: float
+                    example: 100.0
+                category:
+                    type: string
+                    example: "20cd8674-943f-443e-a60b-b7fe4b1f51ea"
+                    maxLength: 36
+                    minLength: 36
+                owner:
+                    type: integer
+                    format: int32
+                    example: 1
+                date:
+                    type: string
+                    format: date
+        ListCosts:
+            type: object
+            properties:
+                total_sum:
+                    type: number
+                    format: float
+                    example: 100.0
+                costs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Cost'
