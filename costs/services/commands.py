@@ -1,43 +1,27 @@
-import datetime
-
 from django.contrib.auth import get_user_model
 
-from services.commands import (
-    GetStatisticBaseCommand, BaseGetForTheDateCommand, BaseGetHistoryCommand
-)
-from .costs import (
-    GetCostsTotalSumService, GetCostsForTheDateService, GetCostsService
-)
+from .costs import GetCostsService, GetCostsTotalSumService
+from ..serializers import CostSerializer
 
 
 User = get_user_model()
 
 
-class GetCostsHistoryCommand(BaseGetHistoryCommand):
-    """Command to return costs history"""
+class GetAllCostsCommand:
+    """Command to get all user costs"""
 
-    get_service_class = GetCostsService
-    total_sum_service_class = GetCostsTotalSumService
-    context_object_name = 'costs'
+    get_service = GetCostsService
+    total_sum_service = GetCostsTotalSumService()
+    serializer_class = CostSerializer
 
+    def __init__(self, user: User):
+        self._user = user
+        self._service = self.get_service(user)
 
-class GetCostsForTheDateCommand(BaseGetForTheDateCommand):
-    """Command to return costs for the concrete date"""
-
-    get_service_class = GetCostsForTheDateService
-    total_sum_service_class = GetCostsTotalSumService
-    context_object_name = 'costs'
-
-
-class GetCostsStatisticCommand(GetStatisticBaseCommand):
-    """Command to return costs statistic"""
-
-    def get_dict_statistic(self):
-        """Return costs statistic in dict format"""
+    def execute(self) -> dict:
+        all_costs = self._service.get_all()
+        total_costs_sum = self.total_sum_service.execute(all_costs)
+        serialized_costs = self.serializer_class(all_costs, many=True).data
         return {
-            'costs': self.month_costs,
-            'date': self.context_date,
-            'total_sum': self.total_costs,
-            'profit': self.profit,
-            'average_costs': self.average_costs,
+            'total_sum': total_costs_sum, 'costs': serialized_costs
         }
