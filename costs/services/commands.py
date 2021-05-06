@@ -51,8 +51,8 @@ class GetAllCostsCommand(ListCostsCommand):
         return self._service.get_all()
 
 
-class GetCostsForTheMonthCommand(ListCostsCommand):
-    """Command to get user costs for the concrete month"""
+class DateCostsListCommand(ListCostsCommand):
+    """Base command for commands to get costs for the date"""
 
     get_service = GetCostsForTheDateService
 
@@ -60,5 +60,16 @@ class GetCostsForTheMonthCommand(ListCostsCommand):
         super().__init__(user)
         self._date = date
 
+
+class GetCostsForTheMonthCommand(DateCostsListCommand):
+    """Command to get user costs for the concrete month"""
+
     def get_costs(self) -> QuerySet:
         return self._service.get_for_the_month(self._date)
+
+
+class GetCostsForTheDateCommand(DateCostsListCommand):
+    """Command to get user costs for the concrete year"""
+
+    def get_costs(self) -> QuerySet:
+        return self._service.get_for_the_date(self._date)
