@@ -9,7 +9,9 @@ from .services.costs import (
     GetStatisticForTheYearService, GetCostsTotalSumService,
     GetAverageCostsForTheDayService
 )
-from .services.commands import GetAllCostsCommand
+from .services.commands import (
+    GetAllCostsCommand, GetCostsForTheMonthCommand
+)
 from .serializers import CostSerializer
 from categories.models import Category
 
@@ -75,20 +77,13 @@ class GetUpdateDeleteCost(APIView):
 class GetForTheMonthView(APIView):
     """View to get costs for the month"""
 
-    get_service = GetCostsForTheDateService
-    total_sum_service = GetCostsTotalSumService()
-    serializer_class = CostSerializer
+    command = GetCostsForTheMonthCommand
 
     def get(self, request, year, month):
-        service = self.get_service(request.user)
         date = datetime.date(year, month, 1)
-        date_costs = service.get_for_the_month(date)
-        total_costs_sum = self.total_sum_service.execute(date_costs)
-        serialized_costs = self.serializer_class(date_costs, many=True).data
-        response_data = {
-            'total_sum': total_costs_sum, 'costs': serialized_costs
-        }
-        return Response(response_data)
+        command = self.command(request.user, date)
+        costs = command.execute()
+        return Response(costs)
 
 
 class GetForTheDateView(APIView):
