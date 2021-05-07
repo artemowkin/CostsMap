@@ -12,7 +12,6 @@ from .services.commands import (
     GetAllCostsCommand, GetCostsForTheMonthCommand, GetCostsForTheDateCommand,
 )
 from .serializers import CostSerializer
-from categories.models import Category
 
 
 class GetCreateCostsView(APIView):
