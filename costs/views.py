@@ -5,8 +5,7 @@ from rest_framework.response import Response
 
 from .services.costs import (
     CreateCostService, GetCostsService, DeleteCostService, ChangeCostService,
-    GetCostsForTheDateService, GetStatisticForTheMonthService,
-    GetStatisticForTheYearService, GetCostsTotalSumService,
+    GetStatisticForTheMonthService, GetStatisticForTheYearService,
     GetAverageCostsForTheDayService
 )
 from .services.commands import (
@@ -20,9 +19,7 @@ class GetCreateCostsView(APIView):
     """View to get all costs and create a new cost"""
 
     get_command = GetAllCostsCommand
-    get_service = GetCostsService
     create_service = CreateCostService
-    total_sum_service = GetCostsTotalSumService()
     serializer_class = CostSerializer
 
     def get(self, request):
