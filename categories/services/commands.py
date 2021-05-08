@@ -1,5 +1,5 @@
 from .categories import GetCategoriesService, get_category_costs
-from costs.services.costs import GetCostsTotalSumService
+from costs.services.base import GetCostsTotalSumService
 
 
 class GetCategoryCostsCommand:

@@ -3,7 +3,7 @@ import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .services.costs import (
+from .services.base import (
     CreateCostService, GetCostsService, DeleteCostService, ChangeCostService,
     GetStatisticForTheMonthService, GetStatisticForTheYearService,
     GetAverageCostsForTheDayService

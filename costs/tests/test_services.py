@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.http import Http404
 from django.contrib.auth import get_user_model
 
-from costs.services.costs import (
+from costs.services.base import (
     GetCostsForTheDateService, GetCostsService, GetCostsTotalSumService,
     CreateCostService, ChangeCostService, DeleteCostService,
     GetStatisticForTheMonthService, GetStatisticForTheYearService,
