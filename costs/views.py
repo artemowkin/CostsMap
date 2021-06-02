@@ -70,7 +70,7 @@ class GetUpdateDeleteCost(APIView):
         return Response(serializer.errors, status=400)
 
 
-class GetForTheMonthView(APIView):
+class GetCostsForTheMonthView(APIView):
     """View to get costs for the month"""
 
     command = GetCostsForTheMonthCommand
@@ -82,7 +82,7 @@ class GetForTheMonthView(APIView):
         return Response(costs)
 
 
-class GetForTheDateView(APIView):
+class GetCostsForTheDateView(APIView):
     """View to get costs for the date"""
 
     command = GetCostsForTheDateCommand

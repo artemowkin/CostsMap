@@ -109,8 +109,8 @@ class GetUpdateDeleteCostViewTest(ViewTest):
         self.assertEqual(response.status_code, 403)
 
 
-class GetForTheMonthViewTest(ViewTest):
-    """Case of testing GetForTheMonthView"""
+class GetCostsForTheMonthViewTest(ViewTest):
+    """Case of testing GetCostsForTheMonthView"""
 
     def test_get_with_logged_in_user(self):
         self.client.login(username="testuser", password="testpass")
@@ -126,8 +126,8 @@ class GetForTheMonthViewTest(ViewTest):
         self.assertEqual(response.status_code, 403)
 
 
-class GetForTheDateViewTest(ViewTest):
-    """Case of testing GetForTheDateView"""
+class GetCostsForTheDateViewTest(ViewTest):
+    """Case of testing GetCostsForTheDateView"""
 
     def test_get_with_logged_in_user(self):
         self.client.login(username="testuser", password="testpass")

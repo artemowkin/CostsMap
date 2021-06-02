@@ -1,28 +1,16 @@
-from django.urls import path, register_converter
-
-from utils import converters
+from django.urls import path
 
 from . import views
 
 
-register_converter(converters.ISODateConverter, 'date')
-register_converter(converters.MonthYearConverter, 'month')
-
 urlpatterns = [
-    path('', views.IncomesForTheDateView.as_view(),
-         name='today_incomes'),
-    path('<date:date>/', views.IncomesForTheDateView.as_view(),
-         name='incomes_for_the_date'),
-    path('add/', views.CreateIncomeView.as_view(),
-         name='create_income'),
-    path('<uuid:pk>/change/', views.ChangeIncomeView.as_view(),
-         name='change_income'),
-    path('<uuid:pk>/delete/', views.DeleteIncomeView.as_view(),
-         name='delete_income'),
-    path('history/', views.IncomesHistoryView.as_view(),
-         name='incomes_history'),
-    path('statistic/', views.IncomesStatisticPageView.as_view(),
-         name='incomes_statistic_for_this_month'),
-    path('<month:date>/statistic/', views.IncomesStatisticPageView.as_view(),
-         name='incomes_statistic_page'),
+    path('', views.GetCreateIncomesView.as_view(), name="all_incomes"),
+    path('<uuid:pk>/', views.GetUpdateDeleteIncome.as_view(),
+         name="concrete_income"),
+    path('<int:year>/<int:month>/', views.GetIncomesForTheMonthView.as_view(),
+         name="month_incomes"),
+    path(
+        '<int:year>/<int:month>/<int:day>/',
+        views.GetIncomesForTheDateView.as_view(), name="date_incomes"
+    ),
 ]

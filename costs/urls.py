@@ -9,11 +9,11 @@ urlpatterns = [
          name="concrete_cost"),
     path(
         '<int:year>/<int:month>/',
-        views.GetForTheMonthView.as_view(), name="month_costs"
+        views.GetCostsForTheMonthView.as_view(), name="month_costs"
     ),
     path(
         '<int:year>/<int:month>/<int:day>/',
-        views.GetForTheDateView.as_view(), name="date_costs"
+        views.GetCostsForTheDateView.as_view(), name="date_costs"
     ),
     path(
         'statistic/<int:year>/<int:month>/',
