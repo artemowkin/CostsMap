@@ -51,7 +51,7 @@ class GetAllIncomesCommand(ListIncomesCommand):
 		return self._service.get_all()
 
 
-class DateIncomesListCommand(ListCostsCommand):
+class DateIncomesListCommand(ListIncomesCommand):
 	"""Base command for commands to get incomes for the date"""
 
 	get_service = GetIncomesForTheDateService
