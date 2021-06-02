@@ -69,7 +69,7 @@ class GetCostsForTheMonthCommand(DateCostsListCommand):
 
 
 class GetCostsForTheDateCommand(DateCostsListCommand):
-    """Command to get user costs for the concrete year"""
+    """Command to get user costs for the concrete date"""
 
     def get_costs(self) -> QuerySet:
         return self._service.get_for_the_date(self._date)
