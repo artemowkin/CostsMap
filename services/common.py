@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.db.models import QuerySet, Model, Sum
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 
 
 User = get_user_model()
@@ -60,6 +60,8 @@ class GetUserEntriesService(ModelService):
     def __init__(self, owner: User):
         super().__init__()
         self._owner = owner
+        if not self._owner.is_authenticated:
+            raise PermissionDenied
 
     def get_concrete(self, pk: UUID) -> Model:
         """Return a concrete user entry with pk"""

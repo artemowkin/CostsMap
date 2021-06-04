@@ -1,4 +1,4 @@
-from views.generic import GetCreateGenericView, GetUpdateDeleteGenericView
+from generics.views import GetCreateGenericView, GetUpdateDeleteGenericView
 from .services.base import (
     CreateCategoryService, DeleteCategoryService, ChangeCategoryService,
     GetCategoriesService

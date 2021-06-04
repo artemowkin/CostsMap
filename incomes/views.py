@@ -1,4 +1,4 @@
-from views.generic import (
+from generics.views import (
     GetCreateGenericView, GetUpdateDeleteGenericView, GetForTheDateGenericView
 )
 from .services.base import (

@@ -21,7 +21,7 @@ class IncomesAPIEndpointsTest(TestCase):
         self.income = Income.objects.create(
             incomes_sum='100.00', owner=self.user
         )
-        serialized_income = {
+        self.serialized_income = {
             'pk': str(self.income.pk), 'incomes_sum': '100.00',
             'owner': self.user.pk, 'date': datetime.date.today().isoformat()
         }

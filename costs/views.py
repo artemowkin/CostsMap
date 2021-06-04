@@ -3,7 +3,7 @@ import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from views.generic import (
+from generics.views import (
     GetCreateGenericView, GetUpdateDeleteGenericView, GetForTheDateGenericView
 )
 from .services.base import (

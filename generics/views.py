@@ -49,7 +49,7 @@ class GetCreateGenericView(CommandGenericView):
 		serializer = self.serializer_class(data=entry_data)
 		if serializer.is_valid():
 			entry = self.create_service.execute(entry_data)
-			return Response({self.model_name: entry.pk}, status=200)
+			return Response({self.model_name: entry.pk}, status=201)
 
 		return Response(serializer.errors, status=400)
 
