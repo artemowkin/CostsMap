@@ -12,6 +12,14 @@ from django.core.exceptions import ImproperlyConfigured
 User = get_user_model()
 
 
+def check_entry_owner(entry: Model, owner: User):
+    """Check is entry owner the same as owner in the second arg"""
+    if not entry.owner == owner:
+        raise ValidationError(
+            f"User `{owner.username}` can't change this entry"
+        )
+
+
 class ModelService:
     """Abstract base class with model attribute"""
 

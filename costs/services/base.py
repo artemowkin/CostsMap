@@ -6,7 +6,8 @@ from django.core.exceptions import ValidationError
 from django import forms
 from service_objects.services import Service
 from services.common import (
-    GetTotalSumService, GetUserEntriesService, GetForTheDateService
+    GetTotalSumService, GetUserEntriesService, GetForTheDateService,
+    check_entry_owner
 )
 from ..models import Cost, Category
 from utils.db import execute_sql_command
@@ -38,13 +39,6 @@ def _check_category_owner(category, owner):
         raise ValidationError(
             f"Category `{category.title}` owner is not the "
             "same as cost owner"
-        )
-
-
-def _check_cost_owner(cost, owner):
-    if not cost.owner == owner:
-        raise ValidationError(
-            f"User `{owner.username}` can't change not his cost"
         )
 
 
@@ -87,7 +81,7 @@ class ChangeCostService(Service):
         costs_sum = self.cleaned_data['costs_sum']
         category = self.cleaned_data['category']
         owner = self.cleaned_data['owner']
-        _check_cost_owner(cost, owner)
+        check_entry_owner(cost, owner)
         _check_category_owner(category, cost.owner)
 
         cost.title = title
@@ -108,7 +102,7 @@ class DeleteCostService(Service):
         """Delete a concrete cost from `cost` attribute"""
         cost = self.cleaned_data['cost']
         owner = self.cleaned_data['owner']
-        _check_cost_owner(cost, owner)
+        check_entry_owner(cost, owner)
 
         cost.delete()
 

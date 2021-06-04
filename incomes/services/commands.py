@@ -1,4 +1,5 @@
 from django.db.models import QuerySet
+from django.contrib.auth import get_user_model
 
 from services.commands import ListEntriesCommand, DateEntriesListCommand
 from .base import (
