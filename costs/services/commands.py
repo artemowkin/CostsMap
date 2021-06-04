@@ -1,4 +1,3 @@
-from django.core.exceptions import ImproperlyConfigured
 from django.db.models import QuerySet
 
 from services.commands import ListEntriesCommand, DateEntriesListCommand
