@@ -2,6 +2,7 @@ import datetime
 import uuid
 
 from django.http import Http404
+from django.urls import reverse
 
 
 class GetEntriesForTheDateTest:
@@ -52,3 +53,67 @@ class GetEntriesServiceTest:
 		entries = self.service.get_all()
 		self.assertEqual(len(entries), 1)
 		self.assertEqual(entries[0], self.entry)
+
+
+class GetCreateEntriesViewTest:
+	"""Tests for GetCreate<model>View view"""
+
+	def test_get_with_logged_in_user(self):
+		self.client.login(username='testuser', password='testpass')
+		response = self.client.get(reverse(self.endpoint))
+		self.assertEqual(response.status_code, 200)
+
+	def test_get_with_unlogged_in_user(self):
+		response = self.client.get(reverse(self.endpoint))
+		self.assertEqual(response.status_code, 403)
+
+	def test_post_with_logged_in_user(self):
+		self.client.login(username='testuser', password='testpass')
+		response = self.request_post()
+		self.assertEqual(response.status_code, 201)
+
+	def test_post_with_unlogged_in_user(self):
+		response = self.request_post()
+		self.assertEqual(response.status_code, 403)
+
+	def request_post(self):
+		raise NotImplementedError
+
+
+class GetUpdateDeleteEntryViewTest:
+	"""Case of testing GetUpdateDelete<entry>View view"""
+
+	def test_get_with_logged_in_user(self):
+	    self.client.login(username="testuser", password="testpass")
+	    response = self.client.get(
+	        reverse(self.endpoint, args=[self.entry.pk])
+	    )
+	    self.assertEqual(response.status_code, 200)
+
+	def test_get_with_unlogged_in_user(self):
+	    response = self.client.get(
+	        reverse(self.endpoint, args=[self.entry.pk])
+	    )
+	    self.assertEqual(response.status_code, 403)
+
+	def test_delete_with_logged_in_user(self):
+	    self.client.login(username="testuser", password="testpass")
+	    response = self.client.delete(
+	        reverse(self.endpoint, args=[self.entry.pk])
+	    )
+	    self.assertEqual(response.status_code, 204)
+
+	def test_delete_with_unlogged_in_user(self):
+	    response = self.client.delete(
+	        reverse(self.endpoint, args=[self.entry.pk])
+	    )
+	    self.assertEqual(response.status_code, 403)
+
+	def test_put_with_logged_in_user(self):
+	    self.client.login(username="testuser", password="testpass")
+	    response = self.request_put()
+	    self.assertEqual(response.status_code, 204)
+
+	def test_put_with_unlogged_in_user(self):
+	    response = self.request_put()
+	    self.assertEqual(response.status_code, 403)

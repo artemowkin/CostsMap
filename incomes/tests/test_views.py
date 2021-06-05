@@ -1,6 +1,9 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
+
+from generics.unittests import GetCreateEntriesViewTest
+from ..models import Income
 
 
 User = get_user_model()
@@ -15,14 +18,14 @@ class ViewTest(TestCase):
         )
 
 
-class GetCreateIncomesViewTest(ViewTest):
+class GetCreateIncomesViewTest(ViewTest, GetCreateEntriesViewTest):
     """Case of testing GetCreateIncomesView"""
-    
-    def test_get_with_logged_in_user(self):
-        self.client.login(username='testuser', password='testpass')
-        response = self.client.get(reverse('all_incomes'))
-        self.assertEqual(response.status_code, 200)
 
-    def test_get_with_unlogged_in_user(self):
-        response = self.client.get(reverse('all_incomes'))
-        self.assertEqual(response.status_code, 403)
+    endpoint = 'all_incomes'
+
+    def request_post(self):
+        return self.client.post(
+            reverse('all_incomes'), {
+                'title': 'test_income', 'incomes_sum': '100.00'
+            }, content_type='application/json'
+        )

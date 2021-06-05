@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 from ..models import Cost
+from generics.unittests import GetCreateEntriesViewTest
 from categories.models import Category
 
 
@@ -21,92 +22,39 @@ class ViewTest(TestCase):
         )
 
 
-class GetCreateCostsViewTest(ViewTest):
+class GetCreateCostsViewTest(ViewTest, GetCreateEntriesViewTest):
     """Case of testing GetCreateCostsView"""
 
-    def test_get_with_logged_in_user(self):
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(reverse("all_costs"))
-        self.assertEqual(response.status_code, 200)
+    endpoint = 'all_costs'
 
-    def test_get_with_unlogged_in_user(self):
-        response = self.client.get(reverse("all_costs"))
-        self.assertEqual(response.status_code, 403)
-
-    def test_post_with_logged_in_user(self):
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.post(
+    def request_post(self):
+        return self.client.post(
             reverse("all_costs"), {
                 'title': 'test_cost', 'costs_sum': '100.00',
                 'category': self.category.pk
             }, content_type="application/json"
         )
-        self.assertEqual(response.status_code, 201)
-
-    def test_post_with_unlogged_in_user(self):
-        response = self.client.post(
-            reverse("all_costs"), {
-                'title': 'test_cost', 'costs_sum': '100.00',
-                'category': self.category.pk
-            }, content_type="application/json"
-        )
-        self.assertEqual(response.status_code, 403)
 
 
 class GetUpdateDeleteCostViewTest(ViewTest):
     """Case of testing GetUpdateDeleteCostView"""
 
+    endpoint = 'concrete_cost'
+
     def setUp(self):
         super().setUp()
-        self.cost = Cost.objects.create(
+        self.entry = Cost.objects.create(
             title='test_cost', costs_sum='100.00', category=self.category,
             owner=self.user
         )
-
-    def test_get_with_logged_in_user(self):
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(
-            reverse('concrete_cost', args=[self.cost.pk])
-        )
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_with_unlogged_in_user(self):
-        response = self.client.get(
-            reverse('concrete_cost', args=[self.cost.pk])
-        )
-        self.assertEqual(response.status_code, 403)
-
-    def test_delete_with_logged_in_user(self):
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.delete(
-            reverse('concrete_cost', args=[self.cost.pk])
-        )
-        self.assertEqual(response.status_code, 204)
-
-    def test_delete_with_unlogged_in_user(self):
-        response = self.client.delete(
-            reverse('concrete_cost', args=[self.cost.pk])
-        )
-        self.assertEqual(response.status_code, 403)
-
-    def test_put_with_logged_in_user(self):
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.put(
+        
+    def request_put(self):
+        return self.client.put(
             reverse('concrete_cost', args=[self.cost.pk]), {
                 'title': 'some_cost', 'costs_sum': '200.00',
                 'category': self.category.pk
             }, content_type="application/json"
         )
-        self.assertEqual(response.status_code, 204)
-
-    def test_put_with_unlogged_in_user(self):
-        response = self.client.put(
-            reverse('concrete_cost', args=[self.cost.pk]), {
-                'title': 'some_cost', 'costs_sum': '200.00',
-                'category': self.category.pk
-            }, content_type="application/json"
-        )
-        self.assertEqual(response.status_code, 403)
 
 
 class GetCostsForTheMonthViewTest(ViewTest):
