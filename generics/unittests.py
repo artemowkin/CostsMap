@@ -117,3 +117,37 @@ class GetUpdateDeleteEntryViewTest:
 	def test_put_with_unlogged_in_user(self):
 	    response = self.request_put()
 	    self.assertEqual(response.status_code, 403)
+
+
+class GetEntriesForTheMonthViewTest:
+	"""Case of testing Get<entry>ForTheMonthView view"""
+
+	def test_get_with_logged_in_user(self):
+		self.client.login(username='testuser', password='testpass')
+		response = self.client.get(
+			reverse(self.endpoint, args=['2020', '01'])
+		)
+		self.assertEqual(response.status_code, 200)
+
+	def test_get_with_unlogged_in_user(self):
+		response = self.client.get(
+			reverse(self.endpoint, args=['2020', '01'])
+		)
+		self.assertEqual(response.status_code, 403)
+
+
+class GetEntriesForTheDateViewTest:
+	"""Case of testing Get<entry>ForTheDateView view"""
+
+	def test_get_with_logged_in_user(self):
+		self.client.login(username='testuser', password='testpass')
+		response = self.client.get(
+			reverse(self.endpoint, args=['2020', '01', '01'])
+		)
+		self.assertEqual(response.status_code, 200)
+
+	def test_get_with_unlogged_in_user(self):
+		response = self.client.get(
+			reverse(self.endpoint, args=['2020', '01', '01'])
+		)
+		self.assertEqual(response.status_code, 403)

@@ -3,7 +3,10 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 from ..models import Cost
-from generics.unittests import GetCreateEntriesViewTest
+from generics.unittests import (
+    GetCreateEntriesViewTest, GetUpdateDeleteEntryViewTest,
+    GetEntriesForTheMonthViewTest, GetEntriesForTheDateViewTest
+)
 from categories.models import Category
 
 
@@ -36,7 +39,7 @@ class GetCreateCostsViewTest(ViewTest, GetCreateEntriesViewTest):
         )
 
 
-class GetUpdateDeleteCostViewTest(ViewTest):
+class GetUpdateDeleteCostViewTest(ViewTest, GetUpdateDeleteEntryViewTest):
     """Case of testing GetUpdateDeleteCostView"""
 
     endpoint = 'concrete_cost'
@@ -47,48 +50,26 @@ class GetUpdateDeleteCostViewTest(ViewTest):
             title='test_cost', costs_sum='100.00', category=self.category,
             owner=self.user
         )
-        
+
     def request_put(self):
         return self.client.put(
-            reverse('concrete_cost', args=[self.cost.pk]), {
+            reverse('concrete_cost', args=[self.entry.pk]), {
                 'title': 'some_cost', 'costs_sum': '200.00',
                 'category': self.category.pk
             }, content_type="application/json"
         )
 
 
-class GetCostsForTheMonthViewTest(ViewTest):
+class GetCostsForTheMonthViewTest(ViewTest, GetEntriesForTheMonthViewTest):
     """Case of testing GetCostsForTheMonthView"""
 
-    def test_get_with_logged_in_user(self):
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(
-            reverse("month_costs", args=("2020", "01"))
-        )
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_with_unlogged_in_user(self):
-        response = self.client.get(
-            reverse("month_costs", args=("2020", "01"))
-        )
-        self.assertEqual(response.status_code, 403)
+    endpoint = 'month_costs'
 
 
-class GetCostsForTheDateViewTest(ViewTest):
+class GetCostsForTheDateViewTest(ViewTest, GetEntriesForTheDateViewTest):
     """Case of testing GetCostsForTheDateView"""
 
-    def test_get_with_logged_in_user(self):
-        self.client.login(username="testuser", password="testpass")
-        response = self.client.get(
-            reverse("date_costs", args=("2020", "01", "01"))
-        )
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_with_unlogged_in_user(self):
-        response = self.client.get(
-            reverse("date_costs", args=("2020", "01", "01"))
-        )
-        self.assertEqual(response.status_code, 403)
+    endpoint = 'date_costs'
 
 
 class CostsMonthStatisticView(ViewTest):
