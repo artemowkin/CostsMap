@@ -80,8 +80,3 @@ class SetUserDefaultCategoriesService(Service):
 def get_category_costs(category: Category) -> QuerySet:
     """Return all costs in category"""
     return category.costs.all()
-
-
-def set_form_categories(form: forms.Form, categories: QuerySet) -> None:
-    """Set queryset for `category` field in form"""
-    form.fields['category'].queryset = categories
