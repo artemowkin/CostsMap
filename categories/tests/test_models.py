@@ -17,7 +17,7 @@ class CategoryModelTest(TestCase):
             username='testuser', password='testpass'
         )
         self.category = Category.objects.create(
-                title='test_category', owner=self.user
+            title='test_category', owner=self.user
         )
 
     def test_was_created(self):
