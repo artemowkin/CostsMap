@@ -1,9 +1,7 @@
 import datetime
-import uuid
 from decimal import Decimal
 
 from django.test import TestCase
-from django.http import Http404
 from django.contrib.auth import get_user_model
 
 from generics.unittests import (

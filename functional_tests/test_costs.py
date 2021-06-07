@@ -20,6 +20,9 @@ class CostsAPIEndpointsTest(TestCase):
         self.user = User.objects.create_superuser(
             username="testuser", password="testpass"
         )
+        self.bad_user = User.objects.create_superuser(
+            username='baduser', password='badpass'
+        )
         self.client.login(username="testuser", password="testpass")
         self.category = Category.objects.create(
             title="test_category", owner=self.user
@@ -45,6 +48,18 @@ class CostsAPIEndpointsTest(TestCase):
             'costs': [self.serialized_cost]
         })
 
+    def test_all_costs_endpoint_with_bad_user(self):
+        """Test: does /costs/ endpoint requested by bad user returns no
+        user costs"""
+        self.client.login(username='baduser', password='badpass')
+        response = self.client.get('/costs/')
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.content)
+        self.assertEqual(json_response, {
+            'total_sum': 0.0,
+            'costs': []
+        })
+
     def test_create_cost_endpoint(self):
         response = self.client.post('/costs/', {
             'title': 'some_cost', 'costs_sum': '100.00',
@@ -60,10 +75,24 @@ class CostsAPIEndpointsTest(TestCase):
         json_response = json.loads(response.content)
         self.assertEqual(json_response, self.serialized_cost)
 
+    def test_get_concrete_cost_endpoint_with_bad_user(self):
+        """Test: does get concrete cost endpoint requested by bad user
+        returns no content"""
+        self.client.login(username='baduser', password='badpass')
+        response = self.client.get(f'/costs/{self.cost.pk}/')
+        self.assertEqual(response.status_code, 404)
+
     def test_delete_concrete_cost_endpoint(self):
         response = self.client.delete(f'/costs/{self.cost.pk}/')
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Cost.objects.count(), 0)
+
+    def test_delete_concrete_cost_endpoint_with_bad_user(self):
+        """Test: does delete a concrete cost endpoint requested by bad user
+        do nothing"""
+        self.client.login(username='baduser', password='badpass')
+        response = self.client.delete(f'/costs/{self.cost.pk}/')
+        self.assertEqual(response.status_code, 404)
 
     def test_update_concrete_cost_endpoint(self):
         response = self.client.put(
@@ -75,6 +104,18 @@ class CostsAPIEndpointsTest(TestCase):
         self.assertEqual(response.status_code, 204)
         cost = Cost.objects.get(pk=self.cost.pk)
         self.assertEqual(str(cost.costs_sum), '200.00')
+
+    def test_update_concrete_cost_endpoint_with_bad_user(self):
+        """Test: does update a concrete cost endpoint requested by bad user
+        do nothing"""
+        self.client.login(username='baduser', password='badpass')
+        response = self.client.put(
+            f'/costs/{self.cost.pk}/', {
+                'title': 'some_cost', 'costs_sum': '200.00',
+                'category': self.category.pk
+            }, content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 404)
 
     def test_get_costs_for_the_month(self):
         today = datetime.date.today()
