@@ -40,51 +40,56 @@ class CRUDFunctionalTest:
         raise NotImplementedError
 
     def test_create_endpoint(self):
-        response = self.client.post(
+        response = self._request_create_endpoint()
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.model.objects.count(), 2)
+
+    def _request_create_endpoint(self):
+        """Request POST on all endpoint"""
+        return self.client.post(
             reverse(self.all_endpoint), self.get_create_data(),
             content_type='application/json'
         )
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(self.model.objects.count(), 2)
 
     def get_create_data(self):
         """Returns data for creating a new entry"""
         raise NotImplementedError
 
     def test_get_concrete_endpoint(self):
-        response = self.client.get(
-            reverse(self.concrete_endpoint, args=[self.entry.pk])
-        )
+        response = self._request_get_concrete_endpoint()
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, self.serialized_entry)
 
     def test_get_concrete_endpoint_with_bad_user(self):
         self.client.login(username='baduser', password='badpass')
-        response = self.client.get(
-            reverse(self.concrete_endpoint, args=[self.entry.pk])
-        )
+        response = self._request_get_concrete_endpoint()
         self.assertEqual(response.status_code, 404)
 
-    def test_delete_endpoint(self):
-        response = self.client.delete(
+    def _request_get_concrete_endpoint(self):
+        """Request GET on concrete endpoint"""
+        return self.client.get(
             reverse(self.concrete_endpoint, args=[self.entry.pk])
         )
+
+    def test_delete_endpoint(self):
+        response = self._request_delete_endpoint()
         self.assertEqual(response.status_code, 204)
         self.assertEqual(self.model.objects.count(), 0)
 
     def test_delete_endpoint_with_bad_user(self):
         self.client.login(username='baduser', password='badpass')
-        response = self.client.delete(
-            reverse(self.concrete_endpoint, args=[self.entry.pk])
-        )
+        response = self._request_delete_endpoint()
         self.assertEqual(response.status_code, 404)
 
-    def test_update_endpoint(self):
-        response = self.client.put(
-            reverse(self.concrete_endpoint, args=[self.entry.pk]),
-            self.get_update_data(), content_type='application/json'
+    def _request_delete_endpoint(self):
+        """Request DELETE on concrete endpoint"""
+        return self.client.delete(
+            reverse(self.concrete_endpoint, args=[self.entry.pk])
         )
+
+    def test_update_endpoint(self):
+        response = self._request_update_endpoint()
         self.assertEqual(response.status_code, 204)
         entry = self.model.objects.get(pk=self.entry.pk)
         self.assertNotEqual(str(self.entry), str(entry))
@@ -95,11 +100,15 @@ class CRUDFunctionalTest:
 
     def test_update_endpoint_with_bad_user(self):
         self.client.login(username='baduser', password='badpass')
-        response = self.client.put(
+        response = self._request_update_endpoint()
+        self.assertEqual(response.status_code, 404)
+
+    def _request_update_endpoint(self):
+        """Request PUT on concrete endpoint"""
+        return self.client.put(
             reverse(self.concrete_endpoint, args=[self.entry.pk]),
             self.get_update_data(), content_type='application/json'
         )
-        self.assertEqual(response.status_code, 404)
 
 
 class DateCRUDFunctionalTest(CRUDFunctionalTest):
@@ -110,9 +119,7 @@ class DateCRUDFunctionalTest(CRUDFunctionalTest):
 
     def test_get_for_the_month(self):
         today = datetime.date.today()
-        response = self.client.get(
-            reverse(self.month_endpoint, args=[today.year, today.month])
-        )
+        response = self._request_month_endpoint(today)
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, self.get_month_response())
@@ -123,14 +130,16 @@ class DateCRUDFunctionalTest(CRUDFunctionalTest):
 
     def test_get_for_the_another_month(self):
         random_date = datetime.date(2020, 1, 1)
-        response = self.client.get(
-            reverse(self.month_endpoint, args=[
-                random_date.year, random_date.month
-            ])
-        )
+        response = self._request_month_endpoint(random_date)
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, self.get_another_month_response())
+
+    def _request_month_endpoint(self, date_obj: datetime.date):
+        """Request GET on month endpoint"""
+        return self.client.get(
+            reverse(self.month_endpoint, args=[date_obj.year, date_obj.month])
+        )
 
     def get_another_month_response(self):
         """Return response for GET request on another than today
@@ -139,11 +148,7 @@ class DateCRUDFunctionalTest(CRUDFunctionalTest):
 
     def test_get_for_the_today(self):
         today = datetime.date.today()
-        response = self.client.get(
-            reverse(self.date_endpoint, args=[
-                today.year, today.month, today.day
-            ])
-        )
+        response = self._request_get_concrete_endpoint(today)
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, self.get_today_response())
@@ -154,14 +159,18 @@ class DateCRUDFunctionalTest(CRUDFunctionalTest):
 
     def test_get_for_the_another_date(self):
         random_date = datetime.date(2020, 1, 1)
-        response = self.client.get(
-            reverse(self.date_endpoint, args=[
-                random_date.year, random_date.month, random_date.day
-            ])
-        )
+        response = self._request_get_concrete_endpoint(random_date)
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, self.get_another_date_response())
+
+    def _request_date_endpoint(self, date_obj: datetime.date):
+        """Request GET on date endpoint"""
+        return self.client.get(
+            reverse(self.date_endpoint, args=[
+                date_obj.year, date_obj.month, date_obj.day
+            ])
+        )
 
     def get_another_date_response(self):
         """Return response for GET reqeust on date endpoint with date
