@@ -1,103 +1,43 @@
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-
-from .forms import IncomeForm
+from generics.views import (
+    GetCreateGenericView, GetUpdateDeleteGenericView, GetForTheDateGenericView
+)
+from .services.base import (
+    CreateIncomeService, GetIncomesService, DeleteIncomeService,
+    ChangeIncomeService
+)
 from .services.commands import (
-    GetIncomesStatisticCommand, GetIncomesForTheDateCommand,
-    GetIncomesHistoryCommand
+    GetAllIncomesCommand, GetIncomesForTheMonthCommand,
+    GetIncomesForTheDateCommand
 )
-from incomes.services import (
-    GetIncomesForTheDateService, GetIncomesTotalSumService, GetIncomesService,
-    DeleteIncomeService, CreateIncomeService, ChangeIncomeService,
-)
-from utils.views import (
-    StatisticPageGenericView, DateGenericView, HistoryGenericView,
-    DeleteGenericView, DefaultView
-)
+from .serializers import IncomeSerializer
 
 
-class IncomesForTheDateView(DateGenericView):
-    """View to render user incomes for the date"""
+class GetCreateIncomesView(GetCreateGenericView):
+    """View to get all incomes and create a new income"""
 
-    template_name = 'incomes/incomes.html'
-    context_object_name = 'incomes'
-    command = GetIncomesForTheDateCommand
-
-
-class CreateIncomeView(DefaultView):
-    """View to create a new income"""
-
-    form_class = IncomeForm
-    template_name = 'incomes/add_income.html'
-
-    def get(self, request):
-        form = self.form_class()
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            return self.form_valid(request, form)
-
-        return render(request, self.template_name, {'form': form})
-
-    def form_valid(self, request, form):
-        form.cleaned_data.update({'owner': request.user})
-        income = CreateIncomeService.execute(form.cleaned_data)
-        return redirect(income.get_absolute_url())
+    get_command = GetAllIncomesCommand
+    create_service = CreateIncomeService
+    serializer_class = IncomeSerializer
+    model_name = 'income'
 
 
-class ChangeIncomeView(DefaultView):
-    """View to change an income"""
+class GetUpdateDeleteIncome(GetUpdateDeleteGenericView):
+    """View to get a concrete income and change/delete an existing income"""
 
-    form_class = IncomeForm
-    template_name = 'incomes/change_income.html'
-
-    def get(self, request, pk):
-        get_service = GetIncomesService(request.user)
-        income = get_service.get_concrete(pk)
-        form = self.form_class(instance=income)
-        return render(
-            request, self.template_name, {'form': form, 'income': income}
-        )
-
-    def post(self, request, pk):
-        get_service = GetIncomesService(request.user)
-        self.income = get_service.get_concrete(pk)
-        form = self.form_class(request.POST, instance=self.income)
-        if form.is_valid():
-            return self.form_valid(request, form)
-
-        return render(
-            request, self.template_name, {'form': form, 'income': self.income}
-        )
-
-    def form_valid(self, request, form):
-        form.cleaned_data.update({'income': self.income})
-        income = ChangeIncomeService.execute(form.cleaned_data)
-        return redirect(income.get_absolute_url())
-
-
-class DeleteIncomeView(DeleteGenericView):
-    """View to delete an income"""
-
-    template_name = 'incomes/delete_income.html'
-    context_object_name = 'income'
-    success_url = reverse_lazy('today_incomes')
     get_service_class = GetIncomesService
-    delete_service = DeleteIncomeService
+    delete_service_class = DeleteIncomeService
+    update_service_class = ChangeIncomeService
+    serializer_class = IncomeSerializer
+    model_name = 'income'
 
 
-class IncomesHistoryView(HistoryGenericView):
-    """View to render all user incomes"""
+class GetIncomesForTheMonthView(GetForTheDateGenericView):
+    """View to get incomes for the month"""
 
-    template_name = 'incomes/history_incomes.html'
-    context_object_name = 'incomes'
-    command = GetIncomesHistoryCommand
+    command = GetIncomesForTheMonthCommand
 
 
-class IncomesStatisticPageView(StatisticPageGenericView):
-    """View to return statistic with user incomes for the month"""
+class GetIncomesForTheDateView(GetForTheDateGenericView):
+    """View to get incomes for the date"""
 
-    template_name = 'incomes/incomes_statistic.html'
-    command = GetIncomesStatisticCommand
+    command = GetIncomesForTheDateCommand

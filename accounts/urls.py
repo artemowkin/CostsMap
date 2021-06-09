@@ -1,13 +1,13 @@
 from django.urls import path
-from django.views.decorators.cache import cache_page
-from allauth.account import views
+from dj_rest_auth import views
 
-from .views import SignupWithCategoriesView
+from .views import RegisterWithCategoriesView, UserView
 
 
 urlpatterns = [
-    path('signup/', SignupWithCategoriesView.as_view(),
+    path('user/', UserView.as_view(), name='account_user'),
+    path('signup/', RegisterWithCategoriesView.as_view(),
          name='account_signup'),
-    path('login/', views.login, name='account_login'),
-    path('logout/', views.logout, name='account_logout'),
+    path('login/', views.LoginView.as_view(), name='account_login'),
+    path('logout/', views.LogoutView.as_view(), name='account_logout'),
 ]

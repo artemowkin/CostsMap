@@ -3,7 +3,8 @@ from service_objects.services import Service
 from django.contrib.auth import get_user_model
 
 from services.common import (
-    GetTotalSumService, GetUserEntriesService, GetForTheDateService
+    GetTotalSumService, GetUserEntriesService, GetForTheDateService,
+    check_entry_owner
 )
 from ..models import Income
 
@@ -52,11 +53,14 @@ class ChangeIncomeService(Service):
 
     income = forms.ModelChoiceField(queryset=Income.objects.all())
     incomes_sum = forms.DecimalField(max_digits=7, decimal_places=2)
+    owner = forms.ModelChoiceField(queryset=User.objects.all())
 
     def process(self) -> Income:
         """Change a concrete income from `income` attribute"""
         income = self.cleaned_data['income']
         incomes_sum = self.cleaned_data['incomes_sum']
+        owner = self.cleaned_data['owner']
+        check_entry_owner(income, owner)
 
         income.incomes_sum = incomes_sum
         income.save()
@@ -67,8 +71,12 @@ class DeleteIncomeService(Service):
     """Service to delete a concrete income"""
 
     income = forms.ModelChoiceField(queryset=Income.objects.all())
+    owner = forms.ModelChoiceField(queryset=User.objects.all())
 
     def process(self) -> None:
         """Delete a concrete income from `income` attribute"""
         income = self.cleaned_data['income']
+        owner = self.cleaned_data['owner']
+        check_entry_owner(income, owner)
+        
         income.delete()

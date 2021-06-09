@@ -1,43 +1,39 @@
-import datetime
+from django.db.models import QuerySet
 
-from django.contrib.auth import get_user_model
-
-from services.commands import (
-    GetStatisticBaseCommand, BaseGetForTheDateCommand, BaseGetHistoryCommand
+from services.commands import ListEntriesCommand, DateEntriesListCommand
+from .base import (
+    GetCostsService, GetCostsTotalSumService, GetCostsForTheDateService
 )
-from .costs import (
-    GetCostsTotalSumService, GetCostsForTheDateService, GetCostsService
-)
+from ..serializers import CostSerializer
 
 
-User = get_user_model()
+class CostsListMixin:
+    """Mixin with costs class attributes"""
+
+    total_sum_service = GetCostsTotalSumService()
+    serializer_class = CostSerializer
+    queryset_name = 'costs'
 
 
-class GetCostsHistoryCommand(BaseGetHistoryCommand):
-    """Command to return costs history"""
+class GetAllCostsCommand(CostsListMixin, ListEntriesCommand):
+    """Command to get all user costs"""
 
-    get_service_class = GetCostsService
-    total_sum_service_class = GetCostsTotalSumService
-    context_object_name = 'costs'
+    get_service = GetCostsService
 
 
-class GetCostsForTheDateCommand(BaseGetForTheDateCommand):
-    """Command to return costs for the concrete date"""
+class GetCostsForTheMonthCommand(CostsListMixin, DateEntriesListCommand):
+    """Command to get user costs for the concrete month"""
 
-    get_service_class = GetCostsForTheDateService
-    total_sum_service_class = GetCostsTotalSumService
-    context_object_name = 'costs'
+    get_service = GetCostsForTheDateService
+
+    def get_entries(self) -> QuerySet:
+        return self._service.get_for_the_month(self._date)
 
 
-class GetCostsStatisticCommand(GetStatisticBaseCommand):
-    """Command to return costs statistic"""
+class GetCostsForTheDateCommand(CostsListMixin, DateEntriesListCommand):
+    """Command to get user costs for the concrete date"""
 
-    def get_dict_statistic(self):
-        """Return costs statistic in dict format"""
-        return {
-            'costs': self.month_costs,
-            'date': self.context_date,
-            'total_sum': self.total_costs,
-            'profit': self.profit,
-            'average_costs': self.average_costs,
-        }
+    get_service = GetCostsForTheDateService
+
+    def get_entries(self) -> QuerySet:
+        return self._service.get_for_the_date(self._date)

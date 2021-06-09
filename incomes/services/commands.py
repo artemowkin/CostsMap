@@ -1,45 +1,43 @@
-import datetime
-
+from django.db.models import QuerySet
 from django.contrib.auth import get_user_model
 
-from services.commands import (
-    GetStatisticBaseCommand, BaseGetForTheDateCommand, BaseGetHistoryCommand
-)
+from services.commands import ListEntriesCommand, DateEntriesListCommand
 from .base import (
-    GetIncomesService, GetIncomesTotalSumService, GetIncomesForTheDateService
+	GetIncomesService, GetIncomesTotalSumService, GetIncomesForTheDateService
 )
-from utils.date import ContextDate
+from ..serializers import IncomeSerializer
 
 
 User = get_user_model()
 
 
-class GetIncomesHistoryCommand(BaseGetHistoryCommand):
-    """Command to return incomes history"""
+class IncomesListMixin:
+	"""Mixin with incomes class attributes"""
 
-    get_service_class = GetIncomesService
-    total_sum_service_class = GetIncomesTotalSumService
-    context_object_name = 'incomes'
-
-
-class GetIncomesForTheDateCommand(BaseGetForTheDateCommand):
-    """Command to return incomes for the concrete date"""
-
-    get_service_class = GetIncomesForTheDateService
-    total_sum_service_class = GetIncomesTotalSumService
-    context_object_name = 'incomes'
+	total_sum_service = GetIncomesTotalSumService()
+	serializer_class = IncomeSerializer
+	queryset_name = 'incomes'
 
 
-class GetIncomesStatisticCommand(GetStatisticBaseCommand):
-    """Command to return incomes statistic"""
+class GetAllIncomesCommand(IncomesListMixin, ListEntriesCommand):
+	"""Command to get all user incomes"""
 
-    def get_dict_statistic(self):
-        """Return incomes statistic in dict format"""
-        return {
-            'incomes': self.month_incomes,
-            'costs': self.month_costs,
-            'date': self.context_date,
-            'total_sum': self.total_incomes,
-            'profit': self.profit,
-            'average_costs': self.average_costs,
-        }
+	get_service = GetIncomesService
+
+
+class GetIncomesForTheMonthCommand(IncomesListMixin, DateEntriesListCommand):
+	"""Command to get user incomes for the concrete month"""
+
+	get_service = GetIncomesForTheDateService
+
+	def get_entries(self) -> QuerySet:
+		return self._service.get_for_the_month(self._date)
+
+
+class GetIncomesForTheDateCommand(IncomesListMixin, DateEntriesListCommand):
+	"""Command to get user incomes for the concrete date"""
+
+	get_service = GetIncomesForTheDateService
+
+	def get_entries(self) -> QuerySet:
+		return self._service.get_for_the_date(self._date)

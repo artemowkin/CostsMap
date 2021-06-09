@@ -1,15 +1,26 @@
-from allauth.account.views import SignupView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from dj_rest_auth.registration.views import RegisterView
 
-from categories.services.categories import SetUserDefaultCategoriesService
+from .serializers import UserSerializer
+from categories.services.base import SetUserDefaultCategoriesService
 
 
-class SignupWithCategoriesView(SignupView):
+class RegisterWithCategoriesView(RegisterView):
     """SignUp view with setting default categories for new user"""
 
-    def form_valid(self, form):
+    def perform_create(self, serializer):
         """Add default categories for new user"""
-        response = super().form_valid(form)
+        user = super().perform_create(serializer)
         SetUserDefaultCategoriesService.execute({
-            'owner': self.request.user
+            'owner': user
         })
-        return response
+        return user
+
+
+class UserView(APIView):
+    """View to display current user information"""
+
+    def get(self, request):
+        serialized_user = UserSerializer(request.user).data
+        return Response(serialized_user)

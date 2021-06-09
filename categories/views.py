@@ -1,90 +1,40 @@
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.db import IntegrityError
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
-from .services.categories import (
-    GetCategoriesService, CreateCategoryService, ChangeCategoryService,
-    DeleteCategoryService
+from generics.views import GetCreateGenericView, GetUpdateDeleteGenericView
+from .services.base import (
+    CreateCategoryService, DeleteCategoryService, ChangeCategoryService,
+    GetCategoriesService
 )
-from .forms import CategoryForm
-from utils.views import DefaultView, DeleteGenericView
-from categories.services.commands import GetCategoryCostsCommand
+from .services.commands import GetAllCategoriesCommand, GetCategoryCostsCommand
+from .serializers import CategorySerializer
 
 
-class CategoryListView(DefaultView):
-    """View to render all user categories"""
+class GetCreateCategoryView(GetCreateGenericView):
+    """View to get all categories and create a new category"""
 
-    def get(self, request):
-        get_service = GetCategoriesService(request.user)
-        categories = get_service.get_all()
-        return render(
-            request, 'costs/category_list.html', {'categories': categories}
-        )
+    get_command = GetAllCategoriesCommand
+    create_service = CreateCategoryService
+    serializer_class = CategorySerializer
+    model_name = 'category'
 
 
-class CostsByCategoryView(DefaultView):
-    """View to render all user category costs"""
+class GetUpdateDeleteCategory(GetUpdateDeleteGenericView):
+    """View to get/delete/update a concrete category"""
 
-    def get(self, request, pk):
-        command = GetCategoryCostsCommand(pk, request.user)
-        context = command.execute()
-        return render(request, 'costs/costs_by_category.html', context)
-
-
-class CreateCategoryView(DefaultView):
-    """View to create a new category"""
-
-    def get(self, request):
-        form = CategoryForm()
-        return render(request, 'costs/add_category.html', {'form': form})
-
-    def post(self, request):
-        form = CategoryForm(request.POST)
-        if form.is_valid():
-            form.cleaned_data.update({'owner': request.user})
-            try:
-                category = CreateCategoryService.execute(form.cleaned_data)
-                return redirect(category.get_absolute_url())
-            except IntegrityError:
-                form.add_error(None, "The same category already exists")
-
-        return render(request, 'costs/add_category.html', {'form': form})
-
-
-class ChangeCategoryView(DefaultView):
-    """View to change a category"""
-
-    def get(self, request, pk):
-        get_service = GetCategoriesService(request.user)
-        category = get_service.get_concrete(pk)
-        form = CategoryForm(instance=category)
-        return render(request, 'costs/change_category.html', {
-            'form': form, 'category': category
-        })
-
-    def post(self, request, pk):
-        get_service = GetCategoriesService(request.user)
-        category = get_service.get_concrete(pk)
-        form = CategoryForm(request.POST, instance=category)
-        if form.is_valid():
-            form.cleaned_data.update({'category': category})
-            try:
-                category = ChangeCategoryService.execute(form.cleaned_data)
-                return redirect(category.get_absolute_url())
-            except IntegrityError:
-                form.add_error(None, 'The same category already exists')
-                category = GetCategoriesService.get_concrete(pk, request.user)
-
-        return render(request, 'costs/change_category.html', {
-            'form': form, 'category': category
-        })
-
-
-class DeleteCategoryView(DeleteGenericView):
-    """View to delete a category"""
-
-    template_name = 'costs/delete_category.html'
-    context_object_name = 'category'
-    success_url = reverse_lazy('category_list')
     get_service_class = GetCategoriesService
-    delete_service = DeleteCategoryService
+    delete_service_class = DeleteCategoryService
+    update_service_class = ChangeCategoryService
+    serializer_class = CategorySerializer
+    model_name = 'category'
+
+
+class GetCategoryCostsView(APIView):
+    """View to get costs by category"""
+
+    command = GetCategoryCostsCommand
+
+    def get(self, request, pk):
+        command = self.command(pk, request.user)
+        result = command.execute()
+        return Response(result)

@@ -1,36 +1,30 @@
-from django.urls import path, register_converter
-
-from utils import converters
+from django.urls import path
 
 from . import views
 
 
-register_converter(converters.ISODateConverter, 'date')
-register_converter(converters.MonthYearConverter, 'month')
-register_converter(converters.YearConverter, 'year')
-
 urlpatterns = [
-    path('', views.CostsForTheDateView.as_view(),
-         name='today_costs'),
-    path('<date:date>/', views.CostsForTheDateView.as_view(),
-         name='costs_for_the_date'),
-    path('add/', views.CreateCostView.as_view(),
-         name='create_cost'),
-    path('<uuid:pk>/change/', views.ChangeCostView.as_view(),
-         name='change_cost'),
-    path('<uuid:pk>/delete/', views.DeleteCostView.as_view(),
-         name='delete_cost'),
-    path('history/', views.CostsHistoryView.as_view(),
-         name='costs_history'),
-    path('statistic/', views.CostsStatisticPageView.as_view(),
-         name='costs_statistic_for_this_month'),
-    path('<month:date>/statistic/',
-         views.CostsStatisticPageView.as_view(), name='costs_statistic_page'),
-    path('<month:date>/statistic/json/', views.StatisticView.as_view(),
-         name='statistic'),
+    path('', views.GetCreateCostsView.as_view(), name="all_costs"),
+    path('<uuid:pk>/', views.GetUpdateDeleteCost.as_view(),
+         name="concrete_cost"),
     path(
-        '<year:date>/statistic/json/',
-        views.CostStatisticForTheLastYear.as_view(),
-        name='statistic_for_the_year'
+        '<int:year>/<int:month>/',
+        views.GetCostsForTheMonthView.as_view(), name="month_costs"
+    ),
+    path(
+        '<int:year>/<int:month>/<int:day>/',
+        views.GetCostsForTheDateView.as_view(), name="date_costs"
+    ),
+    path(
+        'statistic/<int:year>/<int:month>/',
+        views.CostsMonthStatisticView.as_view(), name="costs_statistic_month"
+    ),
+    path(
+        'statistic/<int:year>/',
+        views.CostsYearStatisticView.as_view(), name="costs_statistic_year"
+    ),
+    path(
+        'statistic/average/',
+        views.AverageCostsView.as_view(), name="average_costs"
     ),
 ]

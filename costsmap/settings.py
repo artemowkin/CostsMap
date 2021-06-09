@@ -1,7 +1,6 @@
 import os
 
 import dj_database_url
-from django.core.exceptions import ImproperlyConfigured
 
 from utils.settings import get_env
 
@@ -56,6 +55,9 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'whitenoise',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
 
     # Local
     'costs',
@@ -96,6 +98,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'costsmap.wsgi.application'
 
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
+
+
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
@@ -109,6 +118,8 @@ DATABASES = {
         'PORT': get_env('DJANGO_DB_PORT', 5432)
     }
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 if ENVIRONMENT == 'production':
     db_from_env = dj_database_url.config(conn_max_age=500)
@@ -193,8 +204,6 @@ AUTHENTICATION_BACKENDS = [
 SITE_ID = 1
 
 ACCOUNT_EMAIL_VERIFICATION = 'none'
-
-LOGIN_REDIRECT_URL = 'today_costs'
 
 ACCOUNT_SESSION_REMEMBER = True
 

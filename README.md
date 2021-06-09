@@ -3,8 +3,6 @@
 CostsMap is a site for costs accounting. On this site you can add your
 costs and incomes, sort them by category and see monthly statistic
 
-![CostsMap Site](/images/preview.png)
-
 ## Summary
 
   - [Getting Started](#getting-started)
@@ -39,44 +37,25 @@ After that you need to up this image
 $ docker-compose up -d
 ```
 
+And apply all migrations
+
+```
+$ docker-compose run web python manage.py migrate
+```
+
 ## Running the tests
 
-If you want to run the tests you need some prerequisites:
-
-* `python3.9`
-* `pipenv`
-* `postgresql`
-
-And you need to install dependencies from Pipfile:
+If you want to run all tests you can use the following command:
 
 ```
-$ pipenv install --dev
-```
-
-And create a new database `costsmap` with user `django` with password `django`:
-
-```
-$ psql -U postgres
-=> CREATE DATABASE costsmap;
-=> CREATE USER django WITH PASSWORD 'django';
-=> GRANT ALL PRIVILEGES ON DATABASE costsmap TO django;
-```
-
-That's all. Now you can run the tests. If you want to run all
-tests you can use the following command:
-
-```
-$ python manage.py test
+$ docker-compose run web python manage.py test
 ```
 
 If you want to run only functional tests you can use the following command:
 
 ```
-$ python manage.py test functional_tests
+$ docker-compose run web python manage.py test functional_tests
 ```
-
-> This command will run the Firefox browser window. If you don't have this
-browser on your PC you need to install it
 
 ## Authors
 

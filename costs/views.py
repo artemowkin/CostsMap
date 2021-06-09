@@ -1,141 +1,82 @@
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from django.urls import reverse_lazy
+import datetime
 
-from .forms import CostForm
-from .services.commands import GetCostsStatisticCommand
-from costs.services import (
-    GetCostsService, CreateCostService, ChangeCostService, DeleteCostService,
-    GetStatisticForTheMonthService, GetStatisticForTheYearService
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from generics.views import (
+    GetCreateGenericView, GetUpdateDeleteGenericView, GetForTheDateGenericView
 )
-from categories.services.categories import (
-    GetCategoriesService, set_form_categories
+from .services.base import (
+    CreateCostService, GetCostsService, DeleteCostService, ChangeCostService,
+    GetStatisticForTheMonthService, GetStatisticForTheYearService,
+    GetAverageCostsForTheDayService
 )
-from costs.services.commands import (
-    GetCostsForTheDateCommand, GetCostsHistoryCommand
+from .services.commands import (
+    GetAllCostsCommand, GetCostsForTheMonthCommand, GetCostsForTheDateCommand,
 )
-from utils.views import (
-    DefaultView, DeleteGenericView, StatisticPageGenericView,
-    DateGenericView, HistoryGenericView
-)
+from .serializers import CostSerializer
 
 
-class CostsForTheDateView(DateGenericView):
-    """View to render costs for the date"""
+class GetCreateCostsView(GetCreateGenericView):
+    """View to get all costs and create a new cost"""
 
-    template_name = 'costs/costs.html'
+    get_command = GetAllCostsCommand
+    create_service = CreateCostService
+    serializer_class = CostSerializer
+    model_name = 'cost'
+
+
+class GetUpdateDeleteCost(GetUpdateDeleteGenericView):
+    """View to get a concrete cost and change/delete an existing cost"""
+
+    get_service_class = GetCostsService
+    delete_service_class = DeleteCostService
+    update_service_class = ChangeCostService
+    serializer_class = CostSerializer
+    model_name = 'cost'
+
+
+class GetCostsForTheMonthView(GetForTheDateGenericView):
+    """View to get costs for the month"""
+
+    command = GetCostsForTheMonthCommand
+
+
+class GetCostsForTheDateView(GetForTheDateGenericView):
+    """View to get costs for the date"""
+
     command = GetCostsForTheDateCommand
 
 
-class CostsHistoryView(HistoryGenericView):
-    """View to render all costs for all time."""
+class CostsMonthStatisticView(APIView):
+    """View to get costs statistic for the month"""
 
-    template_name = 'costs/history_costs.html'
-    command = GetCostsHistoryCommand
+    service_class = GetStatisticForTheMonthService
+
+    def get(self, request, year, month):
+        date = datetime.date(year, month, 1)
+        service_data = {'user': request.user, 'date': date}
+        statistic = self.service_class.execute(service_data)
+        return Response(statistic)
 
 
-class CreateCostView(DefaultView):
-    """View to create a new cost"""
+class CostsYearStatisticView(APIView):
+    """View to get costs statistic for the year"""
 
-    form_class = CostForm
-    template_name = 'costs/add_cost.html'
+    service_class = GetStatisticForTheYearService
+
+    def get(self, request, year):
+        date = datetime.date(year, 1, 1)
+        service_data = {'user': request.user, 'date': date}
+        statistic = self.service_class.execute(service_data)
+        return Response(statistic)
+
+
+class AverageCostsView(APIView):
+    """View to get an average costs"""
+
+    average_service = GetAverageCostsForTheDayService
 
     def get(self, request):
-        form = self.form_class()
-        get_categories_service = GetCategoriesService(request.user)
-        user_categories = get_categories_service.get_all()
-        set_form_categories(form, user_categories)
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request):
-        form = self.form_class(request.POST)
-        get_categories_service = GetCategoriesService(request.user)
-        user_categories = get_categories_service.get_all()
-        set_form_categories(form, user_categories)
-        if form.is_valid():
-            return self.form_valid(request, form)
-
-        return render(request, self.template_name, {'form': form})
-
-    def form_valid(self, request, form):
-        form.cleaned_data.update({'owner': request.user})
-        cost = CreateCostService.execute(form.cleaned_data)
-        return redirect(cost.get_absolute_url())
-
-
-class ChangeCostView(DefaultView):
-    """View to change a cost"""
-
-    form_class = CostForm
-    template_name = 'costs/change_cost.html'
-
-    def get(self, request, pk):
-        get_costs_service = GetCostsService(request.user)
-        get_categories_service = GetCategoriesService(request.user)
-        cost = get_costs_service.get_concrete(pk)
-        form = self.form_class(instance=cost)
-        user_categories = get_categories_service.get_all()
-        set_form_categories(form, user_categories)
-        return render(
-            request, self.template_name, {'form': form, 'cost': cost}
-        )
-
-    def post(self, request, pk):
-        get_costs_service = GetCostsService(request.user)
-        get_categories_service = GetCategoriesService(request.user)
-        self.cost = get_costs_service.get_concrete(pk)
-        form = self.form_class(request.POST, instance=self.cost)
-        user_categories = get_categories_service.get_all()
-        set_form_categories(form, user_categories)
-        if form.is_valid():
-            return self.form_valid(request, form)
-
-        return render(
-            request, self.template_name, {'form': form, 'cost': self.cost}
-        )
-
-    def form_valid(self, request, form):
-        form.cleaned_data.update({'cost': self.cost})
-        cost = ChangeCostService.execute(form.cleaned_data)
-        return redirect(cost.get_absolute_url())
-
-
-class DeleteCostView(DeleteGenericView):
-    """View to delete a cost"""
-
-    template_name = 'costs/delete_cost.html'
-    success_url = reverse_lazy('today_costs')
-    context_object_name = 'cost'
-    get_service_class = GetCostsService
-    delete_service = DeleteCostService
-
-
-class StatisticView(DefaultView):
-    """View to return json with costs statistic"""
-
-    def get(self, request, date):
-        data = GetStatisticForTheMonthService.execute({
-            'user': request.user,
-            'date': date
-        })
-        return JsonResponse(data, safe=False)
-
-
-class CostsStatisticPageView(StatisticPageGenericView):
-    """View to render statistic with costs for the month"""
-
-    template_name = 'costs/costs_statistic.html'
-    command = GetCostsStatisticCommand
-
-
-class CostStatisticForTheLastYear(DefaultView):
-    """View to return json statistic with costs by months
-    for the last year
-    """
-
-    def get(self, request, date):
-        data = GetStatisticForTheYearService.execute({
-            'user': request.user,
-            'date': date
-        })
-        return JsonResponse(data, safe=False)
+        average_costs = self.average_service.execute({'user': request.user})
+        return Response({'average_costs': average_costs})
