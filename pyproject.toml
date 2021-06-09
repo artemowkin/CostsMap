@@ -20,7 +20,6 @@ simplejson = "^3.17.2"
 dj-rest-auth = "^2.1.7"
 
 [tool.poetry.dev-dependencies]
-selenium = "^3.141.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
