@@ -1,9 +1,12 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
 from generics.views import GetCreateGenericView, GetUpdateDeleteGenericView
 from .services.base import (
     CreateCategoryService, DeleteCategoryService, ChangeCategoryService,
     GetCategoriesService
 )
-from .services.commands import GetAllCategoriesCommand
+from .services.commands import GetAllCategoriesCommand, GetCategoryCostsCommand
 from .serializers import CategorySerializer
 
 
@@ -24,3 +27,14 @@ class GetUpdateDeleteCategory(GetUpdateDeleteGenericView):
     update_service_class = ChangeCategoryService
     serializer_class = CategorySerializer
     model_name = 'category'
+
+
+class GetCategoryCostsView(APIView):
+    """View to get costs by category"""
+
+    command = GetCategoryCostsCommand
+
+    def get(self, request, pk):
+        command = self.command(pk, request.user)
+        result = command.execute()
+        return Response(result)

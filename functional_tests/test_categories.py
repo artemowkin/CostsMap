@@ -1,10 +1,13 @@
 import datetime
+import simplejson as json
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 from .base import CRUDFunctionalTest
 from categories.models import Category
+from costs.models import Cost
 
 
 User = get_user_model()
@@ -44,3 +47,24 @@ class CategoriesAPIEndpointsTest(TestCase, CRUDFunctionalTest):
 
 	def get_update_data(self):
 		return {'title': 'some_category'}
+
+	def test_get_category_costs_endpoint(self):
+		cost = Cost.objects.create(
+			title='some_cost', costs_sum='100.00', category=self.entry,
+			owner=self.user
+		)
+		serialized_cost = {
+			'pk': str(cost.pk), 'title': 'some_cost', 'costs_sum': '100.00',
+			'category': str(self.entry.pk), 'owner': self.user.pk,
+			'date': cost.date.isoformat()
+		}
+		response = self.client.get(
+			reverse('category_costs', args=[self.entry.pk])
+		)
+		self.assertEqual(response.status_code, 200)
+		json_response = json.loads(response.content)
+		self.assertEqual(json_response, {
+			'total_sum': 100.0,
+			'costs': [serialized_cost],
+			'category': self.entry.title
+		})

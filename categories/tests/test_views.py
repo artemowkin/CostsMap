@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 from ..models import Category
+from costs.models import Cost
 from generics.unittests import (
     GetCreateEntriesViewTest, GetUpdateDeleteEntryViewTest
 )
@@ -50,3 +51,28 @@ class GetUpdateDeleteCategoryViewTest(ViewTest, GetUpdateDeleteEntryViewTest):
                 'title': 'changed_category'
             }, content_type='application/json'
         )
+
+
+class GetCategoryCostsViewTest(ViewTest):
+    """Case of testing GetCategoryCostsView"""
+
+    def setUp(self):
+        super().setUp()
+        self.client.login(username='testuser', password='testpass')
+        self.category = Category.objects.create(
+            title='test_category', owner=self.user
+        )
+        self.cost = Cost.objects.create(
+            title='test_cost', costs_sum='100.00', category=self.category,
+            owner=self.user
+        )
+        self.serialized_cost = {
+            'title': 'test_cost', 'costs_sum': 100.0,
+            'category': self.category.pk, 'owner': self.user.pk
+        }
+
+    def test_get(self):
+        response = self.client.get(
+            reverse('category_costs', args=[self.category.pk])
+        )
+        self.assertEqual(response.status_code, 200)
