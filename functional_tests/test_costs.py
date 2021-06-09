@@ -63,11 +63,35 @@ class CostsAPIEndpointsTest(TestCase, DateCRUDFunctionalTest):
             'category': self.category.pk
         }
 
+    def test_create_endpoint_with_date(self):
+        response =  self.client.post(
+            reverse(self.all_endpoint), {
+                'title': 'some_cost', 'costs_sum': '100.00',
+                'category': self.category.pk, 'date': '2020-01-01'
+            }, content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.model.objects.count(), 2)
+        created_cost = self.model.objects.last()
+        self.assertEqual(created_cost.date.isoformat(), '2020-01-01')
+
     def get_update_data(self):
         return {
             'title': 'some_cost', 'costs_sum': '200.00',
             'category': self.category.pk
         }
+
+    def test_update_endpoint_with_date(self):
+        response = self.client.put(
+            reverse(self.concrete_endpoint, args=[self.entry.pk]), {
+                'title': 'some_cost', 'costs_sum': '200.00',
+                'category': self.category.pk, 'date': '2020-01-01'
+            }, content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 204)
+        entry = self.model.objects.get(pk=self.entry.pk)
+        self.assertNotEqual(str(self.entry), str(entry))
+        self.assertEqual(entry.date.isoformat(), '2020-01-01')
 
     def get_month_response(self):
         return {

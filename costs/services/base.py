@@ -49,6 +49,7 @@ class CreateCostService(Service):
     costs_sum = forms.DecimalField(max_digits=7, decimal_places=2)
     category = forms.ModelChoiceField(queryset=Category.objects.all())
     owner = forms.ModelChoiceField(queryset=User.objects.all())
+    date = forms.DateField(required=False)
     _model = Cost
 
     def process(self) -> Cost:
@@ -57,11 +58,24 @@ class CreateCostService(Service):
         costs_sum = self.cleaned_data['costs_sum']
         category = self.cleaned_data['category']
         owner = self.cleaned_data['owner']
+        date = self.cleaned_data['date']
         _check_category_owner(category, owner)
 
-        cost = self._model.objects.create(
-            title=title, costs_sum=costs_sum, category=category, owner=owner
-        )
+        cost = self._create(title, costs_sum, category, owner, date)
+        return cost
+
+    def _create(self, title, costs_sum, category, owner, date):
+        if date:
+            cost = self._model.objects.create(
+                title=title, costs_sum=costs_sum, category=category,
+                owner=owner, date=date
+            )
+        else:
+            cost = self._model.objects.create(
+                title=title, costs_sum=costs_sum, category=category,
+                owner=owner
+            )
+
         return cost
 
 
@@ -73,6 +87,7 @@ class ChangeCostService(Service):
     costs_sum = forms.DecimalField(max_digits=7, decimal_places=2)
     category = forms.ModelChoiceField(queryset=Category.objects.all())
     owner = forms.ModelChoiceField(queryset=User.objects.all())
+    date = forms.DateField(required=False)
 
     def process(self) -> Cost:
         """Change a concrete cost from `cost` attribute"""
@@ -81,12 +96,19 @@ class ChangeCostService(Service):
         costs_sum = self.cleaned_data['costs_sum']
         category = self.cleaned_data['category']
         owner = self.cleaned_data['owner']
+        date = self.cleaned_data['date']
         check_entry_owner(cost, owner)
         _check_category_owner(category, cost.owner)
 
+        cost = self._change_cost(cost, title, costs_sum, category, date)
+        return cost
+
+    def _change_cost(self, cost, title, costs_sum, category, date):
         cost.title = title
         cost.costs_sum = costs_sum
         cost.category = category
+        if date:
+            cost.date = date
 
         cost.save()
         return cost

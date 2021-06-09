@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -42,14 +44,14 @@ class Cost(ModelWithUUID):
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='costs'
     )
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=datetime.date.today)
     pub_datetime = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'cost'
         verbose_name = 'cost'
         verbose_name_plural = 'costs'
-        ordering = ('-pub_datetime',)
+        ordering = ('-date', '-pub_datetime')
 
     def __str__(self):
         return self.title

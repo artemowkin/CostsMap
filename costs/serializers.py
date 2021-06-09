@@ -9,4 +9,4 @@ class CostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cost
         fields = ('pk', 'title', 'costs_sum', 'category', 'owner', 'date')
-        read_only_fields = ('pk', 'date', 'owner')
+        read_only_fields = ('pk', 'owner')
