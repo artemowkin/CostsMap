@@ -148,7 +148,7 @@ class DateCRUDFunctionalTest(CRUDFunctionalTest):
 
     def test_get_for_the_today(self):
         today = datetime.date.today()
-        response = self._request_get_concrete_endpoint(today)
+        response = self._request_date_endpoint(today)
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, self.get_today_response())
@@ -159,7 +159,7 @@ class DateCRUDFunctionalTest(CRUDFunctionalTest):
 
     def test_get_for_the_another_date(self):
         random_date = datetime.date(2020, 1, 1)
-        response = self._request_get_concrete_endpoint(random_date)
+        response = self._request_date_endpoint(random_date)
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, self.get_another_date_response())
