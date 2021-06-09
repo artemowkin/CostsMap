@@ -1,5 +1,8 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from dj_rest_auth.registration.views import RegisterView
 
+from .serializers import UserSerializer
 from categories.services.base import SetUserDefaultCategoriesService
 
 
@@ -13,3 +16,12 @@ class RegisterWithCategoriesView(RegisterView):
             'owner': user
         })
         return user
+
+
+class UserView(APIView):
+    """View to display current user information"""
+
+    def get(self, request):
+        serialized_user = UserSerializer(self.request.user).data
+        return Response(serialized_user)
+
