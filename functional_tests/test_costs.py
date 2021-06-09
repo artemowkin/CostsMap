@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
+from generics.functional_tests import CRUDFunctionalTest
 from categories.models import Category
 from costs.models import Cost
 
@@ -13,8 +14,12 @@ from costs.models import Cost
 User = get_user_model()
 
 
-class CostsAPIEndpointsTest(TestCase):
+class CostsAPIEndpointsTest(TestCase, CRUDFunctionalTest):
     """Functional test for costs api endpoints"""
+
+    all_endpoint = 'all_costs'
+    concrete_endpoint = 'concrete_cost'
+    model = Cost
 
     def setUp(self):
         self.user = User.objects.create_superuser(
@@ -27,95 +32,40 @@ class CostsAPIEndpointsTest(TestCase):
         self.category = Category.objects.create(
             title="test_category", owner=self.user
         )
-        self.cost = Cost.objects.create(
+        self.entry = Cost.objects.create(
             title='test_cost', costs_sum='100.00', category=self.category,
             owner=self.user
         )
-        self.serialized_cost = {
-            'pk': str(self.cost.pk), 'title': 'test_cost',
+        self.serialized_entry = {
+            'pk': str(self.entry.pk), 'title': 'test_cost',
             'costs_sum': '100.00',
             'category': str(self.category.pk), 'owner': self.user.pk,
             'date': datetime.date.today().isoformat(),
         }
 
-    def test_all_costs_endpoint(self):
-        """Test: does /costs/ endpoint return all costs"""
-        response = self.client.get('/costs/')
-        self.assertEqual(response.status_code, 200)
-        json_response = json.loads(response.content)
-        self.assertEqual(json_response, {
-            'total_sum': float(self.cost.costs_sum),
-            'costs': [self.serialized_cost]
-        })
+    def get_all_response(self):
+        return {
+            'total_sum': float(self.entry.costs_sum),
+            'costs': [self.serialized_entry]
+        }
 
-    def test_all_costs_endpoint_with_bad_user(self):
-        """Test: does /costs/ endpoint requested by bad user returns no
-        user costs"""
-        self.client.login(username='baduser', password='badpass')
-        response = self.client.get('/costs/')
-        self.assertEqual(response.status_code, 200)
-        json_response = json.loads(response.content)
-        self.assertEqual(json_response, {
+    def get_all_bad_response(self):
+        return {
             'total_sum': 0.0,
             'costs': []
-        })
+        }
 
-    def test_create_cost_endpoint(self):
-        response = self.client.post('/costs/', {
+    def get_create_data(self):
+        return {
             'title': 'some_cost', 'costs_sum': '100.00',
             'category': self.category.pk
-        }, content_type="application/json")
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(Cost.objects.count(), 2)
-        self.assertEqual(Cost.objects.first().title, 'some_cost')
+        }
 
-    def test_get_concrete_cost_endpoint(self):
-        response = self.client.get(f'/costs/{self.cost.pk}/')
-        self.assertEqual(response.status_code, 200)
-        json_response = json.loads(response.content)
-        self.assertEqual(json_response, self.serialized_cost)
-
-    def test_get_concrete_cost_endpoint_with_bad_user(self):
-        """Test: does get concrete cost endpoint requested by bad user
-        returns no content"""
-        self.client.login(username='baduser', password='badpass')
-        response = self.client.get(f'/costs/{self.cost.pk}/')
-        self.assertEqual(response.status_code, 404)
-
-    def test_delete_concrete_cost_endpoint(self):
-        response = self.client.delete(f'/costs/{self.cost.pk}/')
-        self.assertEqual(response.status_code, 204)
-        self.assertEqual(Cost.objects.count(), 0)
-
-    def test_delete_concrete_cost_endpoint_with_bad_user(self):
-        """Test: does delete a concrete cost endpoint requested by bad user
-        do nothing"""
-        self.client.login(username='baduser', password='badpass')
-        response = self.client.delete(f'/costs/{self.cost.pk}/')
-        self.assertEqual(response.status_code, 404)
-
-    def test_update_concrete_cost_endpoint(self):
-        response = self.client.put(
-            f'/costs/{self.cost.pk}/', {
-                'title': 'some_cost', 'costs_sum': '200.00',
-                'category': self.category.pk
-            }, content_type="application/json"
-        )
-        self.assertEqual(response.status_code, 204)
-        cost = Cost.objects.get(pk=self.cost.pk)
-        self.assertEqual(str(cost.costs_sum), '200.00')
-
-    def test_update_concrete_cost_endpoint_with_bad_user(self):
-        """Test: does update a concrete cost endpoint requested by bad user
-        do nothing"""
-        self.client.login(username='baduser', password='badpass')
-        response = self.client.put(
-            f'/costs/{self.cost.pk}/', {
-                'title': 'some_cost', 'costs_sum': '200.00',
-                'category': self.category.pk
-            }, content_type='application/json'
-        )
-        self.assertEqual(response.status_code, 404)
+    def get_update_data(self):
+        return {
+            'title': 'some_cost', 'costs_sum': '200.00',
+            'category': self.category.pk
+        }
 
     def test_get_costs_for_the_month(self):
         today = datetime.date.today()
@@ -123,8 +73,8 @@ class CostsAPIEndpointsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, {
-            'total_sum': float(self.cost.costs_sum),
-            'costs': [self.serialized_cost]
+            'total_sum': float(self.entry.costs_sum),
+            'costs': [self.serialized_entry]
         })
 
     def test_get_costs_for_the_another_month(self):
@@ -144,8 +94,8 @@ class CostsAPIEndpointsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, {
-            'total_sum': float(self.cost.costs_sum),
-            'costs': [self.serialized_cost]
+            'total_sum': float(self.entry.costs_sum),
+            'costs': [self.serialized_entry]
         })
 
     def test_get_costs_for_the_another_date(self):
@@ -166,7 +116,7 @@ class CostsAPIEndpointsTest(TestCase):
         json_response = json.loads(response.content)
         self.assertEqual(json_response, [{
             'category': self.category.title,
-            'costs': float(self.cost.costs_sum)
+            'costs': float(self.entry.costs_sum)
         }])
 
     def test_get_costs_statistic_for_the_year(self):
@@ -177,8 +127,8 @@ class CostsAPIEndpointsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, [{
-            'cost_month': float(self.cost.date.month),
-            'cost_sum': float(self.cost.costs_sum)
+            'cost_month': float(self.entry.date.month),
+            'cost_sum': float(self.entry.costs_sum)
         }])
 
     def test_get_average_costs_statistic(self):
@@ -186,5 +136,5 @@ class CostsAPIEndpointsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.content)
         self.assertEqual(json_response, {
-            'average_costs': float(self.cost.costs_sum)
+            'average_costs': float(self.entry.costs_sum)
         })

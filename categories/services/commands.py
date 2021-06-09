@@ -17,13 +17,13 @@ class GetAllCategoriesCommand:
     def __init__(self, user: User):
         self._user = user
 
-    def execute(self) -> dict:
+    def execute(self) -> list:
         service = self.get_service(self._user)
         categories = service.get_all()
         serialized_categories = self.serializer_class(
             categories, many=True
         ).data
-        return {'categories': serialized_categories}
+        return serialized_categories
 
 
 class GetCategoryCostsCommand:
