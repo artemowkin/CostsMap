@@ -56,10 +56,7 @@ $ pipenv install --dev
 And create a new database `costsmap` with user `django` with password `django`:
 
 ```
-$ psql -U postgres
-=> CREATE DATABASE costsmap;
-=> CREATE USER django WITH PASSWORD 'django';
-=> GRANT ALL PRIVILEGES ON DATABASE costsmap TO django;
+$ createuser -s -P django
 ```
 
 That's all. Now you can run the tests. If you want to run all
