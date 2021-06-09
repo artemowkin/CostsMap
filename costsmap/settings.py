@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'whitenoise',
     'rest_framework',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
 
     # Local
     'costs',

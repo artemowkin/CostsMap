@@ -72,6 +72,21 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "dj-rest-auth"
+version = "2.1.7"
+description = "Authentication and Registration in Django Rest Framework"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+Django = ">=2.0"
+djangorestframework = ">=3.7.0"
+
+[package.extras]
+with_social = ["django-allauth (>=0.40.0,<0.45.0)"]
+
+[[package]]
 name = "django"
 version = "3.2.4"
 description = "A high-level Python Web framework that encourages rapid development and clean, pragmatic design."
@@ -326,7 +341,7 @@ brotli = ["brotli"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "39cfda459c7c08828e80485402195b7f9547709bada4a9c3e14c4b539944fbcf"
+content-hash = "22e15687f91e3f21dc2f8cd4f23752ee5f3c86b9ed710322bcf263f326145fed"
 
 [metadata.files]
 asgiref = [
@@ -413,6 +428,9 @@ defusedxml = [
 dj-database-url = [
     {file = "dj-database-url-0.5.0.tar.gz", hash = "sha256:4aeaeb1f573c74835b0686a2b46b85990571159ffc21aa57ecd4d1e1cb334163"},
     {file = "dj_database_url-0.5.0-py2.py3-none-any.whl", hash = "sha256:851785365761ebe4994a921b433062309eb882fedd318e1b0fcecc607ed02da9"},
+]
+dj-rest-auth = [
+    {file = "dj-rest-auth-2.1.7.tar.gz", hash = "sha256:45f95fa982c41ae7ba5dee041de5dbb6e3724347796e718cf2bb5c0b681b2d10"},
 ]
 django = [
     {file = "Django-3.2.4-py3-none-any.whl", hash = "sha256:ea735cbbbb3b2fba6d4da4784a0043d84c67c92f1fdf15ad6db69900e792c10f"},

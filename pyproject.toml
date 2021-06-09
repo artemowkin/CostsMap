@@ -17,6 +17,7 @@ whitenoise = "^5.2.0"
 python-dateutil = "^2.8.1"
 django-service-objects = "^0.7.0"
 simplejson = "^3.17.2"
+dj-rest-auth = "^2.1.7"
 
 [tool.poetry.dev-dependencies]
 selenium = "^3.141.0"
