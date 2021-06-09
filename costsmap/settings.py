@@ -1,7 +1,6 @@
 import os
 
 import dj_database_url
-from django.core.exceptions import ImproperlyConfigured
 
 from utils.settings import get_env
 

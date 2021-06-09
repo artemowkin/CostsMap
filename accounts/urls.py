@@ -1,5 +1,4 @@
 from django.urls import path
-from django.views.decorators.cache import cache_page
 from dj_rest_auth import views
 
 from .views import RegisterWithCategoriesView, UserView

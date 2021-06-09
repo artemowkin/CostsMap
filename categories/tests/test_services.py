@@ -98,7 +98,7 @@ class GetCategoryCostsServiceTest(BaseServiceTest):
 
     def test_get_with_costs(self):
         """Test: does get_category_costs return all category costs"""
-        cost = Cost.objects.create(
+        Cost.objects.create(
             title='cost_title', costs_sum='100.00', owner=self.user,
             category=self.entry
         )

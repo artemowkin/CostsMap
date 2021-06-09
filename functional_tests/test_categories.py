@@ -1,4 +1,3 @@
-import datetime
 import simplejson as json
 
 from django.test import TestCase

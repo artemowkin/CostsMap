@@ -46,7 +46,7 @@ class GetEntriesServiceTest:
 	def test_get_concrete_with_incorrect_pk(self):
 		"""Test: does get_concrete not return entry if pk is incorrect"""
 		with self.assertRaises(Http404):
-			entry = self.service.get_concrete(uuid.uuid4())
+			self.service.get_concrete(uuid.uuid4())
 
 	def test_get_all(self):
 		"""Test: does get_all method return all user entries"""
@@ -84,39 +84,39 @@ class GetUpdateDeleteEntryViewTest:
 	"""Case of testing GetUpdateDelete<entry>View view"""
 
 	def test_get_with_logged_in_user(self):
-	    self.client.login(username="testuser", password="testpass")
-	    response = self.client.get(
-	        reverse(self.endpoint, args=[self.entry.pk])
-	    )
-	    self.assertEqual(response.status_code, 200)
+		self.client.login(username="testuser", password="testpass")
+		response = self.client.get(
+			reverse(self.endpoint, args=[self.entry.pk])
+		)
+		self.assertEqual(response.status_code, 200)
 
 	def test_get_with_unlogged_in_user(self):
-	    response = self.client.get(
-	        reverse(self.endpoint, args=[self.entry.pk])
-	    )
-	    self.assertEqual(response.status_code, 403)
+		response = self.client.get(
+			reverse(self.endpoint, args=[self.entry.pk])
+		)
+		self.assertEqual(response.status_code, 403)
 
 	def test_delete_with_logged_in_user(self):
-	    self.client.login(username="testuser", password="testpass")
-	    response = self.client.delete(
-	        reverse(self.endpoint, args=[self.entry.pk])
-	    )
-	    self.assertEqual(response.status_code, 204)
+		self.client.login(username="testuser", password="testpass")
+		response = self.client.delete(
+			reverse(self.endpoint, args=[self.entry.pk])
+		)
+		self.assertEqual(response.status_code, 204)
 
 	def test_delete_with_unlogged_in_user(self):
-	    response = self.client.delete(
-	        reverse(self.endpoint, args=[self.entry.pk])
-	    )
-	    self.assertEqual(response.status_code, 403)
+		response = self.client.delete(
+			reverse(self.endpoint, args=[self.entry.pk])
+		)
+		self.assertEqual(response.status_code, 403)
 
 	def test_put_with_logged_in_user(self):
-	    self.client.login(username="testuser", password="testpass")
-	    response = self.request_put()
-	    self.assertEqual(response.status_code, 204)
+		self.client.login(username="testuser", password="testpass")
+		response = self.request_put()
+		self.assertEqual(response.status_code, 204)
 
 	def test_put_with_unlogged_in_user(self):
-	    response = self.request_put()
-	    self.assertEqual(response.status_code, 403)
+		response = self.request_put()
+		self.assertEqual(response.status_code, 403)
 
 
 class GetEntriesForTheMonthViewTest:

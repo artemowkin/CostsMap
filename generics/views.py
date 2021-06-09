@@ -126,7 +126,7 @@ class GetForTheDateGenericView(APIView):
 			)
 
 	def get(self, request, **kwargs):
-		if not 'day' in kwargs:
+		if 'day' not in kwargs:
 			kwargs |= {'day': 1}
 			
 		date = datetime.date(**kwargs)

@@ -1,6 +1,5 @@
 import datetime
 import simplejson as json
-from uuid import UUID
 
 from django.test import TestCase
 from django.urls import reverse
@@ -64,7 +63,7 @@ class CostsAPIEndpointsTest(TestCase, DateCRUDFunctionalTest):
         }
 
     def test_create_endpoint_with_date(self):
-        response =  self.client.post(
+        response = self.client.post(
             reverse(self.all_endpoint), {
                 'title': 'some_cost', 'costs_sum': '100.00',
                 'category': self.category.pk, 'date': '2020-01-01'

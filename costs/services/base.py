@@ -159,9 +159,9 @@ class GetStatisticForTheMonthService(Service):
         user = self.cleaned_data['user']
         date = self.cleaned_data.get('date', datetime.date.today())
         result = execute_sql_command(
-            self.SQL_GET_STATISTIC_FOR_THE_MONTH, (
+            self.SQL_GET_STATISTIC_FOR_THE_MONTH, [
                 user.pk, date.month, date.year
-            )
+            ]
         )
         return self._format_month_statistic_to_list_of_dicts(result)
 
@@ -205,7 +205,7 @@ class GetStatisticForTheYearService(Service):
         user = self.cleaned_data['user']
         date = self.cleaned_data.get('date', datetime.date.today())
         result = execute_sql_command(
-            self.SQL_GET_STATISTIC_FOR_THE_YEAR, (date.year, user.pk)
+            self.SQL_GET_STATISTIC_FOR_THE_YEAR, [date.year, user.pk]
         )
         return self._format_year_statistic_to_list_of_dicts(result)
 
@@ -237,7 +237,7 @@ class GetAverageCostsForTheDayService(Service):
         """Return user average costs for the day"""
         user = self.cleaned_data['user']
         result = execute_sql_command(
-            self.SQL_GET_AVERAGE_COSTS_FOR_THE_DAY, (user.pk,)
+            self.SQL_GET_AVERAGE_COSTS_FOR_THE_DAY, [user.pk]
         )[0][0]
         return self._normalize_fetch_result(result)
 

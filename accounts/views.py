@@ -22,6 +22,5 @@ class UserView(APIView):
     """View to display current user information"""
 
     def get(self, request):
-        serialized_user = UserSerializer(self.request.user).data
+        serialized_user = UserSerializer(request.user).data
         return Response(serialized_user)
-
