@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "CostsMap"
-version = "1.0.0"
+version = "2.0.0"
 description = "CostsMap is a site for costs accounting"
 authors = ["artemowkin <artyom.groshev2017@gmail.com>"]
 license = "GPL-3.0"
