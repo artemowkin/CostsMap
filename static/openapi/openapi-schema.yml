@@ -130,6 +130,7 @@ paths:
                             title: "New Cost"
                             costs_sum: 100.0
                             category: "c71caa23-909d-4ec7-90ab-aecc15f6a6f9"
+                            date: "2020-01-01"
         responses:
             '201':
                 content:
@@ -180,6 +181,7 @@ paths:
                               title: "Changing Cost"
                               costs_sum: 100.0
                               category: "c71caa23-909d-4ec7-90ab-aecc15f6a6f9"
+                              date: "2020-01-01"
           responses:
               '204':
                   description: 'The cost was changed successfully'
