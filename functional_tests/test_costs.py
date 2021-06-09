@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
-from generics.functional_tests import CRUDFunctionalTest
+from .base import DateCRUDFunctionalTest
 from categories.models import Category
 from costs.models import Cost
 
@@ -14,11 +14,13 @@ from costs.models import Cost
 User = get_user_model()
 
 
-class CostsAPIEndpointsTest(TestCase, CRUDFunctionalTest):
+class CostsAPIEndpointsTest(TestCase, DateCRUDFunctionalTest):
     """Functional test for costs api endpoints"""
 
     all_endpoint = 'all_costs'
     concrete_endpoint = 'concrete_cost'
+    month_endpoint = 'month_costs'
+    date_endpoint = 'date_costs'
     model = Cost
 
     def setUp(self):
@@ -67,45 +69,23 @@ class CostsAPIEndpointsTest(TestCase, CRUDFunctionalTest):
             'category': self.category.pk
         }
 
-    def test_get_costs_for_the_month(self):
-        today = datetime.date.today()
-        response = self.client.get(f"/costs/{today.year}/{today.month}/")
-        self.assertEqual(response.status_code, 200)
-        json_response = json.loads(response.content)
-        self.assertEqual(json_response, {
+    def get_month_response(self):
+        return {
             'total_sum': float(self.entry.costs_sum),
             'costs': [self.serialized_entry]
-        })
+        }
 
-    def test_get_costs_for_the_another_month(self):
-        random_date = datetime.date(2020, 1, 1)
-        response = self.client.get(
-            f'/costs/{random_date.year}/{random_date.month}/'
-        )
-        self.assertEqual(response.status_code, 200)
-        json_response = json.loads(response.content)
-        self.assertEqual(json_response, {'total_sum': 0.0, 'costs': []})
+    def get_another_month_response(self):
+        return {'total_sum': 0.0, 'costs': []}
 
-    def test_get_costs_for_the_today(self):
-        today = datetime.date.today()
-        response = self.client.get(
-            f'/costs/{today.year}/{today.month}/{today.day}/'
-        )
-        self.assertEqual(response.status_code, 200)
-        json_response = json.loads(response.content)
-        self.assertEqual(json_response, {
+    def get_today_response(self):
+        return {
             'total_sum': float(self.entry.costs_sum),
             'costs': [self.serialized_entry]
-        })
+        }
 
-    def test_get_costs_for_the_another_date(self):
-        random_date = datetime.date(2020, 1, 1)
-        response = self.client.get(
-            f'/costs/{random_date.year}/{random_date.month}/{random_date.day}/'
-        )
-        self.assertEqual(response.status_code, 200)
-        json_response = json.loads(response.content)
-        self.assertEqual(json_response, {'total_sum': 0.0, 'costs': []})
+    def get_another_date_response(self):
+        return {'total_sum': 0.0, 'costs': []}
 
     def test_get_costs_statistic_for_the_month(self):
         today = datetime.date.today()

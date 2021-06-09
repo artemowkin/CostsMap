@@ -3,7 +3,7 @@ import datetime
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
-from generics.functional_tests import CRUDFunctionalTest
+from .base import CRUDFunctionalTest
 from categories.models import Category
 
 
