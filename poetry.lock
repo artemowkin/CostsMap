@@ -119,6 +119,17 @@ requests = "*"
 requests-oauthlib = ">=0.3.0"
 
 [[package]]
+name = "django-cors-headers"
+version = "3.7.0"
+description = "django-cors-headers is a Django application for handling the server headers required for Cross-Origin Resource Sharing (CORS)."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+Django = ">=2.2"
+
+[[package]]
 name = "django-service-objects"
 version = "0.7.0"
 description = "Service objects for Django"
@@ -330,7 +341,7 @@ brotli = ["brotli"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "9d7631209f7147176290b6d358814cf7aaf26fda580d0101660f5e182673c211"
+content-hash = "8c882fc8680e368bc1c5b75e1344a1ee45c7021eb97318aa7bccdf4fd8dd9cd4"
 
 [metadata.files]
 asgiref = [
@@ -427,6 +438,10 @@ django = [
 ]
 django-allauth = [
     {file = "django-allauth-0.44.0.tar.gz", hash = "sha256:e51af457466022f52154d74c8523ac69375120fad2acce6e239635d85e610b25"},
+]
+django-cors-headers = [
+    {file = "django-cors-headers-3.7.0.tar.gz", hash = "sha256:96069c4aaacace786a34ee7894ff680780ec2644e4268b31181044410fecd12e"},
+    {file = "django_cors_headers-3.7.0-py3-none-any.whl", hash = "sha256:1ac2b1213de75a251e2ba04448da15f99bcfcbe164288ae6b5ff929dc49b372f"},
 ]
 django-service-objects = [
     {file = "django-service-objects-0.7.0.tar.gz", hash = "sha256:42be7b09c5df229951d849c99cd7efc414e01caa15c3b652ba5e668a35f18888"},
