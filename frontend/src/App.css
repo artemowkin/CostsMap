@@ -1,0 +1,51 @@
+* {
+	box-sizing: border-box;
+	color: #333;
+	font-family: Roboto;
+}
+
+a {
+	text-decoration: none;
+}
+
+body {
+	margin: 0;
+}
+
+.app_header {
+	width: 100%;
+	max-width: 1200px;
+	height: 80px;
+	margin: 0 auto;
+	padding: 0 10px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.logo {
+	font-weight: bold;
+	font-size: 30px;
+	font-weight: bold;
+}
+
+.navigation_bar {
+	height: inherit;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.navigation_link {
+	font-size: 20px;
+	height: inherit;
+	padding: 0 30px;
+	display: flex;
+	align-items: center;	
+	transition: background ease-in-out .25s, color ease-in-out .25s;
+}
+
+.navigation_link:hover {
+	background: #333;
+	color: white;
+}
