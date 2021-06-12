@@ -5,46 +5,48 @@ class CostsList extends React.Component {
 
 	render() {
 		if (this.props.costs === null) {
+			return this.renderLoadingCosts();
+		} else if (this.props.costs.length === 0) {
 			return this.renderNoCosts();
 		} else {
 			return this.renderCosts()
 		}
 	}
 
-	renderNoCosts() {
+	renderLoadingCosts() {
 		return (<p>Loading...</p>);
 	}
 
+	renderNoCosts() {
+		return (<p>There is no costs for this date :(</p>);
+	}
+
 	renderCosts() {
-		if (this.props.costs.length === 0) {
-			return (<p>There is no costs for this date :(</p>);
-		} else {
-			let costsItems = this.props.costs.map((cost) =>
-				<div key={cost.pk} className="cost">
-					<div className="cost_left">
-						<div className="cost_image"></div>
-						<div className="cost_description">
-							<div className="cost_title">{cost.title}</div>
-							<div className="cost_category">
-								{cost.category.title}
-							</div>
+		let costsItems = this.props.costs.map((cost) =>
+			<div key={cost.pk} className="cost">
+				<div className="cost_left">
+					<div className="cost_image"></div>
+					<div className="cost_description">
+						<div className="cost_title">{cost.title}</div>
+						<div className="cost_category">
+							{cost.category.title}
 						</div>
 					</div>
-					<div className="cost_right">
-						<div className="costs_sum">- {cost.costs_sum} ₽</div>
-						<button className="cost_edit_button"></button>
-					</div>
 				</div>
-			);
-			return (
-				<div className="costs_content">
-					<div className="total_sum_container">
-						<div className="total_sum">Total sum: {this.props.total_sum} ₽</div>
-					</div>
-					<div id="costs_list">{costsItems}</div>
+				<div className="cost_right">
+					<div className="costs_sum">- {cost.costs_sum} ₽</div>
+					<button className="cost_edit_button"></button>
 				</div>
-			);
-		}
+			</div>
+		);
+		return (
+			<div className="costs_content">
+				<div className="total_sum_container">
+					<div className="total_sum">Total sum: {this.props.total_sum} ₽</div>
+				</div>
+				<div id="costs_list">{costsItems}</div>
+			</div>
+		);
 	}
 }
 
