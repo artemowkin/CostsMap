@@ -22,8 +22,18 @@ To install this project you need to have:
 
 * `docker`
 * `docker-compose`
+* `nodejs`
+* `npm`
 
 ### Installing
+
+#### Backend
+
+Change your directory to backend
+
+```
+$ cd backend
+```
 
 First, you need to build the Docker image
 
@@ -41,6 +51,20 @@ And apply all migrations
 
 ```
 $ docker-compose run web python manage.py migrate
+```
+
+#### Frontend
+
+Change your directory to frontent
+
+```
+$ cd frontent
+```
+
+And start the development server
+
+```
+$ npm start
 ```
 
 ## Running the tests
