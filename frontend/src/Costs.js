@@ -37,7 +37,7 @@ class CostsList extends React.Component {
 				</div>
 			);
 			return (
-				<div className="day_costs">
+				<div className="costs_content">
 					<div className="total_sum_container">
 						<div className="total_sum">Total sum: {this.props.total_sum} ₽</div>
 					</div>
