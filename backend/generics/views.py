@@ -61,6 +61,7 @@ class GetUpdateDeleteGenericView(APIView):
 	delete_service_class = None
 	update_service_class = None
 	serializer_class = None
+	mutable_serializer_class = None
 	model_name = 'object'
 
 	def __init__(self, *args, **kwargs):
@@ -85,27 +86,31 @@ class GetUpdateDeleteGenericView(APIView):
 				f"{self.__class__.__name__} must have "
 				"`serializer_class` attribute"
 			)
+		if not self.mutable_serializer_class:
+			self.mutable_serializer_class = self.serializer_class
 
-	def dispatch(self, request, pk):
-		self.get_service = self.get_service_class(request.user)
-		self.entry = self.get_service.get_concrete(pk)
-		return super().dispatch(request, pk)
+	def _get_requested_entry(self, request, pk):
+		get_service = self.get_service_class(request.user)
+		return get_service.get_concrete(pk)
 
 	def get(self, request, pk):
-		serializer = self.serializer_class(self.entry)
+		entry = self._get_requested_entry(request, pk)
+		serializer = self.serializer_class(entry)
 		return Response(serializer.data)
 
 	def delete(self, request, pk):
+		entry = self._get_requested_entry(request, pk)
 		self.delete_service_class.execute({
-			self.model_name: self.entry, 'owner': request.user
+			self.model_name: entry, 'owner': request.user
 		})
 		return Response(status=204)
 
 	def put(self, request, pk):
-		serializer = self.serializer_class(self.entry, data=request.data)
+		entry = self._get_requested_entry(request, pk)
+		serializer = self.mutable_serializer_class(entry, data=request.data)
 		if serializer.is_valid():
 			service_data = serializer.validated_data | {
-				self.model_name: self.entry, 'owner': request.user
+				self.model_name: entry, 'owner': request.user
 			}
 			self.update_service_class.execute(service_data)
 			return Response(status=204)

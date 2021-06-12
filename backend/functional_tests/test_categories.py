@@ -54,7 +54,11 @@ class CategoriesAPIEndpointsTest(TestCase, CRUDFunctionalTest):
 		)
 		serialized_cost = {
 			'pk': str(cost.pk), 'title': 'some_cost', 'costs_sum': '100.00',
-			'category': str(self.entry.pk), 'owner': self.user.pk,
+			'category': {
+				'pk': str(self.entry.pk),
+				'title': self.entry.title,
+				'owner': self.entry.owner.pk
+			}, 'owner': self.user.pk,
 			'date': cost.date.isoformat()
 		}
 		response = self.client.get(

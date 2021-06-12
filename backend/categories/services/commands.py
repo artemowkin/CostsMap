@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from .base import GetCategoriesService, get_category_costs
 from ..serializers import CategorySerializer
 from costs.services.base import GetCostsTotalSumService
-from costs.serializers import CostSerializer
+from costs.serializers import ImmutableCostSerializer
 
 
 User = get_user_model()
@@ -32,7 +32,7 @@ class GetCategoryCostsCommand:
 
     get_service_class = GetCategoriesService
     total_sum_service = GetCostsTotalSumService()
-    cost_serializer = CostSerializer
+    cost_serializer = ImmutableCostSerializer
     category_serializer = CategorySerializer
 
     def __init__(self, category_pk, user):

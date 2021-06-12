@@ -14,7 +14,7 @@ from .services.base import (
 from .services.commands import (
     GetAllCostsCommand, GetCostsForTheMonthCommand, GetCostsForTheDateCommand,
 )
-from .serializers import CostSerializer
+from .serializers import ImmutableCostSerializer, MutableCostSerializer
 
 
 class GetCreateCostsView(GetCreateGenericView):
@@ -22,7 +22,7 @@ class GetCreateCostsView(GetCreateGenericView):
 
     get_command = GetAllCostsCommand
     create_service = CreateCostService
-    serializer_class = CostSerializer
+    serializer_class = MutableCostSerializer
     model_name = 'cost'
 
 
@@ -32,7 +32,8 @@ class GetUpdateDeleteCost(GetUpdateDeleteGenericView):
     get_service_class = GetCostsService
     delete_service_class = DeleteCostService
     update_service_class = ChangeCostService
-    serializer_class = CostSerializer
+    serializer_class = ImmutableCostSerializer
+    mutable_serializer_class = MutableCostSerializer
     model_name = 'cost'
 
 

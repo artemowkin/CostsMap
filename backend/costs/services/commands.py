@@ -4,14 +4,14 @@ from services.commands import ListEntriesCommand, DateEntriesListCommand
 from .base import (
     GetCostsService, GetCostsTotalSumService, GetCostsForTheDateService
 )
-from ..serializers import CostSerializer
+from ..serializers import ImmutableCostSerializer
 
 
 class CostsListMixin:
     """Mixin with costs class attributes"""
 
     total_sum_service = GetCostsTotalSumService()
-    serializer_class = CostSerializer
+    serializer_class = ImmutableCostSerializer
     queryset_name = 'costs'
 
 

@@ -40,7 +40,11 @@ class CostsAPIEndpointsTest(TestCase, DateCRUDFunctionalTest):
         self.serialized_entry = {
             'pk': str(self.entry.pk), 'title': 'test_cost',
             'costs_sum': '100.00',
-            'category': str(self.category.pk), 'owner': self.user.pk,
+            'category': {
+                'pk': str(self.category.pk),
+                'title': self.category.title,
+                'owner': self.category.owner.pk
+            }, 'owner': self.user.pk,
             'date': datetime.date.today().isoformat(),
         }
 
