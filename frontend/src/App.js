@@ -2,6 +2,7 @@ import React from 'react';
 import './App.css';
 import Header from './Header.js';
 import DayCosts from './Costs.js';
+import Login from './Login.js';
 
 class App extends React.Component {
 
@@ -17,7 +18,9 @@ class App extends React.Component {
 			return (
 				<div className="app">
 					<Header />
-					<section id="content"></section>
+					<section id="content">
+						<Login />
+					</section>
 				</div>
 			);
 		} else {

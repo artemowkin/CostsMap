@@ -8,6 +8,10 @@ a {
 	text-decoration: none;
 }
 
+input, select {
+	outline: none;
+}
+
 body {
 	margin: 0;
 }
@@ -180,4 +184,60 @@ body {
 	color: #808080;
 	font-size: 1rem;
 	padding-right: 10px;
+}
+
+form h1 {
+	font-size: 2rem;
+	margin-bottom: 2rem;
+}
+
+form {
+	padding: 0 .5rem;
+}
+
+.form_error {
+	color: #721c24;
+	background-color: #f8d7da;
+	padding: .75rem 1.25rem;
+	border: 1px solid #f5c6cb;
+	border-radius: .25rem;
+	font-size: 1rem;
+	width: 26rem;
+}
+
+form p label {
+	display: block;
+	margin-bottom: 10px;
+	font-style: 15px;
+}
+
+form p input {
+	width: 20rem;
+	font-size: 1rem;
+	font-weight: 400;
+	padding: .375rem .75rem;
+	border: 1px solid silver;
+	border-radius: 5px;
+	transition: box-shadow ease-in-out .25s;
+}
+
+form p input:focus {
+	box-shadow: 0 0 0 3px rgb(0 0 0 / 20%);
+}
+
+.login_form button[type="submit"] {
+	background: #333;
+	color: white;
+	font-size: 1rem;
+	border: 3px solid #333;
+	border-radius: 5px;
+	padding: .75rem 1.5rem;
+	margin-top: 20px;
+	cursor: pointer;
+	transition: background ease-in-out .25s, color ease-in-out .25s;
+}
+
+.login_form button[type="submit"]:hover {
+	background: white;
+	color: #333;
 }
