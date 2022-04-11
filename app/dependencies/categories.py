@@ -33,3 +33,34 @@ async def get_user_categories(user: User = Depends(current_user)):
     user_categories = await database.fetch_all(select_query)
     fmt_categories = [Category.from_orm(entry) for entry in user_categories]
     return fmt_categories
+
+
+async def get_category_by_title(
+    category_title: str, user: User = Depends(current_user)
+):
+    """
+    Return a concrete category for current user using title
+    and owner fields
+    """
+    select_query = categories.select().where(
+        categories.c.title == category_title, categories.c.owner == user.id
+    )
+    user_category = await database.fetch_one(select_query)
+    if not user_category:
+        raise HTTPException(
+            status_code=404,
+            detail="Category with this title doesn't exist for current user"
+        )
+
+    fmt_category = Category.from_orm(user_category)
+    return fmt_category
+
+
+async def delete_category_by_title(
+    category: Category = Depends(get_category_by_title)
+):
+    """Delete a concrete category using `title` and `owner` fields"""
+    delete_query = categories.delete().where(
+        categories.c.title == category.title
+    )
+    await database.execute(delete_query)

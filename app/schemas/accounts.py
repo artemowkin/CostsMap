@@ -53,3 +53,7 @@ class User(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class Auth401(BaseModel):
+    detail: str
