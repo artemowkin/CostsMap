@@ -44,3 +44,12 @@ class RegistrationAuthData(BaseModel):
             raise ValueError('passwords do not match')
 
         return v
+
+
+class User(BaseModel):
+    id: int
+    email: EmailStr
+    password: str
+
+    class Config:
+        orm_mode = True
