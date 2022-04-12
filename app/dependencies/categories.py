@@ -59,8 +59,21 @@ async def get_category_by_title(
 async def delete_category_by_title(
     category: Category = Depends(get_category_by_title)
 ):
-    """Delete a concrete category using `title` and `owner` fields"""
+    """
+    Get a concrete category from `get_category_by_title` and remove it
+    """
     delete_query = categories.delete().where(
         categories.c.title == category.title
     )
     await database.execute(delete_query)
+
+
+async def update_category_by_title(
+    update_data: Category, category: Category = Depends(get_category_by_title)
+):
+    """Update a concrete category using update_data from JSON request"""
+    update_query = categories.update().where(
+        categories.c.title == category.title
+    ).values(title=update_data.title)
+    await database.execute(update_query)
+    return update_data

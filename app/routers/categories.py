@@ -5,7 +5,7 @@ from app.schemas.categories import (
 )
 from app.dependencies.categories import (
     create_category, get_user_categories, get_category_by_title,
-    delete_category_by_title
+    delete_category_by_title, update_category_by_title
 )
 
 
@@ -49,3 +49,14 @@ async def get_concrete_category(
 def delete_category():
     """Delete a concrete category by `title`"""
     return {'deleted': True}
+
+
+@router.put(
+    "/{category_title}", response_model=Category,
+    responses={404: {'model': Category404}}
+)
+async def update_category(
+    category: Category = Depends(update_category_by_title)
+):
+    """Update a concrete category by `title` field"""
+    return category
