@@ -1,10 +1,13 @@
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
-from ..schemas.accounts import UserRegistration, UserLogIn, UserOut
+from ..schemas.accounts import (
+    UserRegistration, UserLogIn, UserOut, ChangeUserPassword
+)
 from ..services.accounts import (
     create_user_in_db, create_token_for_user, check_user_password,
-    decode_token, get_user_by_email, update_user_data
+    decode_token, get_user_by_email, update_user_data, verify_password,
+    update_user_password
 )
 
 
@@ -28,7 +31,7 @@ async def login_user(user: UserLogIn):
     return token
 
 
-async def get_current_user(token: str = Depends(oauth)):
+async def get_current_user(token: str = Depends(oauth)) -> UserOut:
     """Return current user using user email from token"""
     decoded_token = decode_token(token)
     db_user = await get_user_by_email(decoded_token['sub'])
@@ -36,9 +39,22 @@ async def get_current_user(token: str = Depends(oauth)):
     return user
 
 
-async def change_user(
-    changing_data: UserOut, user: UserOut = Depends(get_current_user)
-):
+async def change_user(changing_data: UserOut, token: str = Depends(oauth)):
     """Change the current user using data from request"""
-    await update_user_data(user.email, changing_data)
+    decoded_token = decode_token(token)
+    await update_user_data(decoded_token['sub'], changing_data)
     return changing_data
+
+
+async def change_user_password(
+    changing_password: ChangeUserPassword, token: str = Depends(oauth)
+):
+    """Change password for current user"""
+    decoded_token = decode_token(token)
+    db_user = await get_user_by_email(decoded_token['sub'])
+    if not verify_password(changing_password.old_password, db_user.password):
+        raise HTTPException(status_code=400, detail="Incorrect old password")
+
+    await update_user_password(
+        decoded_token['sub'], changing_password.new_password
+    )

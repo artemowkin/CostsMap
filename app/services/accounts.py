@@ -116,3 +116,12 @@ async def update_user_data(email: str, changing_data: UserOut):
         users.c.email == email
     )
     await database.execute(update_query)
+
+
+async def update_user_password(email: str, new_password: str):
+    """Update password for user"""
+    password_hash = hash_password(new_password)
+    update_query = users.update().values(password=password_hash).where(
+        users.c.email == email
+    )
+    await database.execute(update_query)
