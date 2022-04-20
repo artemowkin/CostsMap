@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from ..db.main import database
 from ..db.accounts import users
-from ..schemas.accounts import UserRegistration, Token, UserLogIn
+from ..schemas.accounts import UserRegistration, Token, UserLogIn, UserOut
 from ..settings import JWT_TOKEN_EXP_DELTA, SECRET_KEY, JWT_ALGORITHM
 
 
@@ -107,3 +107,12 @@ async def get_user_by_email(user_email: str):
     )
 
     return db_user
+
+
+@user_exists_decorator
+async def update_user_data(email: str, changing_data: UserOut):
+    """Update the user information"""
+    update_query = users.update().values(**changing_data.dict()).where(
+        users.c.email == email
+    )
+    await database.execute(update_query)

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from ..schemas.accounts import Token, UserOut
 from ..dependencies.accounts import (
-    registrate_user, login_user, get_current_user
+    registrate_user, login_user, get_current_user, change_user
 )
 
 
@@ -24,4 +24,10 @@ async def login(token: Token = Depends(login_user)):
 @router.get("/me/", response_model=UserOut)
 async def me(user: UserOut = Depends(get_current_user)):
     """Return current user"""
+    return user
+
+
+@router.put("/me/", response_model=UserOut)
+async def change_me(user: UserOut = Depends(change_user)):
+    """Change current user data"""
     return user
