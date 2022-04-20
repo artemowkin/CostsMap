@@ -1,7 +1,14 @@
-from ..schemas.accounts import UserRegistration, UserLogIn
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer
+
+from ..schemas.accounts import UserRegistration, UserLogIn, UserOut
 from ..services.accounts import (
-    create_user_in_db, create_token_for_user, check_user_password
+    create_user_in_db, create_token_for_user, check_user_password,
+    decode_token, get_user_by_email
 )
+
+
+oauth = OAuth2PasswordBearer(tokenUrl="token")
 
 
 async def registrate_user(user: UserRegistration):
@@ -19,3 +26,11 @@ async def login_user(user: UserLogIn):
     await check_user_password(user)
     token = create_token_for_user(user.email)
     return token
+
+
+async def get_current_user(token: str = Depends(oauth)):
+    """Return current user using user email from token"""
+    decoded_token = decode_token(token)
+    db_user = await get_user_by_email(decoded_token['sub'])
+    user = UserOut.from_orm(db_user)
+    return user

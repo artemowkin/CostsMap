@@ -4,7 +4,7 @@ import calendar
 from fastapi import HTTPException
 from asyncpg.exceptions import UniqueViolationError
 from passlib.context import CryptContext
-from jose import jwt
+from jose import jwt, JWTError
 from pydantic import BaseModel
 
 from ..db.main import database
@@ -65,17 +65,45 @@ def create_token_for_user(user_email: str,
     return Token(token=jwt_token, exptime=exp_date)
 
 
+def decode_token(token: str):
+    """Decode user token and return JSON data from it"""
+    unauthenticated_error = HTTPException(
+        status_code=401, detail="Token is incorrect",
+        headers={"WWW-Authenticate": "Bearer"}
+    )
+    try:
+        decoded_token = jwt.decode(
+            token, SECRET_KEY, algorithms=[JWT_ALGORITHM]
+        )
+        if not 'sub' in decoded_token or not 'exp' in decoded_token:
+            raise unauthenticated_error
+
+        utc_now_timestamp = calendar.timegm(datetime.utcnow().utctimetuple())
+        if decoded_token['exp'] < utc_now_timestamp:
+            raise unauthenticated_error
+    except JWTError:
+        raise unauthenticated_error
+
+    return decoded_token
+
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
 async def check_user_password(user: UserLogIn):
     """Get user from db and check do passwords match"""
-    get_query = users.select().where(users.c.email == user.email)
+    db_user = await get_user_by_email(user.email)
+    if not verify_password(user.password, db_user.password):
+        raise HTTPException(status_code=400, detail="Incorrect password")
+
+
+async def get_user_by_email(user_email: str):
+    """Get user from DB using email"""
+    get_query = users.select().where(users.c.email == user_email)
     db_user = await database.fetch_one(get_query)
     if not db_user: raise HTTPException(
         status_code=400, detail="User with this email doesn't exist"
     )
 
-    if not verify_password(user.password, db_user.password):
-        raise HTTPException(status_code=400, detail="Incorrect password")
+    return db_user

@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from ..schemas.accounts import Token
-from ..dependencies.accounts import registrate_user, login_user
+from ..schemas.accounts import Token, UserOut
+from ..dependencies.accounts import (
+    registrate_user, login_user, get_current_user
+)
 
 
 router = APIRouter()
@@ -17,3 +19,9 @@ async def registration(token: Token = Depends(registrate_user)):
 async def login(token: Token = Depends(login_user)):
     """Log in user and generate new JWT token"""
     return token
+
+
+@router.get("/me/", response_model=UserOut)
+async def me(user: UserOut = Depends(get_current_user)):
+    """Return current user"""
+    return user
