@@ -32,12 +32,13 @@ class BaseUser(BaseModel):
     """Base user pydantic model with base fields"""
 
     email: EmailStr = Field(..., description='user email')
-    currency: Currencies = Field(..., description='main user currency')
-    language: Languages = Field(..., description='user language')
 
 
 class UserOut(BaseUser):
     """User pydantic model for sending user info as response"""
+
+    currency: Currencies = Field(..., description='main user currency')
+    language: Languages = Field(..., description='user language')
 
     class Config:
         orm_mode = True
@@ -55,6 +56,8 @@ class UserLogIn(BaseUser):
 class UserRegistration(BaseUser):
     """User pydantic model with data for registration"""
 
+    currency: Currencies = Field(..., description='main user currency')
+    language: Languages = Field(..., description='user language')
     password1: str = Field(
         ..., min_length=6, max_length=256, description='user password'
     )
@@ -75,7 +78,7 @@ class UserRegistration(BaseUser):
         return v
 
 
-class ChangeUserPassword:
+class ChangeUserPassword(BaseModel):
     """Pydantic model with data for changing user password"""
 
     old_password: str = Field(..., description="old user password")

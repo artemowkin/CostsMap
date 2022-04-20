@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from ..db.main import database
 from ..db.accounts import users
-from ..schemas.accounts import UserRegistration, Token
+from ..schemas.accounts import UserRegistration, Token, UserLogIn
 from ..settings import JWT_TOKEN_EXP_DELTA, SECRET_KEY, JWT_ALGORITHM
 
 
@@ -63,3 +63,19 @@ def create_token_for_user(user_email: str,
     token_data = {'sub': user_email, 'exp': exp_date}
     jwt_token = jwt.encode(token_data, SECRET_KEY, algorithm=JWT_ALGORITHM)
     return Token(token=jwt_token, exptime=exp_date)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+async def check_user_password(user: UserLogIn):
+    """Get user from db and check do passwords match"""
+    get_query = users.select().where(users.c.email == user.email)
+    db_user = await database.fetch_one(get_query)
+    if not db_user: raise HTTPException(
+        status_code=400, detail="User with this email doesn't exist"
+    )
+
+    if not verify_password(user.password, db_user.password):
+        raise HTTPException(status_code=400, detail="Incorrect password")
