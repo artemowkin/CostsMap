@@ -13,4 +13,10 @@ def get_env(env_name: str, default_value: str | None = None):
     return env_value
 
 
-DATABASE_URL = get_env('DATABASE_URL')
+DATABASE_URL = get_env('COSTSMAP_DATABASE_URL')
+
+SECRET_KEY = get_env('COSTSMAP_SECRET_KEY')
+
+JWT_ALGORITHM = 'HS256'
+
+JWT_TOKEN_EXP_DELTA = 30 * 24 * 60 * 60 # 30 days
