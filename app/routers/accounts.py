@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from ..schemas.accounts import Token, UserOut, ChangeUserPassword
+from ..schemas.accounts import Token, UserOut
 from ..dependencies.accounts import (
     registrate_user, login_user, get_current_user, change_user,
     change_user_password
@@ -34,7 +34,15 @@ def change_me(user: UserOut = Depends(change_user)):
     return user
 
 
-@router.post("/change_password/", dependencies=[Depends(change_user_password)])
+@router.post(
+    "/change_password/",
+    dependencies=[Depends(change_user_password)],
+    responses={200: {'content': {
+        'application/json': {
+            'example': {'updated': True},
+        }
+    }}}
+)
 def change_password():
     """Change password for user"""
     return {'updated': True}

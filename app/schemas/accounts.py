@@ -3,6 +3,11 @@ from enum import Enum
 from pydantic import BaseModel, EmailStr, Field, validator
 
 
+SUPPORTED_CURRENCIES = ('₽', '$', '€', '¥')
+
+SUPPORTED_LANGUAGES = ('russian', 'english')
+
+
 def _validate_password_constratints(password: str):
     """Validate constratints for password"""
     if password.lower() == password:
