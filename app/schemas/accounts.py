@@ -3,11 +3,6 @@ from enum import Enum
 from pydantic import BaseModel, EmailStr, Field, validator
 
 
-SUPPORTED_CURRENCIES = ('₽', '$', '€', '¥')
-
-SUPPORTED_LANGUAGES = ('russian', 'english')
-
-
 def _validate_password_constratints(password: str):
     """Validate constratints for password"""
     if password.lower() == password:
@@ -26,11 +21,23 @@ class Currencies(str, Enum):
     yuan = '¥'
 
 
+class SupportedCurrencies(BaseModel):
+    """Model that has list of supported currencies"""
+
+    currencies: list[str] = ['₽', '$', '€', '¥']
+
+
 class Languages(str, Enum):
     """Enumeration of available user languages"""
 
     russian = 'russian'
     english = 'english'
+
+
+class SupportedLanguages(BaseModel):
+    """Model that has list of supported languages"""
+
+    languages: list[str] = ['russian', 'english']
 
 
 class BaseUser(BaseModel):
