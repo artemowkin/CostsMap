@@ -44,6 +44,11 @@ def user_exists_decorator(func):
     return inner
 
 
+def user_does_not_exist_decorator(func):
+    """Handle if user doesn't exist"""
+    pass
+
+
 @user_exists_decorator
 async def create_user_in_db(user: UserRegistration):
     """Create entry in db for user"""
@@ -56,9 +61,11 @@ async def create_user_in_db(user: UserRegistration):
 def create_token_for_user(user_email: str,
         exp_date: int | None = None) -> Token:
     """Create JWT token for user"""
+    utc_now_timestamp = calendar.timegm(datetime.utcnow().utctimetuple())
     if not exp_date:
-        utc_now_timestamp = calendar.timegm(datetime.utcnow().utctimetuple())
         exp_date = utc_now_timestamp + JWT_TOKEN_EXP_DELTA
+    else:
+        assert utc_now_timestamp < exp_date
 
     token_data = {'sub': user_email, 'exp': exp_date}
     jwt_token = jwt.encode(token_data, SECRET_KEY, algorithm=JWT_ALGORITHM)
