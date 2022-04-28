@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from .routers import accounts
+from .routers import accounts, categories
 from .db.main import database
 
 
@@ -17,11 +17,17 @@ app = FastAPI(
         "name": "GPL-3.0",
         "url": "https://www.gnu.org/licenses/gpl-3.0.html"
     },
-    docs_url="/api/v1/auth/docs/",
-    redoc_url="/api/v1/auth/redoc/",
+    docs_url="/api/v1/docs/",
+    redoc_url="/api/v1/redoc/",
 )
 
 app.include_router(accounts.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(
+    categories.router,
+    prefix="/api/v1/categories",
+    tags=["categories"]
+)
+
 
 @app.on_event("startup")
 async def startup():

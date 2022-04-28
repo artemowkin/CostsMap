@@ -49,6 +49,7 @@ class BaseUser(BaseModel):
 class UserOut(BaseUser):
     """User pydantic model for sending user info as response"""
 
+    id: int | None = None
     currency: Currencies = Field(..., description='main user currency')
     language: Languages = Field(..., description='user language')
 
