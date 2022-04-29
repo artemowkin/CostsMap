@@ -4,8 +4,10 @@ from fastapi import Depends, Query
 
 from .accounts import get_current_user
 from ..schemas.accounts import UserOut
-from ..schemas.categories import CategoryOut
-from ..services.categories import get_categories_with_costs_for_the_month
+from ..schemas.categories import CategoryOut, BaseCategory
+from ..services.categories import (
+    get_categories_with_costs_for_the_month, create_category
+)
 
 
 current_month = datetime.utcnow().strftime("%Y-%m")
@@ -21,3 +23,15 @@ async def get_all_categories_for_month(
         CategoryOut.from_orm(category) for category in categories
     ]
     return categories_out
+
+
+async def create_concrete_category(
+    category: BaseCategory,
+    user: UserOut = Depends(get_current_user)
+):
+    """Create the new category"""
+    category_id = await create_category(category, user)
+    category_data = CategoryOut(
+        **category.dict(), id=category_id
+    )
+    return category_data
