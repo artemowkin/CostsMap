@@ -26,7 +26,7 @@ def create_categories(
     return category
 
 
-@router.get('/{category_id}/')
+@router.get('/{category_id}/', response_model=CategoryOut)
 def get_concrete_category(
     category: CategoryOut = Depends(get_concrete_category)
 ):
