@@ -45,4 +45,19 @@ async def get_category_by_id(category_id: int, user: UserOut):
         categories.c.id == category_id, categories.c.user_id == user.id
     )
     category = await database.fetch_one(get_query)
+    if not category:
+        raise HTTPException(
+            status_code=404, detail="Category with this id doesn't exist"
+        )
+
     return category
+
+
+@category_exists_decorator
+async def update_category_by_id(
+    category_id: int, category_data: BaseCategory
+):
+    """Update the concrete category using category id"""
+    update_query = categories.update().values(
+        **category_data.dict()).where(categories.c.id == category_id)
+    await database.execute(update_query)

@@ -7,7 +7,7 @@ from ..schemas.accounts import UserOut
 from ..schemas.categories import CategoryOut, BaseCategory
 from ..services.categories import (
     get_categories_with_costs_for_the_month, create_category,
-    get_category_by_id
+    get_category_by_id, update_category_by_id
 )
 
 
@@ -45,3 +45,15 @@ async def get_concrete_category(
     category = await get_category_by_id(category_id, user)
     category_out = CategoryOut.from_orm(category)
     return category_out
+
+
+async def update_concrete_category(
+    updating_category_data: BaseCategory,
+    category: CategoryOut = Depends(get_concrete_category)
+):
+    """Update the concrete category by id"""
+    await update_category_by_id(category.id, updating_category_data)
+    updated_category = CategoryOut(
+        **updating_category_data.dict(), id=category.id
+    )
+    return updated_category
