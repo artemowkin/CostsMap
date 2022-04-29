@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends
 from ..schemas.categories import CategoryOut
 from ..dependencies.categories import (
     get_all_categories_for_month, create_concrete_category,
-    get_concrete_category, update_concrete_category
+    get_concrete_category, update_concrete_category,
+    delete_category_by_id
 )
 
 
@@ -40,3 +41,13 @@ def update_concrete_category(
 ):
     """Update the concrete category"""
     return category
+
+
+@router.delete(
+    '/{category_id}/',
+    status_code=204,
+    dependencies=[Depends(delete_category_by_id)]
+)
+def delete_concrete_category():
+    """Delete the concrete category by id"""
+    pass

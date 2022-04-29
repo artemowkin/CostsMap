@@ -7,7 +7,7 @@ from ..schemas.accounts import UserOut
 from ..schemas.categories import CategoryOut, BaseCategory
 from ..services.categories import (
     get_categories_with_costs_for_the_month, create_category,
-    get_category_by_id, update_category_by_id
+    get_category_by_id, update_category_by_id, delete_category
 )
 
 
@@ -57,3 +57,10 @@ async def update_concrete_category(
         **updating_category_data.dict(), id=category.id
     )
     return updated_category
+
+
+async def delete_category_by_id(
+    category: CategoryOut = Depends(get_concrete_category)
+):
+    """Delete the concrete category using category id"""
+    await delete_category(category.id)

@@ -61,3 +61,9 @@ async def update_category_by_id(
     update_query = categories.update().values(
         **category_data.dict()).where(categories.c.id == category_id)
     await database.execute(update_query)
+
+
+async def delete_category(category_id: int):
+    """Delete the category using id"""
+    delete_query = categories.delete().where(categories.c.id == category_id)
+    await database.execute(delete_query)
