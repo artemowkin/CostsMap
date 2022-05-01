@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from .routers import accounts, categories
+from .routers import accounts, categories, cards
 from .db.main import database
 
 
@@ -27,6 +27,7 @@ app.include_router(
     prefix="/api/v1/categories",
     tags=["categories"]
 )
+app.include_router(cards.router, prefix="/api/v1/cards", tags=["cards"])
 
 
 @app.on_event("startup")
