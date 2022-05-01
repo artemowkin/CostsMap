@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
 
 from ..schemas.cards import CardOut
-from ..dependencies.cards import get_all_cards, create_new_card
+from ..dependencies.cards import (
+    get_all_cards, create_new_card, get_concrete_card
+)
 
 
 router = APIRouter()
@@ -16,4 +18,10 @@ def all_cards(cards: list[CardOut] = Depends(get_all_cards)):
 @router.post('/', response_model=CardOut)
 def create_card(card: CardOut = Depends(create_new_card)):
     """Create a new card for current user"""
+    return card
+
+
+@router.get('/{card_id}/', response_model=CardOut)
+def concrete_card(card: CardOut = Depends(get_concrete_card)):
+    """Return a concrete user card"""
     return card

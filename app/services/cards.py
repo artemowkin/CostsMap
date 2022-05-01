@@ -34,3 +34,15 @@ async def create_new_user_card(card_info: Card, user_id: int) -> int:
     create_query = cards.insert().values(**card_info.dict(), user_id=user_id)
     created_card_id = await database.execute(create_query)
     return created_card_id
+
+
+async def get_concrete_user_card(card_id: int, user_id: int):
+    """Return a concrete user card using card id and user id"""
+    get_query = cards.select().where(
+        cards.c.id == card_id, cards.c.user_id == user_id
+    )
+    card_db = await database.fetch_one(get_query)
+    if not card_db: raise HTTPException(
+        status_code=404, detail="Category with this id doesn't exist"
+    )
+    return card_db
