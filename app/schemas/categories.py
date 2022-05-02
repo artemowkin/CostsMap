@@ -10,7 +10,7 @@ class BaseCategory(BaseModel):
 
 class CategoryOut(BaseCategory):
     """Model for category in response"""
-    id: int
+    id: int | None = None
 
     class Config:
         orm_mode = True

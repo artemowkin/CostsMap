@@ -8,7 +8,7 @@ from app.db.categories import categories
 from app.db.main import get_database
 
 
-engine = get_database()
+database = get_database()
 
 
 def category_exists_decorator(func):
