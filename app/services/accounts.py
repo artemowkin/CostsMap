@@ -3,17 +3,20 @@ import calendar
 
 from fastapi import HTTPException
 from asyncpg.exceptions import UniqueViolationError
+from sqlite3 import IntegrityError
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from pydantic import BaseModel
 
-from ..db.main import database
+from ..db.main import get_database
 from ..db.accounts import users
-from ..schemas.accounts import UserRegistration, Token, UserLogIn, UserOut
-from ..settings import JWT_TOKEN_EXP_DELTA, SECRET_KEY, JWT_ALGORITHM
+from ..schemas.accounts import UserRegistration, Token, UserLogIn, UserIn
+from ..settings import config
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+database = get_database()
 
 
 class UserInDb(BaseModel):
@@ -36,17 +39,12 @@ def user_exists_decorator(func):
     async def inner(*args, **kwargs):
         try:
             await func(*args, **kwargs)
-        except UniqueViolationError:
+        except (UniqueViolationError, IntegrityError):
             raise HTTPException(
                 status_code=400, detail="User with this email already exists"
             )
 
     return inner
-
-
-def user_does_not_exist_decorator(func):
-    """Handle if user doesn't exist"""
-    pass
 
 
 @user_exists_decorator
@@ -63,12 +61,14 @@ def create_token_for_user(user_email: str,
     """Create JWT token for user"""
     utc_now_timestamp = calendar.timegm(datetime.utcnow().utctimetuple())
     if not exp_date:
-        exp_date = utc_now_timestamp + JWT_TOKEN_EXP_DELTA
+        exp_date = utc_now_timestamp + config.jwt_token_exp_delta
     else:
         assert utc_now_timestamp < exp_date
 
     token_data = {'sub': user_email, 'exp': exp_date}
-    jwt_token = jwt.encode(token_data, SECRET_KEY, algorithm=JWT_ALGORITHM)
+    jwt_token = jwt.encode(
+        token_data, config.secret_key, algorithm=config.jwt_algorithm
+    )
     return Token(token=jwt_token, exptime=exp_date)
 
 
@@ -80,7 +80,7 @@ def decode_token(token: str):
     )
     try:
         decoded_token = jwt.decode(
-            token, SECRET_KEY, algorithms=[JWT_ALGORITHM]
+            token, config.secret_key, algorithms=[config.jwt_algorithm]
         )
         if not 'sub' in decoded_token or not 'exp' in decoded_token:
             raise unauthenticated_error
@@ -117,12 +117,13 @@ async def get_user_by_email(user_email: str):
 
 
 @user_exists_decorator
-async def update_user_data(email: str, changing_data: UserOut):
+async def update_user_data(email: str, changing_data: UserIn):
     """Update the user information"""
     update_query = users.update().values(**changing_data.dict()).where(
         users.c.email == email
     )
-    await database.execute(update_query)
+    result = await database.execute(update_query)
+    return result
 
 
 async def update_user_password(email: str, new_password: str):

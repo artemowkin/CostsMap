@@ -46,12 +46,17 @@ class BaseUser(BaseModel):
     email: EmailStr = Field(..., description='user email')
 
 
-class UserOut(BaseUser):
+class UserIn(BaseUser):
+    """User pydantic model for input request data"""
+
+    currency: Currencies = Field(..., description='main user currency')
+    language: Languages = Field(..., description='user language')
+
+
+class UserOut(UserIn):
     """User pydantic model for sending user info as response"""
 
     id: int | None = None
-    currency: Currencies = Field(..., description='main user currency')
-    language: Languages = Field(..., description='user language')
 
     class Config:
         orm_mode = True

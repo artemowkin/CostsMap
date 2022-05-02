@@ -2,8 +2,11 @@ from fastapi import HTTPException
 from asyncpg.exceptions import UniqueViolationError
 
 from ..db.cards import cards
-from ..db.main import database
+from ..db.main import get_database
 from ..schemas.cards import Card
+
+
+database = get_database()
 
 
 def unique_card_handler(func):

@@ -1,6 +1,9 @@
 import sqlalchemy
 
-from .main import metadata, engine
+from .main import metadata, get_engine
+
+
+engine = get_engine()
 
 
 users = sqlalchemy.Table("users", metadata,

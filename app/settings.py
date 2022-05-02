@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 
 def get_env(env_name: str, default_value: str | None = None):
@@ -13,10 +14,18 @@ def get_env(env_name: str, default_value: str | None = None):
     return env_value
 
 
-DATABASE_URL = get_env('COSTSMAP_DATABASE_URL')
+class Config:
+    """Class with application settings"""
 
-SECRET_KEY = get_env('COSTSMAP_SECRET_KEY')
+    def __init__(self):
+        self.base_dir = Path(__file__).parent.parent
+        self.test_db_path = self.base_dir / 'testdb.db'
+        self.test_db_url = f"sqlite:///{self.test_db_path}"
+        self.database_url = get_env('COSTSMAP_DATABASE_URL')
+        self.secret_key = get_env('COSTSMAP_SECRET_KEY')
+        self.jwt_algorithm = 'HS256'
+        self.jwt_token_exp_delta = 30 * 24 * 60 * 60 # 30 days
+        self.is_testing = False
 
-JWT_ALGORITHM = 'HS256'
 
-JWT_TOKEN_EXP_DELTA = 30 * 24 * 60 * 60 # 30 days
+config = Config()

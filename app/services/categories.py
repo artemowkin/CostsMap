@@ -1,10 +1,14 @@
 from fastapi import HTTPException
 from asyncpg.exceptions import UniqueViolationError
+from sqlite3 import IntegrityError
 
 from ..schemas.accounts import UserOut
 from ..schemas.categories import BaseCategory
 from app.db.categories import categories
-from app.db.main import database
+from app.db.main import get_database
+
+
+engine = get_database()
 
 
 def category_exists_decorator(func):
@@ -13,7 +17,7 @@ def category_exists_decorator(func):
     async def inner(*args, **kwargs):
         try:
             await func(*args, **kwargs)
-        except UniqueViolationError:
+        except (UniqueViolationError, IntegrityError):
             raise HTTPException(
                 status_code=400,
                 detail="Category with this title already exists"

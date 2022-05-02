@@ -1,9 +1,10 @@
-from decimal import Decimal
-
 import sqlalchemy
 
-from .main import metadata, engine
+from .main import metadata, get_engine
 from .accounts import users
+
+
+engine = get_engine()
 
 
 cards = sqlalchemy.Table("cards", metadata,

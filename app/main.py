@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 
 from .routers import accounts, categories, cards
-from .db.main import database
+from .db.main import get_database
+
+
+database = get_database()
 
 
 app = FastAPI(
