@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from asyncpg.exceptions import UniqueViolationError
+from sqlite3 import IntegrityError
 
 from ..db.cards import cards
 from ..db.main import get_database
@@ -15,7 +16,7 @@ def unique_card_handler(func):
         try:
             result = await func(*args, **kwargs)
             return result
-        except UniqueViolationError:
+        except (UniqueViolationError, IntegrityError):
             raise HTTPException(
                 status_code=400,
                 detail="Card with this title already exists"
@@ -46,6 +47,6 @@ async def get_concrete_user_card(card_id: int, user_id: int):
     )
     card_db = await database.fetch_one(get_query)
     if not card_db: raise HTTPException(
-        status_code=404, detail="Category with this id doesn't exist"
+        status_code=404, detail="Card with this id doesn't exist"
     )
     return card_db

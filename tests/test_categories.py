@@ -13,6 +13,8 @@ client = TestClient(app)
 
 
 def test_create_category():
+    clean_testing()
+    setup_testing()
     response = client.post('/api/v1/auth/registration/', json={
         "email": "someone@gmail.com",
         "password1": "Password123",
@@ -20,6 +22,7 @@ def test_create_category():
         "currency": "$",
         "language": "english",
     })
+    print(response.json())
     assert response.status_code == 200
     data = response.json()
     assert 'token' in data
