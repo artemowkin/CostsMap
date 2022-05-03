@@ -1,10 +1,8 @@
 from fastapi import FastAPI
+import databases
 
 from .routers import accounts, categories, cards
-from .db.main import get_database
-
-
-database = get_database()
+from .settings import config
 
 
 app = FastAPI(
@@ -35,9 +33,14 @@ app.include_router(cards.router, prefix="/api/v1/cards", tags=["cards"])
 
 @app.on_event("startup")
 async def startup():
-    await database.connect()
+    if config.is_testing:
+        config.database = databases.Database(config.test_db_url)
+    else:
+        config.database = databases.Database(config.database_url)
+
+    await config.database.connect()
 
 
 @app.on_event("shutdown")
 async def shutdown():
-    await database.disconnect()
+    if not config.database: await config.database.disconnect()

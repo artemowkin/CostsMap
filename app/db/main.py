@@ -1,3 +1,4 @@
+from fastapi import FastAPI
 import databases
 from sqlalchemy import create_engine, MetaData
 
@@ -5,13 +6,6 @@ from ..settings import config
 
 
 metadata = MetaData()
-
-
-def get_database():
-    if config.is_testing:
-        return databases.Database(config.test_db_url)
-
-    return databases.Database(config.database_url)
 
 
 def get_engine():

@@ -17,7 +17,7 @@ class CardOut(Card):
     """Card pydantic model for output responses"""
 
     id: int
-    amount: Decimal | None = None
+    amount: Decimal = Decimal('0')
 
     class Config:
         orm_mode = True

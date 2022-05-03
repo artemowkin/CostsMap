@@ -1,5 +1,7 @@
 import os
 
+from databases import Database
+
 from app.settings import config
 
 
@@ -11,6 +13,7 @@ def _create_test_db_if_doesnt_exist():
 def setup_testing():
     _create_test_db_if_doesnt_exist()
     config.is_testing = True
+    config.database = Database(config.test_db_url)
     from app.db.accounts import users
     from app.db.categories import categories
     from app.db.main import metadata, get_engine

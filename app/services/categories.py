@@ -5,10 +5,7 @@ from sqlite3 import IntegrityError
 from ..schemas.accounts import UserOut
 from ..schemas.categories import BaseCategory
 from app.db.categories import categories
-from app.db.main import get_database
-
-
-database = get_database()
+from ..settings import config
 
 
 def category_exists_decorator(func):
@@ -29,7 +26,7 @@ def category_exists_decorator(func):
 async def get_categories_with_costs_for_the_month(user: UserOut, month: str):
     """Return user categories with costs for the month"""
     get_query = categories.select().where(categories.c.user_id == user.id)
-    db_categories = await database.fetch_all(get_query)
+    db_categories = await config.database.fetch_all(get_query)
     return db_categories
 
 
@@ -39,7 +36,7 @@ async def create_category(category: BaseCategory, user: UserOut):
     create_query = categories.insert().values(
         **category.dict(), user_id=user.id
     )
-    category_id = await database.execute(create_query)
+    category_id = await config.database.execute(create_query)
     return category_id
 
 
@@ -48,7 +45,7 @@ async def get_category_by_id(category_id: int, user: UserOut):
     get_query = categories.select().where(
         categories.c.id == category_id, categories.c.user_id == user.id
     )
-    category = await database.fetch_one(get_query)
+    category = await config.database.fetch_one(get_query)
     if not category:
         raise HTTPException(
             status_code=404, detail="Category with this id doesn't exist"
@@ -64,10 +61,10 @@ async def update_category_by_id(
     """Update the concrete category using category id"""
     update_query = categories.update().values(
         **category_data.dict()).where(categories.c.id == category_id)
-    await database.execute(update_query)
+    await config.database.execute(update_query)
 
 
 async def delete_category(category_id: int):
     """Delete the category using id"""
     delete_query = categories.delete().where(categories.c.id == category_id)
-    await database.execute(delete_query)
+    await config.database.execute(delete_query)

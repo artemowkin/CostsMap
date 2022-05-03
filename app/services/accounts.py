@@ -8,15 +8,12 @@ from passlib.context import CryptContext
 from jose import jwt, JWTError
 from pydantic import BaseModel
 
-from ..db.main import get_database
 from ..db.accounts import users
 from ..schemas.accounts import UserRegistration, Token, UserLogIn, UserIn
 from ..settings import config
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-database = get_database()
 
 
 class UserInDb(BaseModel):
@@ -53,7 +50,7 @@ async def create_user_in_db(user: UserRegistration):
     hashed_user_password = hash_password(user.password1)
     creation_data = UserInDb(**user.dict(), password=hashed_user_password)
     creation_query = users.insert().values(**creation_data.dict())
-    await database.execute(creation_query)
+    await config.database.execute(creation_query)
 
 
 def create_token_for_user(user_email: str,
@@ -108,7 +105,7 @@ async def check_user_password(user: UserLogIn):
 async def get_user_by_email(user_email: str):
     """Get user from DB using email"""
     get_query = users.select().where(users.c.email == user_email)
-    db_user = await database.fetch_one(get_query)
+    db_user = await config.database.fetch_one(get_query)
     if not db_user: raise HTTPException(
         status_code=400, detail="User with this email doesn't exist"
     )
@@ -122,7 +119,7 @@ async def update_user_data(email: str, changing_data: UserIn):
     update_query = users.update().values(**changing_data.dict()).where(
         users.c.email == email
     )
-    result = await database.execute(update_query)
+    result = await config.database.execute(update_query)
     return result
 
 
@@ -132,4 +129,4 @@ async def update_user_password(email: str, new_password: str):
     update_query = users.update().values(password=password_hash).where(
         users.c.email == email
     )
-    await database.execute(update_query)
+    await config.database.execute(update_query)
