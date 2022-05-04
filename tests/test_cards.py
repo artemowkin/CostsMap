@@ -219,3 +219,41 @@ def test_update_concrete_card_with_already_exist_title():
     assert response.json() == {
         'detail': 'Card with this title already exists'
     }
+
+
+def test_delete_concrete_card():
+    response = client.post('/api/v1/auth/login/', json={
+        "email": "someone@gmail.com",
+        "password": "Password123",
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert 'token' in data
+    token = data['token']
+    response = client.post('/api/v1/cards/', headers={
+        "Authorization": f"Bearer {token}",
+    }, json={
+        "title": "Some card2",
+        "currency": "$",
+        "color": "#333333",
+    })
+    assert response.status_code == 200
+    response = client.delete('/api/v1/cards/1/', headers={
+        "Authorization": f"Bearer {token}",
+    })
+    assert response.status_code == 204
+
+
+def test_delete_concrete_card_with_doesnt_exist_id():
+    response = client.post('/api/v1/auth/login/', json={
+        "email": "someone@gmail.com",
+        "password": "Password123",
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert 'token' in data
+    token = data['token']
+    response = client.delete('/api/v1/cards/96/', headers={
+        "Authorization": f"Bearer {token}",
+    })
+    assert response.status_code == 404

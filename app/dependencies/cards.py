@@ -5,7 +5,7 @@ from ..schemas.accounts import UserOut
 from ..schemas.cards import CardOut, Card
 from ..services.cards import (
     get_all_user_cards, create_new_user_card, get_concrete_user_card,
-    update_concrete_user_card
+    update_concrete_user_card, delete_concrete_user_card
 )
 
 
@@ -39,8 +39,14 @@ async def update_concrete_card(
 ):
     """Update the concrete card using data from request"""
     await update_concrete_user_card(updating_card.id, card_info)
-    print(updating_card.amount)
     card_out = CardOut(
         **card_info.dict(), id=updating_card.id, amount=updating_card.amount
     )
     return card_out
+
+
+async def delete_concrete_card(
+    deleting_card: CardOut = Depends(get_concrete_card)
+):
+    """Delete the concrete user card by id"""
+    await delete_concrete_user_card(deleting_card.id)

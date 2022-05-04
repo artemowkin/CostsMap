@@ -56,3 +56,9 @@ async def update_concrete_user_card(card_id: int, card_info: Card):
         cards.c.id == card_id
     )
     await config.database.execute(update_query)
+
+
+async def delete_concrete_user_card(card_id: int):
+    """Delete the concrete card in db"""
+    delete_query = cards.delete().where(cards.c.id == card_id)
+    await config.database.execute(delete_query)
