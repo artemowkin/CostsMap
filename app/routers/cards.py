@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends
 from ..schemas.cards import CardOut
 from ..dependencies.cards import (
     get_all_cards, create_new_card, get_concrete_card,
-    update_concrete_card, delete_concrete_card
+    update_concrete_card, delete_concrete_card,
+    transfer_between_cards
 )
 
 
@@ -41,4 +42,14 @@ def update_card(card: CardOut = Depends(update_concrete_card)):
 )
 def delete_card():
     """Delete the concrete card using card id"""
+    pass
+
+
+@router.post(
+    '/transfer/',
+    status_code=204,
+    dependencies=[Depends(transfer_between_cards)]
+)
+def transfer():
+    """Transfer money between two cards"""
     pass

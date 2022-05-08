@@ -3,7 +3,7 @@ from asyncpg.exceptions import UniqueViolationError
 from sqlite3 import IntegrityError
 
 from ..db.cards import cards
-from ..schemas.cards import Card
+from ..schemas.cards import Card, Transfer
 from ..settings import config
 
 
@@ -62,3 +62,19 @@ async def delete_concrete_user_card(card_id: int):
     """Delete the concrete card in db"""
     delete_query = cards.delete().where(cards.c.id == card_id)
     await config.database.execute(delete_query)
+
+
+async def transfer_money_between_cards(
+        from_card, to_card, transfer_info: Transfer):
+    """Transfer money between two cards"""
+    from_result_amount = from_card.amount - transfer_info.from_amount
+    to_result_amount = to_card.amount + transfer_info.to_amount
+
+    update_query_from = cards.update().values(
+        amount=from_result_amount).where(cards.c.id == from_card.id)
+    update_query_to = cards.update().values(
+        amount=to_result_amount).where(cards.c.id == to_card.id)
+
+    async with config.database.transaction():
+        await config.database.execute(update_query_from)
+        await config.database.execute(update_query_to)
