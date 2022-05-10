@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import databases
 
-from .routers import accounts, categories, cards
+from .routers import accounts, categories, cards, costs
 from .settings import config
 
 
@@ -29,6 +29,7 @@ app.include_router(
     tags=["categories"]
 )
 app.include_router(cards.router, prefix="/api/v1/cards", tags=["cards"])
+app.include_router(costs.router, prefix="/api/v1/costs", tags=["costs"])
 
 
 @app.on_event("startup")
