@@ -1,15 +1,4 @@
-from fastapi.testclient import TestClient
-
-from .main import setup_testing, clean_testing
-
-
-clean_testing()
-
-setup_testing()
-
-from app.main import app
-
-client = TestClient(app)
+from .main import setup_testing, client, clean_testing
 
 
 def test_create_category():

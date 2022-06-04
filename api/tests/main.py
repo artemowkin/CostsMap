@@ -1,26 +1,47 @@
 import os
 
+from sqlalchemy import create_engine
+from fastapi.testclient import TestClient
 from databases import Database
 
-from app.settings import config
+from project.db import get_database
+from project.settings import BASE_DIR
+from main import app
 
 
-def _create_test_db_if_doesnt_exist():
-    if not os.path.exists(config.test_db_path):
-        os.mknod(config.test_db_path)
+TEST_DB_PATH = BASE_DIR / 'testing.db'
+
+TEST_DB_URL = f"sqlite:///{TEST_DB_PATH}"
+
+
+@app.on_event("startup")
+def clean_startup():
+    pass
+
+
+async def override_get_db():
+    database = Database(TEST_DB_URL)
+    try:
+        await database.connect()
+        yield database
+    finally:
+        await database.disconnect()
+
+
+app.dependency_overrides[get_database] = override_get_db
+
+client = TestClient(app)
 
 
 def setup_testing():
-    _create_test_db_if_doesnt_exist()
-    config.is_testing = True
-    config.database = Database(config.test_db_url)
-    from app.db.accounts import users
-    from app.db.categories import categories
-    from app.db.main import metadata, get_engine
-    engine = get_engine()
+    from accounts.db import users
+    from categories.db import categories
+    from cards.db import cards
+    from project.db import metadata
+    engine = create_engine(TEST_DB_URL)
     metadata.create_all(engine)
 
 
 def clean_testing():
-    if os.path.exists(config.test_db_path):
-        os.remove(config.test_db_path)
+    if TEST_DB_PATH.exists():
+        os.remove(TEST_DB_PATH)
