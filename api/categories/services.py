@@ -23,7 +23,7 @@ def category_exists_decorator(func):
     return inner
 
 
-async def get_categories_with_costs_for_the_month(user: UserOut, month: str, db: Database):
+async def get_all_user_categories(user: UserOut, db: Database):
     """Return user categories with costs for the month"""
     get_query = categories.select().where(categories.c.user_id == user.id)
     db_categories = await db.fetch_all(get_query)

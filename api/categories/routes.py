@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from .schemas import CategoryOut
 from .dependencies import (
-    get_all_categories_for_month, create_concrete_category,
+    get_all_categories, create_concrete_category,
     get_concrete_category, update_concrete_category,
     delete_category_by_id
 )
@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.get('/', response_model=list[CategoryOut])
 def all_categories(
-    categories: list[CategoryOut] = Depends(get_all_categories_for_month)
+    categories: list[CategoryOut] = Depends(get_all_categories)
 ):
     """Return all categories for the month"""
     return categories
