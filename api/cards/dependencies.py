@@ -5,8 +5,8 @@ from databases import Database
 from project.db import get_database
 from accounts.dependencies import get_current_user
 from accounts.schemas import UserOut
-from cards.schemas import CardOut, Card, Transfer
-from cards.services import (
+from .schemas import CardOut, Card, Transfer
+from .services import (
     get_all_user_cards, create_new_user_card, get_concrete_user_card,
     update_concrete_user_card, delete_concrete_user_card,
     transfer_money_between_cards

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
-from cards.schemas import CardOut
-from cards.dependencies import (
+from .schemas import CardOut
+from .dependencies import (
     get_all_cards, create_new_card, get_concrete_card,
     update_concrete_card, delete_concrete_card,
     transfer_between_cards

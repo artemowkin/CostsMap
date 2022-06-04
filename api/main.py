@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 
 from accounts.routes import router as accounts_router
 from cards.routes import router as cards_router
+from categories.routes import router as categories_router
 from project.settings import config
 from project.db import get_database, metadata
 
@@ -26,6 +27,8 @@ app = FastAPI(
 app.include_router(accounts_router, prefix="/api/v1/auth", tags=["auth"])
 
 app.include_router(cards_router, prefix="/api/v1/cards", tags=["cards"])
+
+app.include_router(categories_router, prefix="/api/v1/categories", tags=["categories"])
 
 
 @app.on_event("startup")
