@@ -1,0 +1,59 @@
+.authentication {
+    display: grid;
+    place-content: center;
+    grid-template-columns: 1fr;
+    width: 100%;
+    height: 100vh;
+    padding: 2rem;
+}
+
+.authForm {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 0 40px rgba(0, 0, 0, .25);
+    border-radius: 20px;
+    padding: 2rem;
+    gap: 1.5rem;
+}
+
+.authForm h2 {
+    margin: 0;
+}
+
+.authFormField {
+    width: 100%;
+    position: relative;
+}
+
+.authForm input {
+    width: 100%;
+    font-size: 1rem;
+    border-radius: 20rem;
+    border: 4px solid rgba(249, 160, 63, .3);
+    padding: .75rem;
+    text-align: center;
+}
+
+.authForm label {
+    position: absolute;
+    font-size: .75rem;
+    top: calc((-1rem - 4px) / 2);
+    left: 1.5rem;
+    background-color: white;
+    padding: 0 .5rem;
+    border-radius: 10rem;
+    border: 4px solid rgba(249, 160, 63, .3);
+}
+
+.authForm button {
+    width: 100%;
+    padding: .75rem;
+    border-radius: 10rem;
+    border: 0;
+    color: white;
+    background: linear-gradient(to right bottom, rgba(249, 160, 63, .8), #201E1F);
+    font-size: 1rem;
+}

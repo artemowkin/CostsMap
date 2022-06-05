@@ -1,0 +1,25 @@
+.categoriesList {
+    width: 100%;
+    display: grid;
+    place-content: space-evenly;
+    grid-template-columns: repeat(4, minmax(70px, 1fr));
+    padding: 1rem;
+}
+
+.category {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.categoryImage {
+    width: 60px;
+    height: 60px;
+    border-radius: 20rem;
+    color: white;
+    display: grid;
+    place-content: center;
+    font-size: 30px;
+}

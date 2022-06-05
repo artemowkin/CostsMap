@@ -1,33 +1,21 @@
-// import logo from './logo.svg';
+import { useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { CategoriesPage } from './components/Categories/CategoriesPage';
+import { LoginPage } from './components/Login/LoginPage';
 import './App.css';
+import { useAuth } from './hooks/Auth/useAuth';
 
 function App() {
+  const { tokenValue } = useAuth();
+  const [token, setToken] = useState(tokenValue);
+
   return (
-    /* <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div> */
-    <footer>
-      <nav>
-        <div className="footerButton"></div>
-        <div className="footerButton"></div>
-        <div className="footerButton"></div>
-        <div className="footerButton"></div>
-        <div className="footerButton"></div>
-      </nav>
-    </footer>
+    <>
+      <Routes>
+        <Route path="/" element={<CategoriesPage token={token} />}/>
+        <Route path="/login" element={<LoginPage token={token} setToken={setToken} />} />
+      </Routes>
+    </>
   );
 }
 

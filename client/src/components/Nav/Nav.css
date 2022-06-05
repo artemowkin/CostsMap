@@ -1,0 +1,23 @@
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+
+.footerWrapper {
+    display: grid;
+    place-content: space-evenly;
+    place-items: center;
+    grid-template-rows: 1fr;
+    grid-template-columns: repeat(5, minmax(50px, 1fr));
+    gap: .25rem;
+    margin: 1rem;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, .25);
+    padding: 1rem .5rem;
+}
+
+footer a {
+    -webkit-tap-highlight-color: transparent;
+}
