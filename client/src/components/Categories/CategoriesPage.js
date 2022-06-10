@@ -27,10 +27,13 @@ export const CategoriesPage = ({ token }) => {
         <main className="categoriesPage">
             <section className="categoriesList">
                 {jsxCategories}
-                <Link className="addButton" to="/">
-                    <div className="addButtonImage">+</div>
-                    <div className="addButtonTitle">Add</div>
+                <Link className="addCategoryButton" to="/add_category">
+                    <div className="addCategoryButtonImage">+</div>
+                    <div className="addCategoryButtonTitle">Add</div>
                 </Link>
+                <div className="addIncomeButtonContainer">
+                    <Link className="addIncomeButton" to="/">+ Income</Link>
+                </div>
             </section>
             <Nav />
         </main>

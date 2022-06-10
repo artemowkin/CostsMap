@@ -3,16 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
 const loginUser = async (email, password) => {
-    const response = await fetch("http://192.168.0.156:8000/api/v1/auth/login/", {
-        method: "POST",
-        body: JSON.stringify({email, password}),
-        headers: {'Content-Type': 'application/json'}
-    });
+    try {
+        const response = await fetch("http://192.168.0.156:8000/api/v1/auth/login/", {
+            method: "POST",
+            body: JSON.stringify({email, password}),
+            headers: {'Content-Type': 'application/json'}
+        });
 
-    if (response.status > 299) return null;
+        if (response.status > 299) return null;
 
-    const tokenJson = await response.json();
-    return tokenJson;
+        const tokenJson = await response.json();
+        return tokenJson;
+    } catch (err) {
+        return null;
+    }
 }
 
 export const LoginPage = ({ token, setToken }) => {
