@@ -12,9 +12,9 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<CategoriesPage token={token} />} render={() => (
+        <Route path="/" element={
             token ? <CategoriesPage token={token} /> : <Navigate to="/login" />
-        )} />
+        } />
         <Route path="/login" element={<LoginPage token={token} setToken={setToken} />} />
       </Routes>
     </>

@@ -1,14 +1,8 @@
-import { useNavigate } from "react-router-dom";
-
 export const useAuth = () => {
-    let tokenValue = localStorage.getItem("tokenValue");
-    const tokenExpDate = localStorage.getItem("tokenExpDate");
+    let tokenValue = localStorage.getItem("tokenValue", null);
+    const tokenExpDate = localStorage.getItem("tokenExpDate", null);
 
-    tokenValue = (Date.now() / 1000 >= tokenExpDate) ? "" : tokenValue;
+    tokenValue = (tokenExpDate !== null && Date.now() / 1000 >= tokenExpDate) ? "" : tokenValue;
 
     return { tokenValue, tokenExpDate };
-}
-
-export const loginRequired = (token, navigate) => {
-    if (!token) navigate("/login", { replace: true });
 }

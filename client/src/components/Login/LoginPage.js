@@ -8,6 +8,9 @@ const loginUser = async (email, password) => {
         body: JSON.stringify({email, password}),
         headers: {'Content-Type': 'application/json'}
     });
+
+    if (response.status > 299) return null;
+
     const tokenJson = await response.json();
     return tokenJson;
 }

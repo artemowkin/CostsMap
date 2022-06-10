@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { loginRequired } from '../../hooks/Auth/useAuth';
 import { Nav } from '../Nav/Nav';
 import './CategoriesPage.css';
 import { Category } from './Category';
@@ -16,13 +14,10 @@ const getUserCategories = async (token) => {
 
 export const CategoriesPage = ({ token }) => {
     const [jsxCategories, setJsxCategories] = useState([]);
-    const navigate = useNavigate();
-
-    useEffect(() => loginRequired(token, navigate));
 
     useEffect(() => {
         getUserCategories(token).then((userCategories) => {
-            const formattedCategories = userCategories.map((category) => <Category category={category} />);
+            const formattedCategories = userCategories.map((category) => <Category key={category.id} category={category} />);
             setJsxCategories(formattedCategories);
         });
     }, []);
