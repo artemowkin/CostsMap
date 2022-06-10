@@ -4,6 +4,7 @@ import { CategoriesPage } from './components/Categories/CategoriesPage';
 import { LoginPage } from './components/Login/LoginPage';
 import './App.css';
 import { useAuth } from './hooks/Auth/useAuth';
+import { CardsPage } from './components/Cards/CardsPage';
 
 function App() {
   const { tokenValue } = useAuth();
@@ -14,6 +15,9 @@ function App() {
       <Routes>
         <Route path="/" element={
             token ? <CategoriesPage token={token} /> : <Navigate to="/login" />
+        } />
+        <Route path="/cards" element={
+            token ? <CardsPage token={token} /> : <Navigate to="/login" />
         } />
         <Route path="/login" element={<LoginPage token={token} setToken={setToken} />} />
       </Routes>

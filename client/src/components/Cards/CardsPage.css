@@ -1,0 +1,43 @@
+.cardsList {
+    width: 100%;
+    padding: 1rem;
+    padding-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.card {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, .25);
+}
+
+.cardInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: start;
+    gap: .25rem;
+}
+
+.cardImage {
+    width: 60px;
+    height: 60px;
+    border-radius: 20rem;
+}
+
+.cardTitle {
+    font-size: 1.25rem;
+}
+
+.cardAmount {
+    font-size: 1rem;
+}

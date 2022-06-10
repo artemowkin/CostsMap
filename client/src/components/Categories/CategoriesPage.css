@@ -23,3 +23,24 @@
     place-content: center;
     font-size: 30px;
 }
+
+.addButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .5rem;
+}
+
+.addButtonImage {
+    display: grid;
+    place-items: end center;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(to left bottom, rgba(249, 160, 63, .8), #201E1F);
+    border-radius: 20rem;
+    color: white;
+    display: grid;
+    place-items: center;
+    font-size: 1.75rem;
+}

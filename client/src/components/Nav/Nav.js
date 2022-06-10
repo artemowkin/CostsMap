@@ -13,7 +13,7 @@ export const Nav = () => {
         <footer>
             <nav className="footerWrapper">
                 <Link to="/"><img src={categories} alt="categories"/></Link>
-                <Link to="/"><img src={cards} alt="cards"/></Link>
+                <Link to="/cards"><img src={cards} alt="cards"/></Link>
                 <Link to="/"><img src={costs} alt="costs"/></Link>
                 <Link to="/"><img src={statistic} alt="statistic"/></Link>
                 <Link to="/"><img src={account} alt="account"/></Link>

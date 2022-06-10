@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Nav } from '../Nav/Nav';
 import './CategoriesPage.css';
 import { Category } from './Category';
 
 const getUserCategories = async (token) => {
-    const response = await fetch("http://localhost:8000/api/v1/categories/", {
+    const response = await fetch("http://192.168.0.156:8000/api/v1/categories/", {
         method: "GET",
         headers: {"Authorization": `Bearer ${token}`}
     });
@@ -26,6 +27,10 @@ export const CategoriesPage = ({ token }) => {
         <main className="categoriesPage">
             <section className="categoriesList">
                 {jsxCategories}
+                <Link className="addButton" to="/">
+                    <div className="addButtonImage">+</div>
+                    <div className="addButtonTitle">Add</div>
+                </Link>
             </section>
             <Nav />
         </main>
