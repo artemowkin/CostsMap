@@ -1,3 +1,6 @@
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
 from fastapi import HTTPException
 from asyncpg.exceptions import UniqueViolationError
 from sqlite3 import IntegrityError
@@ -24,9 +27,24 @@ def category_exists_decorator(func):
 
 
 async def get_all_user_categories(user: UserOut, db: Database):
-    """Return user categories with costs for the month"""
+    """Return all user categories"""
     get_query = categories.select().where(categories.c.user_id == user.id)
     db_categories = await db.fetch_all(get_query)
+    return db_categories
+
+
+async def get_costs_for_categories(user: UserOut, month: str, db: Database):
+    """Return user categories with costs for the month"""
+    start_date = datetime.fromisoformat(month + '-01')
+    end_date = start_date + relativedelta(months=1)
+    get_query = (
+        'select categories.id, sum(costs.amount) as costs_sum from '
+        'categories join costs on costs.category_id = categories.id '
+        'where costs.date >= date(:start_date) and costs.date < date(:end_date) and categories.user_id = :user_id '
+        'group by categories.id;'
+    )
+    values = {'start_date': start_date, 'end_date': end_date, 'user_id': user.id}
+    db_categories = await db.fetch_all(get_query, values)
     return db_categories
 
 

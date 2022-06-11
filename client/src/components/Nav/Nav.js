@@ -18,7 +18,7 @@ export const Nav = () => {
                     </div>
                     <div className="footerIconTitle">categories</div>
                 </Link>
-                <Link to="/">
+                <Link to="/cards">
                     <div className="footerIconBackground">
                         <img src={cards} alt="cards"/>
                     </div>

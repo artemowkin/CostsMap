@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { loginRequired } from '../../hooks/Auth/useAuth';
+import { Link } from 'react-router-dom';
 import { Nav } from '../Nav/Nav';
 import './CategoriesPage.css';
 import { Category } from './Category';
 
 const getUserCategories = async (token) => {
-    const response = await fetch("http://localhost:8000/api/v1/categories/", {
+    const response = await fetch("http://192.168.0.156:8000/api/v1/categories/", {
         method: "GET",
         headers: {"Authorization": `Bearer ${token}`}
     });
@@ -16,13 +15,10 @@ const getUserCategories = async (token) => {
 
 export const CategoriesPage = ({ token }) => {
     const [jsxCategories, setJsxCategories] = useState([]);
-    const navigate = useNavigate();
-
-    useEffect(() => loginRequired(token, navigate));
 
     useEffect(() => {
         getUserCategories(token).then((userCategories) => {
-            const formattedCategories = userCategories.map((category) => <Category category={category} />);
+            const formattedCategories = userCategories.map((category) => <Category key={category.id} category={category} />);
             setJsxCategories(formattedCategories);
         });
     }, []);
@@ -31,6 +27,13 @@ export const CategoriesPage = ({ token }) => {
         <main className="categoriesPage">
             <section className="categoriesList">
                 {jsxCategories}
+                <Link className="addCategoryButton" to="/add_category">
+                    <div className="addCategoryButtonImage">+</div>
+                    <div className="addCategoryButtonTitle">Add</div>
+                </Link>
+                <div className="addIncomeButtonContainer">
+                    <Link className="addIncomeButton" to="/">+ Income</Link>
+                </div>
             </section>
             <Nav />
         </main>

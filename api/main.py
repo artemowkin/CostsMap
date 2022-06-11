@@ -10,7 +10,7 @@ from project.settings import config
 from project.db import get_database, metadata
 
 
-origins = ["http://localhost:3000"]
+origins = ["*"]
 
 app = FastAPI(
     title="CostsMap",

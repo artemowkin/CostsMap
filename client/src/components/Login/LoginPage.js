@@ -3,13 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
 const loginUser = async (email, password) => {
-    const response = await fetch("http://localhost:8000/api/v1/auth/login/", {
-        method: "POST",
-        body: JSON.stringify({email, password}),
-        headers: {'Content-Type': 'application/json'}
-    });
-    const tokenJson = await response.json();
-    return tokenJson;
+    try {
+        const response = await fetch("http://192.168.0.156:8000/api/v1/auth/login/", {
+            method: "POST",
+            body: JSON.stringify({email, password}),
+            headers: {'Content-Type': 'application/json'}
+        });
+
+        if (response.status > 299) return null;
+
+        const tokenJson = await response.json();
+        return tokenJson;
+    } catch (err) {
+        return null;
+    }
 }
 
 export const LoginPage = ({ token, setToken }) => {
@@ -17,6 +24,7 @@ export const LoginPage = ({ token, setToken }) => {
     const [passwordValue, setPasswordValue] = useState("");
     const [emailFieldStyle, setEmailFieldStyle] = useState({});
     const [passwordFieldStyle, setPasswordFieldStyle] = useState({});
+    const [ErrorMessageStyle, setErrorMessageStyle] = useState({});
 
     const navigate = useNavigate();
 
@@ -28,6 +36,11 @@ export const LoginPage = ({ token, setToken }) => {
         element.preventDefault();
 
         loginUser(emailValue, passwordValue).then(({ token, exptime }) => {
+            if (!token) {
+                setErrorMessageStyle({display: "block"});
+                return;
+            }
+
             localStorage.setItem("tokenValue", token);
             localStorage.setItem("tokenExpDate", exptime);
             setToken(token);
@@ -36,6 +49,7 @@ export const LoginPage = ({ token, setToken }) => {
     };
 
     const emailChange = (element) => {
+        setErrorMessageStyle({display: ""});
         let emailRegexp = /.+@.+\..+/;
         let emailValue = element.target.value;
 
@@ -49,6 +63,7 @@ export const LoginPage = ({ token, setToken }) => {
     }
 
     const passwordChange = (element) => {
+        setErrorMessageStyle({display: ""});
         setPasswordValue(element.target.value);
     }
 
@@ -56,6 +71,7 @@ export const LoginPage = ({ token, setToken }) => {
         <main className="authentication">
             <form onSubmit={handleSubmit} className="authForm">
                 <h2>Authentication</h2>
+                <div className="errorMessage" style={ErrorMessageStyle}>Error with sending request</div>
                 <div className="authFormField">
                     <label>email</label>
                     <input onChange={emailChange} style={emailFieldStyle} type="email" />
