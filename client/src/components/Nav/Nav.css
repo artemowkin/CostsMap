@@ -20,4 +20,30 @@ footer {
 
 footer a {
     -webkit-tap-highlight-color: transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-decoration: none;
+    gap: 5px;
+}
+
+.footerIconBackground {
+    background: rgba(249, 160, 63, .1);
+    width: 50px;
+    height: 50px;
+    border-radius: 20px;
+    display: grid;
+    place-content: center;
+}
+
+.footerIconBackground img {
+    width: 25px;
+    height: 25px;
+    object-fit: contain;
+}
+
+.footerIconTitle {
+    font-size: 8px;
+    color: rgba(0, 0, 0, .8);
 }

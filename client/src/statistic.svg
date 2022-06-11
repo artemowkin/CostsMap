@@ -1,36 +1,18 @@
-<svg id="Слой_1" data-name="Слой 1" xmlns="http://www.w3.org/2000/svg" width="48.58" height="48.6" viewBox="0 0 48.58 48.6">
+<svg id="Слой_1" data-name="Слой 1" xmlns="http://www.w3.org/2000/svg" width="35" height="35.05" viewBox="0 0 35 35.05">
   <defs>
     <style>
-      .cls-1, .cls-2, .cls-3, .cls-4 {
-        fill: none;
-        stroke-miterlimit: 10;
-      }
-
       .cls-1 {
-        stroke: #50b2c0;
-      }
-
-      .cls-1, .cls-2, .cls-3 {
-        stroke-width: 14px;
-      }
-
-      .cls-2 {
+        fill: none;
         stroke: #f9a03f;
-      }
-
-      .cls-3, .cls-4 {
-        stroke: #201e1f;
-      }
-
-      .cls-4 {
-        stroke-width: 2px;
+        stroke-miterlimit: 10;
+        stroke-width: 5px;
       }
     </style>
   </defs>
-  <path class="cls-1" d="M7,24.29A17.27,17.27,0,0,1,24.25,7h0"/>
-  <path class="cls-2" d="M24.24,7A17.29,17.29,0,0,1,41.55,24.28v0h0"/>
-  <path class="cls-2" d="M41.55,24.29A17.29,17.29,0,0,1,24.28,41.58h0"/>
-  <path class="cls-3" d="M24.28,41.58A17.3,17.3,0,0,1,7,24.28H7"/>
-  <path class="cls-4" d="M35.54,24.3A11.25,11.25,0,1,1,24.29,13.06,11.25,11.25,0,0,1,35.54,24.3Z"/>
-  <ellipse class="cls-4" cx="24.29" cy="24.3" rx="23.29" ry="23.3"/>
+  <g>
+    <path class="cls-1" d="M2.5,17.55a15,15,0,0,0,15,15"/>
+    <path class="cls-1" d="M17.5,2.55a15,15,0,0,0-15,15"/>
+    <path class="cls-1" d="M17.5,32.55a15,15,0,0,0,15-15"/>
+    <path class="cls-1" d="M32.35,16A13.49,13.49,0,0,0,18.85,2.5"/>
+  </g>
 </svg>

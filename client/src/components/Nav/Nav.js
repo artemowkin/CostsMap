@@ -12,11 +12,36 @@ export const Nav = () => {
     return (
         <footer>
             <nav className="footerWrapper">
-                <Link to="/"><img src={categories} alt="categories"/></Link>
-                <Link to="/"><img src={cards} alt="cards"/></Link>
-                <Link to="/"><img src={costs} alt="costs"/></Link>
-                <Link to="/"><img src={statistic} alt="statistic"/></Link>
-                <Link to="/"><img src={account} alt="account"/></Link>
+                <Link to="/">
+                    <div className="footerIconBackground">
+                        <img src={categories} alt="categories"/>
+                    </div>
+                    <div className="footerIconTitle">categories</div>
+                </Link>
+                <Link to="/">
+                    <div className="footerIconBackground">
+                        <img src={cards} alt="cards"/>
+                    </div>
+                    <div className="footerIconTitle">cards</div>
+                </Link>
+                <Link to="/">
+                    <div className="footerIconBackground">
+                        <img src={costs} alt="costs"/>
+                    </div>
+                    <div className="footerIconTitle">costs</div>
+                </Link>
+                <Link to="/">
+                    <div className="footerIconBackground">
+                        <img src={statistic} alt="statistic"/>
+                    </div>
+                    <div className="footerIconTitle">statistic</div>
+                </Link>
+                <Link to="/">
+                    <div className="footerIconBackground">
+                        <img src={account} alt="account"/>
+                    </div>
+                    <div className="footerIconTitle">account</div>
+                </Link>
             </nav>
         </footer>
     );
