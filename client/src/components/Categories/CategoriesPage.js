@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Nav } from '../Nav/Nav';
@@ -5,12 +6,12 @@ import './CategoriesPage.css';
 import { Category } from './Category';
 
 const getUserCategories = async (token) => {
-    const response = await fetch("http://192.168.0.156:8000/api/v1/categories/", {
+    const response = await axios({
+        url: "/categories/",
         method: "GET",
         headers: {"Authorization": `Bearer ${token}`}
     });
-    const jsonCategories = await response.json();
-    return jsonCategories;
+    return response.data;
 }
 
 export const CategoriesPage = ({ token, categories, user }) => {

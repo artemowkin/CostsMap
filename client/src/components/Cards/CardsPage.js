@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useState } from "react"
 import { Nav } from "../Nav/Nav";
 import { Card } from "./Card";
@@ -5,12 +6,12 @@ import { Card } from "./Card";
 import './CardsPage.css';
 
 const getUserCards = async (token) => {
-    const response = await fetch("http://192.168.0.156:8000/api/v1/cards/", {
+    const response = await axios({
+        url: "/cards/",
         method: "GET",
         headers: {"Authorization": `Bearer ${token}`}
     });
-    const jsonCategories = await response.json();
-    return jsonCategories;
+    return response.data;
 }
 
 export const CardsPage = ({ token }) => {

@@ -1,3 +1,4 @@
+import axios from "axios"
 import { useEffect, useState } from "react"
 import { Nav } from "../Nav/Nav"
 import { Cost } from "./Cost"
@@ -5,15 +6,12 @@ import { Cost } from "./Cost"
 import './CostsPage.css'
 
 const getCosts = async (token) => {
-    const response = await fetch("http://192.168.0.156:8000/api/v1/costs/", {
+    const response = await axios({
+        url: "/costs/",
         headers: {"Authorization": `Bearer ${token}`}
     })
 
-    if (response.status > 299) return []
-
-    const responseJson = await response.json()
-
-    return responseJson
+    return response.data
 }
 
 const getFormattedCosts = (costs) => {
@@ -75,7 +73,7 @@ export const CostsPage = ({ token, user }) => {
             const fmtCosts = getFormattedCosts(costs)
             setFormattedCosts(fmtCosts)
         })
-    }, [user])
+    }, [token, user])
 
     useEffect(() => {
         const jsxDatedCosts = getJsxDatedCosts(formattedCosts, user)

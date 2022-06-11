@@ -1,22 +1,24 @@
+import axios from 'axios';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './addCategoryPopUp.css';
 
 const createCategory = async (payload, token) => {
-    const response = await fetch("http://192.168.0.156:8000/api/v1/categories/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-    })
+    try {
+        const response = await axios({
+            url: "/categories/",
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            data: payload
+        })
 
-    if (response.status > 299) return { status: response.status, category: null }
-
-    const createdCategory = await response.json()
-
-    return { status: response.status, category: createdCategory }
+        return { status: response.status, category: response.data }
+    } catch (error) {
+        return { status: error.response.status, category: null }
+    }
 }
 
 export const AddCategoryPopUp = ({ token, setCategories }) => {

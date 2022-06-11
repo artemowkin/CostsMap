@@ -1,21 +1,20 @@
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
 const loginUser = async (email, password) => {
     try {
-        const response = await fetch("http://192.168.0.156:8000/api/v1/auth/login/", {
+        const response = await axios({
+            url: "/auth/login/",
             method: "POST",
-            body: JSON.stringify({email, password}),
+            data: {email, password},
             headers: {'Content-Type': 'application/json'}
         });
 
-        if (response.status > 299) return null;
-
-        const tokenJson = await response.json();
-        return tokenJson;
-    } catch (err) {
-        return null;
+        return { status: response.status, ...response.data }
+    } catch (error) {
+        return { status: error.response.status, token: null, exptime: null }
     }
 }
 
@@ -24,7 +23,8 @@ export const LoginPage = ({ token, setToken }) => {
     const [passwordValue, setPasswordValue] = useState("");
     const [emailFieldStyle, setEmailFieldStyle] = useState({});
     const [passwordFieldStyle, setPasswordFieldStyle] = useState({});
-    const [ErrorMessageStyle, setErrorMessageStyle] = useState({});
+    const [errorMessageStyle, setErrorMessageStyle] = useState({});
+    const [errorMessageValue, setErrorMessageValue] = useState()
 
     const navigate = useNavigate();
 
@@ -35,8 +35,17 @@ export const LoginPage = ({ token, setToken }) => {
     const handleSubmit = (element) => {
         element.preventDefault();
 
-        loginUser(emailValue, passwordValue).then(({ token, exptime }) => {
+        if (!passwordValue || !emailValue || emailFieldStyle.display) return
+
+        loginUser(emailValue, passwordValue).then(({ status, token, exptime }) => {
+            if (status >= 400 && status < 500) {
+                setErrorMessageValue("Incorrect password or email")
+                setErrorMessageStyle({display: "block"});
+                return
+            }
+
             if (!token) {
+                setErrorMessageValue("Error with sending request")
                 setErrorMessageStyle({display: "block"});
                 return;
             }
@@ -71,7 +80,7 @@ export const LoginPage = ({ token, setToken }) => {
         <main className="authentication">
             <form onSubmit={handleSubmit} className="authForm">
                 <h2>Authentication</h2>
-                <div className="errorMessage" style={ErrorMessageStyle}>Error with sending request</div>
+                <div className="errorMessage" style={errorMessageStyle}>{errorMessageValue}</div>
                 <div className="authFormField">
                     <label>email</label>
                     <input onChange={emailChange} style={emailFieldStyle} type="email" placeholder='example@mail.com' />
