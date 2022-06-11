@@ -8,17 +8,18 @@ import { CardsPage } from './components/Cards/CardsPage';
 import { AddCategoryPopUp } from './components/AddCategory/AddCategoryPopUp';
 
 function App() {
-  const { tokenValue } = useAuth();
-  const [token, setToken] = useState(tokenValue);
+  const { tokenValue } = useAuth()
+  const [token, setToken] = useState(tokenValue)
+  const [categories, setCategories] = useState([])
 
   return (
     <>
       <Routes>
         <Route path="/" element={
-          token ? <CategoriesPage token={token} /> : <Navigate to="/login" />
+          token ? <CategoriesPage token={token} categories={categories} /> : <Navigate to="/login" />
         } />
         <Route path="/add_category" element={
-          token ? (<><CategoriesPage token={token} /><AddCategoryPopUp token={token} /></>) : <Navigate to="/login" />
+          token ? (<><CategoriesPage token={token} categories={categories} /><AddCategoryPopUp token={token} setCategories={setCategories} /></>) : <Navigate to="/login" />
         } />
         <Route path="/cards" element={
           token ? <CardsPage token={token} /> : <Navigate to="/login" />

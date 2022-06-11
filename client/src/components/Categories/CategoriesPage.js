@@ -13,7 +13,7 @@ const getUserCategories = async (token) => {
     return jsonCategories;
 }
 
-export const CategoriesPage = ({ token }) => {
+export const CategoriesPage = ({ token, categories }) => {
     const [jsxCategories, setJsxCategories] = useState([]);
 
     useEffect(() => {
@@ -21,7 +21,7 @@ export const CategoriesPage = ({ token }) => {
             const formattedCategories = userCategories.map((category) => <Category key={category.id} category={category} />);
             setJsxCategories(formattedCategories);
         });
-    }, []);
+    }, [categories]);
 
     return (
         <main className="categoriesPage">

@@ -14,7 +14,7 @@ footer {
     gap: .25rem;
     margin: 1rem;
     border-radius: 20px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, .25);
+    box-shadow: 0 0 20px rgba(0, 0, 0, .05);
     padding: 1rem .5rem;
 }
 
@@ -32,7 +32,7 @@ footer a {
     background: rgba(249, 160, 63, .1);
     width: 50px;
     height: 50px;
-    border-radius: 20px;
+    border-radius: 15px;
     display: grid;
     place-content: center;
 }

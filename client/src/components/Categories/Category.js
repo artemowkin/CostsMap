@@ -4,9 +4,9 @@ export const Category = ({ category }) => {
     return (
         <div className="category">
             <div className="categoryTitle">{category.title}</div>
-            <div className="categoryCostsLimit">{category.costs_limit}</div>
+            <div className="categoryCostsLimit">{category.costs_limit ?? 0}</div>
             <div className="categoryImage" style={{backgroundColor: category.color}}><div className="categoryImageCurrency">$</div></div>
-            <div className="categoryCostsSum" style={categoryCostsSumStyle}>{category.costs_sum}</div>
+            <div className="categoryCostsSum" style={categoryCostsSumStyle}>{category.costs_sum ?? 0}</div>
         </div>
     );
 }

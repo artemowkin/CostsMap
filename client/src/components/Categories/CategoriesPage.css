@@ -5,6 +5,7 @@
     place-content: space-evenly;
     grid-template-columns: repeat(4, minmax(70px, 1fr));
     padding: 1rem;
+    row-gap: 1rem;
 }
 
 .category {
@@ -15,12 +16,17 @@
     gap: .25rem;
 }
 
+.categoryTitle {
+    font-size: .8rem;
+}
+
 .categoryCostsLimit, .categoryCostsSum, .addCategoryButtonTitle {
     font-size: .75rem;
 }
 
 .categoryImage {
     position: relative;
+    opacity: .7;
     width: 60px;
     height: 60px;
     border-radius: 20rem;
@@ -37,8 +43,8 @@
     top: 0;
     right: 0;
     bottom: 0;
-    margin: 5px;
-    background: rgba(0, 0, 0, .5);
+    margin: 4px;
+    background: rgba(0, 0, 0, .25);
     border-radius: 10rem;
     z-index: 2;
 }
@@ -60,9 +66,9 @@
     place-items: end center;
     width: 60px;
     height: 60px;
-    background: linear-gradient(to left bottom, rgba(249, 160, 63, .8), #201E1F);
+    background: rgba(249, 160, 63, .1);
+    color: #F9A03F;
     border-radius: 20rem;
-    color: white;
     display: grid;
     place-items: center;
     font-size: 1.75rem;
@@ -80,8 +86,8 @@
 .addIncomeButton {
     padding: .9rem 2.5rem;
     border-radius: 10rem;
-    background: linear-gradient(to right bottom, rgba(108, 197, 81, .8), #201E1F);
+    background: rgba(108, 197, 81, .9);
     color: white;
     text-align: center;
-    box-shadow: 0 0 50px 10px rgba(0, 0, 0, .25);
+    box-shadow: 0 0 20px rgba(108, 197, 81, .5);
 }
