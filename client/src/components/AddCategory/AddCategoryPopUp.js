@@ -75,7 +75,7 @@ export const AddCategoryPopUp = ({ token, setCategories }) => {
         createCategory(payload, token).then(({ status, category }) => {
             switch (status) {
                 case 200:
-                    setCategories((categories) => categories.push(category))
+                    setCategories((categories) => [...categories, category])
                     navigate('/')
                     break
                 case 400:
@@ -100,7 +100,7 @@ export const AddCategoryPopUp = ({ token, setCategories }) => {
                 <div className="categoryErrorMessage" style={uniqueMessageStyle}>Category with this title already exists</div>
                 <div className="categoryErrorMessage" style={errorMessageStyle}>Error with sending request</div>
 
-                <input placeholder='Category Title' autoFocus onChange={titleChange} style={titleStyle} value={titleValue} required maxLength="10" minLength="1" />
+                <input placeholder='Category Title' onChange={titleChange} style={titleStyle} value={titleValue} required maxLength="10" minLength="1" />
                 <input placeholder='Costs Limit' onChange={costsLimitChange} style={costsLimitStyle} value={costsLimitValue} inputMode='numeric' min="1" max="999999" />
                 <p><input onChange={colorChange} value={colorValue} type='color' required /><label>Color</label></p>
                 <button type="submit">Create</button>

@@ -13,15 +13,15 @@ const getUserCategories = async (token) => {
     return jsonCategories;
 }
 
-export const CategoriesPage = ({ token, categories }) => {
+export const CategoriesPage = ({ token, categories, user }) => {
     const [jsxCategories, setJsxCategories] = useState([]);
 
     useEffect(() => {
         getUserCategories(token).then((userCategories) => {
-            const formattedCategories = userCategories.map((category) => <Category key={category.id} category={category} />);
+            const formattedCategories = userCategories.map((category) => <Category key={category.id} category={category} user={user}/>);
             setJsxCategories(formattedCategories);
         });
-    }, [categories]);
+    }, [categories, user]);
 
     return (
         <main className="categoriesPage">

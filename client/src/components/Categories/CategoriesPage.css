@@ -6,6 +6,7 @@
     grid-template-columns: repeat(4, minmax(70px, 1fr));
     padding: 1rem;
     row-gap: 1rem;
+    margin-bottom: 7rem;
 }
 
 .category {
@@ -86,7 +87,7 @@
 .addIncomeButton {
     padding: .9rem 2.5rem;
     border-radius: 10rem;
-    background: rgba(108, 197, 81, .9);
+    background: rgba(108, 197, 81);
     color: white;
     text-align: center;
     box-shadow: 0 0 20px rgba(108, 197, 81, .5);
