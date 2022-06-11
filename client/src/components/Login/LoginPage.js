@@ -78,16 +78,16 @@ export const LoginPage = ({ token, setToken }) => {
 
     return (
         <main className="authentication">
-            <form onSubmit={handleSubmit} className="authForm">
+            <form onSubmit={handleSubmit} className="authForm bg-white dark:bg-foreground-black">
                 <h2>Authentication</h2>
                 <div className="errorMessage" style={errorMessageStyle}>{errorMessageValue}</div>
                 <div className="authFormField">
-                    <label>email</label>
-                    <input onChange={emailChange} style={emailFieldStyle} type="email" placeholder='example@mail.com' />
+                    <label className="bg-white dark:bg-foreground-black">email</label>
+                    <input className="bg-white dark:bg-foreground-black" onChange={emailChange} style={emailFieldStyle} type="email" placeholder='example@mail.com' />
                 </div>
                 <div className="authFormField">
-                    <label>password</label>
-                    <input onChange={passwordChange} style={passwordFieldStyle} type="password" placeholder='password' />
+                    <label className="bg-white dark:bg-foreground-black">password</label>
+                    <input className="bg-white dark:bg-foreground-black" onChange={passwordChange} style={passwordFieldStyle} type="password" placeholder='password' />
                 </div>
                 <button type="submit">Log In</button>
             </form>
