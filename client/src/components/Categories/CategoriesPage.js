@@ -25,10 +25,10 @@ export const CategoriesPage = ({ token, categories, user }) => {
     }, [categories, user]);
 
     return (
-        <main className="categoriesPage">
+        <main className="categoriesPage bg-white dark:bg-background-black">
             <section className="categoriesList">
                 {jsxCategories}
-                <Link className="addCategoryButton" to="/add_category">
+                <Link className="addCategoryButton text-black dark:text-white" to="/add_category">
                     <div className="addCategoryButtonImage">+</div>
                     <div className="addCategoryButtonTitle">Add</div>
                 </Link>

@@ -11,36 +11,36 @@ import './Nav.css';
 export const Nav = () => {
     return (
         <footer>
-            <nav className="footerWrapper">
+            <nav className="footerWrapper bg-white dark:bg-foreground-black text-black dark:text-white">
                 <Link to="/">
                     <div className="footerIconBackground">
                         <img src={categories} alt="categories"/>
                     </div>
-                    <div className="footerIconTitle">categories</div>
+                    <div className="footerIconTitle text-black dark:text-white">categories</div>
                 </Link>
                 <Link to="/cards">
                     <div className="footerIconBackground">
                         <img src={cards} alt="cards"/>
                     </div>
-                    <div className="footerIconTitle">cards</div>
+                    <div className="footerIconTitle text-black dark:text-white">cards</div>
                 </Link>
                 <Link to="/costs">
                     <div className="footerIconBackground">
                         <img src={costs} alt="costs"/>
                     </div>
-                    <div className="footerIconTitle">costs</div>
+                    <div className="footerIconTitle text-black dark:text-white">costs</div>
                 </Link>
                 <Link to="/">
                     <div className="footerIconBackground">
                         <img src={statistic} alt="statistic"/>
                     </div>
-                    <div className="footerIconTitle">statistic</div>
+                    <div className="footerIconTitle text-black dark:text-white">statistic</div>
                 </Link>
                 <Link to="/">
                     <div className="footerIconBackground">
                         <img src={account} alt="account"/>
                     </div>
-                    <div className="footerIconTitle">account</div>
+                    <div className="footerIconTitle text-black dark:text-white">account</div>
                 </Link>
             </nav>
         </footer>

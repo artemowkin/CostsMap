@@ -26,7 +26,7 @@ export const AddCategoryPopUp = ({ token, setCategories }) => {
     const [titleStyle, setTitleStyle] = useState({})
     const [costsLimitValue, setCostsLimitValue] = useState("")
     const [costsLimitStyle, setCostsLimitStyle] = useState({})
-    const [colorValue, setColorValue] = useState("#000000")
+    const [colorValue, setColorValue] = useState("#ff0000")
     const [uniqueMessageStyle, setUniqueMessageStyle] = useState({})
     const [errorMessageStyle, setErrorMessageStyle] = useState({})
 
@@ -96,14 +96,14 @@ export const AddCategoryPopUp = ({ token, setCategories }) => {
         <div className="addCategoryPopUpContainer">
             <Link to="/" className="backLink" />
 
-            <form className="addCategoryForm" onSubmit={formSubmit}>
+            <form className="addCategoryForm bg-white dark:bg-background-black text-black dark:text-white" onSubmit={formSubmit}>
                 <h2>Create category</h2>
 
                 <div className="categoryErrorMessage" style={uniqueMessageStyle}>Category with this title already exists</div>
                 <div className="categoryErrorMessage" style={errorMessageStyle}>Error with sending request</div>
 
-                <input placeholder='Category Title' onChange={titleChange} style={titleStyle} value={titleValue} required maxLength="10" minLength="1" />
-                <input placeholder='Costs Limit' onChange={costsLimitChange} style={costsLimitStyle} value={costsLimitValue} inputMode='numeric' min="1" max="999999" />
+                <input className="bg-white dark:bg-foreground-black" placeholder='Category Title' onChange={titleChange} style={titleStyle} value={titleValue} required maxLength="10" minLength="1" />
+                <input className="bg-white dark:bg-foreground-black" placeholder='Costs Limit' onChange={costsLimitChange} style={costsLimitStyle} value={costsLimitValue} inputMode='numeric' min="1" max="999999" />
                 <p><input onChange={colorChange} value={colorValue} type='color' required /><label>Color</label></p>
                 <button type="submit">Create</button>
             </form>

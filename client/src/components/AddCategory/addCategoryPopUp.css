@@ -39,7 +39,6 @@
     justify-content: space-between;
     align-items: center;
     gap: .75rem;
-    background-color: white;
     border-radius: 20px;
     box-shadow: 0 0 20px rgba(0, 0, 0, .5);
     animation: formStart .35s ease-out forwards;
