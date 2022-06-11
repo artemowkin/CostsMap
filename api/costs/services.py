@@ -2,6 +2,7 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 
 from databases import Database
+from sqlalchemy import desc
 
 from accounts.schemas import UserOut
 from costs.db import costs
@@ -14,6 +15,6 @@ async def get_all_user_costs_by_month(user: UserOut, month: str, db: Database):
     get_query = costs.select().where(
         costs.c.user_id == user.id, costs.c.date >= month_start_date,
         costs.c.date < month_end_date
-    )
+    ).order_by(desc(costs.c.date))
     db_costs = await db.fetch_all(get_query)
     return db_costs

@@ -7,6 +7,7 @@ import { useAuth } from './hooks/Auth/useAuth';
 import { CardsPage } from './components/Cards/CardsPage';
 import { AddCategoryPopUp } from './components/AddCategory/AddCategoryPopUp';
 import { getUser } from './hooks/Auth/getUser';
+import { CostsPage } from './components/Costs/CostsPage';
 
 function App() {
   const { tokenValue } = useAuth()
@@ -15,7 +16,13 @@ function App() {
   const [categories, setCategories] = useState([])
 
   useEffect(() => {
-    getUser(token).then((user) => setCurrentUser(user))
+    getUser(token).then((user) => {
+      if (!user) {
+        setToken("")
+      } else {
+        setCurrentUser(user)
+      }
+    })
   }, [])
 
   return (
@@ -29,6 +36,9 @@ function App() {
         } />
         <Route path="/cards" element={
           token ? <CardsPage token={token} /> : <Navigate to="/login" />
+        } />
+        <Route path="/costs" element={
+          token ? <CostsPage token={token} user={currentUser} /> : <Navigate to="/login" />
         } />
         <Route path="/login" element={<LoginPage token={token} setToken={setToken} />} />
       </Routes>
