@@ -20,6 +20,7 @@
 }
 
 .categoryImage {
+    position: relative;
     width: 60px;
     height: 60px;
     border-radius: 20rem;
@@ -27,6 +28,23 @@
     display: grid;
     place-content: center;
     font-size: 30px;
+}
+
+.categoryImage::after {
+    content: ' ';
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: 5px;
+    background: rgba(0, 0, 0, .5);
+    border-radius: 10rem;
+    z-index: 2;
+}
+
+.categoryImageCurrency {
+    z-index: 3;
 }
 
 .addCategoryButton {
@@ -66,8 +84,4 @@
     color: white;
     text-align: center;
     box-shadow: 0 0 50px 10px rgba(0, 0, 0, .25);
-}
-
-.addCategoryForm {
-
 }

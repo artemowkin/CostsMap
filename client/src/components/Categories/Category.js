@@ -5,7 +5,7 @@ export const Category = ({ category }) => {
         <div className="category">
             <div className="categoryTitle">{category.title}</div>
             <div className="categoryCostsLimit">{category.costs_limit}</div>
-            <div className="categoryImage" style={{backgroundColor: category.color}}>$</div>
+            <div className="categoryImage" style={{backgroundColor: category.color}}><div className="categoryImageCurrency">$</div></div>
             <div className="categoryCostsSum" style={categoryCostsSumStyle}>{category.costs_sum}</div>
         </div>
     );

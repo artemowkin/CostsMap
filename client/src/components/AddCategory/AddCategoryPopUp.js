@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom';
 import './addCategoryPopUp.css';
 
 const createCategory = async (payload, token) => {
-    response = await fetch("http://192.168.0.156:800/api/v1/categories/", {
+    const response = await fetch("http://192.168.0.156:800/api/v1/categories/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify(payload);
+        body: JSON.stringify(payload)
     })
 }
 

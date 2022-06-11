@@ -74,11 +74,11 @@ export const LoginPage = ({ token, setToken }) => {
                 <div className="errorMessage" style={ErrorMessageStyle}>Error with sending request</div>
                 <div className="authFormField">
                     <label>email</label>
-                    <input onChange={emailChange} style={emailFieldStyle} type="email" />
+                    <input onChange={emailChange} style={emailFieldStyle} type="email" placeholder='example@mail.com' />
                 </div>
                 <div className="authFormField">
                     <label>password</label>
-                    <input onChange={passwordChange} style={passwordFieldStyle} type="password" />
+                    <input onChange={passwordChange} style={passwordFieldStyle} type="password" placeholder='password' />
                 </div>
                 <button type="submit">Log In</button>
             </form>
