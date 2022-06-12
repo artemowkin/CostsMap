@@ -4,6 +4,7 @@ import { Nav } from "../Nav/Nav"
 import { Cost } from "./Cost"
 
 import './CostsPage.css'
+import costsIcon from '../../costs.svg';
 
 const getCosts = async (token) => {
     const response = await axios({
@@ -65,6 +66,7 @@ const getJsxCosts = (costs, user) => {
 }
 
 export const CostsPage = ({ token, user }) => {
+    const [areCostsGetted, setAreCostsGetted] = useState(false)
     const [formattedCosts, setFormattedCosts] = useState([])
     const [jsxCosts, setJsxCosts] = useState([])
 
@@ -77,8 +79,19 @@ export const CostsPage = ({ token, user }) => {
 
     useEffect(() => {
         const jsxDatedCosts = getJsxDatedCosts(formattedCosts, user)
-        setJsxCosts(jsxDatedCosts)
+        setJsxCosts(jsxDatedCosts, () => setAreCostsGetted(true))
     }, [formattedCosts])
+
+    if (areCostsGetted && jsxCosts.length === 0)
+        return (
+            <>
+                <div className="emptyPage">
+                    <img src={costsIcon} />
+                    <h2>There are no costs for this month</h2>
+                </div>
+                <Nav />
+            </>
+        )
 
     return (
         <>

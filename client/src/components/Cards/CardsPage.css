@@ -38,3 +38,38 @@
 .cardAmount {
     font-size: 1rem;
 }
+
+.addCardButtonContainer {
+    position: fixed;
+    bottom: 8.5rem;
+    left: 0;
+    right: 0;
+    display: grid;
+    place-content: center;
+}
+
+.addCardButton {
+    position: relative;
+    padding: .9rem 2.5rem;
+    border-radius: 10rem;
+    color: white;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(80, 178, 192, .2);
+}
+
+.addCardButton::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba(80, 178, 192, .6);
+    border-radius: 10rem;
+    z-index: 2
+}
+
+.addCardButton span {
+    position: relative;
+    z-index: 3;
+}

@@ -1,3 +1,28 @@
 #root {
     padding-bottom: 7rem;
 }
+
+.emptyPage {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: grid;
+    place-content: center;
+    place-items: center;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.emptyPage img {
+    width: 100px;
+    opacity: .7;
+}
+
+.emptyPage h2 {
+    padding: 0 3rem;
+    font-size: 1.25rem;
+    text-align: center;
+    font-weight: normal;
+}
