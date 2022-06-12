@@ -2,15 +2,11 @@ import { Nav } from "../Nav/Nav"
 
 import './AccountPage.css'
 
+import systemTheme from "./system-theme.svg"
+import darkTheme from "./theme-dark.svg"
+import lightTheme from "./theme-light.svg"
+
 export const AccountPage = ({ token, user }) => {
-    const changeTheme = () => {
-        const currentTheme = document.documentElement.className ?? "white"
-        const changingTheme = (currentTheme === "dark") ? "white" : "dark"
-
-        localStorage.setItem("color-theme", changingTheme)
-        document.documentElement.className = changingTheme
-    }
-
     const setSystemTheme = () => {
         const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
 
@@ -32,10 +28,11 @@ export const AccountPage = ({ token, user }) => {
         <>
             <div className="accountPage">
                 <p className="themeChoicer">
+                    <div className="themeChoiceTitle">Theme:</div>
                     <div className="themeButtons bg-white dark:bg-background-black">
-                        <button onClick={setSystemTheme} className="themeButton"></button>
-                        <button onClick={setWhiteTheme} className="themeButton"></button>
-                        <button onClick={setDarkTheme} className="themeButton"></button>
+                        <button onClick={setSystemTheme} className="themeButton"><img src={systemTheme} /></button>
+                        <button onClick={setWhiteTheme} className="themeButton"><img src={lightTheme} /></button>
+                        <button onClick={setDarkTheme} className="themeButton"><img src={darkTheme} /></button>
                     </div>
                 </p>
             </div>
