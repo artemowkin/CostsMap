@@ -4,6 +4,7 @@ from sqlalchemy.sql import func
 from project.db import metadata
 from accounts.db import users
 from categories.db import categories
+from cards.db import cards
 
 
 costs = sqlalchemy.Table("costs", metadata,
@@ -14,6 +15,11 @@ costs = sqlalchemy.Table("costs", metadata,
         "category_id",
         sqlalchemy.Integer,
         sqlalchemy.ForeignKey(categories.c.id, ondelete="CASCADE")
+    ),
+    sqlalchemy.Column(
+        "card_id",
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey(cards.c.id, ondelete="CASCADE")
     ),
     sqlalchemy.Column(
         "user_id",

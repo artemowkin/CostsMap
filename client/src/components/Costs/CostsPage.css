@@ -60,3 +60,7 @@
 .costCategoryImageSymbol {
     z-index: 3;
 }
+
+.costCardTitle {
+    font-size: .75rem;
+}

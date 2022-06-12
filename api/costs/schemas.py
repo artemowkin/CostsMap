@@ -3,6 +3,7 @@ from datetime import date as dt_date
 
 from pydantic import BaseModel, validator
 
+from cards.schemas import CardOut
 from categories.schemas import CategoryOut
 
 
@@ -26,12 +27,14 @@ class Cost(BaseCost):
     """Model for cost data getting from request"""
 
     category_id: int
+    card_id: int
 
 
 class CostOut(BaseCost):
     """Model for cost data returning in response"""
 
     category: CategoryOut
+    card: CardOut
 
     class Config:
         orm_mode = True

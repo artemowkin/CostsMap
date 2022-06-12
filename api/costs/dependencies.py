@@ -12,6 +12,8 @@ from .schemas import CostOut
 from categories.schemas import CategoryOut
 from accounts.schemas import UserOut
 from accounts.dependencies import get_current_user
+from cards.services import get_concrete_user_card
+from cards.schemas import CardOut
 
 
 today_string = date.today().strftime("%Y-%m")
@@ -28,7 +30,9 @@ async def get_all_costs_for_the_month(
     for db_cost in db_costs:
         costs_dict = dict(zip(db_cost.keys(), db_cost.values()))
         db_category = await get_category_by_id(db_cost.category_id, user, db)
+        db_card = await get_concrete_user_card(db_cost.card_id, user.id, db)
         costs_dict['category'] = CategoryOut.from_orm(db_category)
+        costs_dict['card'] = CardOut.from_orm(db_card)
         out_costs.append(CostOut(**costs_dict))
 
     return out_costs
