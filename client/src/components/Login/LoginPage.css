@@ -22,10 +22,10 @@
 
 .authForm {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr;
+    place-content: center space-between;
+    place-items: center;
     box-shadow: 0 0 40px rgba(0, 0, 0, .25);
     border-radius: 20px;
     padding: 2rem;
@@ -34,6 +34,8 @@
 
 .authForm h2 {
     margin: 0;
+    font-weight: bold;
+    font-size: 1.25rem;
 }
 
 .authFormField {

@@ -13,9 +13,8 @@
 }
 
 .themeButtons {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(3, min-content);
     border-radius: 15px;
     gap: .5rem;
 }
@@ -27,6 +26,7 @@
     cursor: pointer;
     display: grid;
     place-content: center;
+    place-items: center;
 }
 
 .themeButton::after {
@@ -45,4 +45,5 @@
     width: 30px;
     height: 30px;
     object-fit: contain;
+    margin: 0 auto;
 }

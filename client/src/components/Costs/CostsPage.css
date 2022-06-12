@@ -10,10 +10,8 @@
 }
 
 .costsDateList {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 1rem;
 }
 
@@ -28,8 +26,10 @@
 }
 
 .costCardInfo {
-    display: flex;
-    align-items: center;
+    display: grid;
+    place-content: center;
+    place-items: center left;
+    grid-template-columns: repeat(2, min-content);
     gap: .75rem;
 }
 

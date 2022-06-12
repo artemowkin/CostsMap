@@ -34,10 +34,9 @@
     z-index: 99999;
     width: 100%;
     padding: 1.5rem 1rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr;
+    place-items: center;
     gap: .75rem;
     border-radius: 20px;
     box-shadow: 0 0 20px rgba(0, 0, 0, .5);
@@ -57,6 +56,8 @@
 .addCategoryForm h2 {
     margin: 0;
     margin-bottom: .5rem;
+    font-weight: bold;
+    font-size: 1.25rem;
 }
 
 .addCategoryForm input:not([type="color"]) {
@@ -73,7 +74,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: .5rem;
 }
 
 .addCategoryForm input[type="color"] {
@@ -85,6 +85,7 @@
     border-radius: 20px;
     overflow: hidden;
     cursor: pointer;
+    margin-right: .5rem;
 }
 
 .addCategoryForm input[type="color"]::-webkit-color-swatch-wrapper {
@@ -97,7 +98,7 @@
 
 .addCategoryForm button {
     color: white;
-    padding: 1rem 5rem;
+    padding: .75rem 5rem;
     font-size: 1rem;
     border: 0;
     border-radius: 10rem;

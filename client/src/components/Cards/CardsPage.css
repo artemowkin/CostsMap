@@ -2,17 +2,16 @@
     width: 100%;
     padding: 1rem;
     padding-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: start;
+    display: grid;
+    grid-template-columns: 1fr;
     align-items: center;
     gap: 1.5rem;
 }
 
 .card {
-    display: flex;
-    align-items: center;
-    justify-content: start;
+    display: grid;
+    place-content: center start;
+    grid-template-columns: repeat(2, min-content);
     gap: 1rem;
     width: 100%;
     padding: 1rem;
@@ -21,10 +20,8 @@
 }
 
 .cardInfo {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: start;
+    display: grid;
+    place-content: center start;
     gap: .25rem;
 }
 
