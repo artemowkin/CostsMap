@@ -5,10 +5,10 @@ from databases import Database
 
 from project.db import get_database
 from .services import (
-    get_all_user_costs_by_month
+    get_all_user_costs_by_month, get_total_costs_for_the_month
 )
 from categories.services import get_category_by_id
-from .schemas import CostOut
+from .schemas import CostOut, TotalCosts
 from categories.schemas import CategoryOut
 from accounts.schemas import UserOut
 from accounts.dependencies import get_current_user
@@ -25,6 +25,7 @@ async def get_all_costs_for_the_month(
     db: Database = Depends(get_database)
 ):
     """Return all costs for the month (current by default)"""
+    assert user.id
     db_costs = await get_all_user_costs_by_month(user, month, db)
     out_costs = []
     for db_cost in db_costs:
@@ -36,3 +37,14 @@ async def get_all_costs_for_the_month(
         out_costs.append(CostOut(**costs_dict))
 
     return out_costs
+
+
+async def get_total_costs(
+    month: str = Query(today_string, regex=r"\d{4}-\d{2}"),
+    user: UserOut = Depends(get_current_user),
+    db: Database = Depends(get_database)
+):
+    """Return total costs for the month for concrete user"""
+    assert user.id
+    total_costs = await get_total_costs_for_the_month(user.id, month, db)
+    return TotalCosts(total_costs=total_costs)

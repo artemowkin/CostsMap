@@ -38,3 +38,9 @@ class CostOut(BaseCost):
 
     class Config:
         orm_mode = True
+
+
+class TotalCosts(BaseModel):
+    """Model for total costs response"""
+
+    total_costs: Decimal
