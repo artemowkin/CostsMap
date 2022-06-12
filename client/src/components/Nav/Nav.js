@@ -36,7 +36,7 @@ export const Nav = () => {
                     </div>
                     <div className="footerIconTitle text-black dark:text-white">statistic</div>
                 </Link>
-                <Link to="/">
+                <Link to="/account">
                     <div className="footerIconBackground">
                         <img src={account} alt="account"/>
                     </div>

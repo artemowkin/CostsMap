@@ -33,7 +33,7 @@ export const CategoriesPage = ({ token, categories, user }) => {
                     <div className="addCategoryButtonTitle">Add</div>
                 </Link>
                 <div className="addIncomeButtonContainer">
-                    <Link className="addIncomeButton" to="/">+ Income</Link>
+                    <Link className="addIncomeButton bg-white dark:bg-background-black" to="/"><span>+ Income</span></Link>
                 </div>
             </section>
             <Nav />

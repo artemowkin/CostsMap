@@ -1,0 +1,36 @@
+.accountPage {
+    padding: 1rem;
+}
+
+.themeChoicer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.themeButtons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    gap: .5rem;
+}
+
+.themeButton {
+    width: 60px;
+    height: 60px;
+    position: relative;
+    cursor: pointer;
+}
+
+.themeButton::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba(249, 160, 63, .3);
+    border-radius: 10px;
+    z-index: 2;
+}

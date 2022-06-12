@@ -85,10 +85,27 @@
 }
 
 .addIncomeButton {
+    position: relative;
     padding: .9rem 2.5rem;
     border-radius: 10rem;
-    background: rgba(108, 197, 81);
     color: white;
     text-align: center;
-    box-shadow: 0 0 20px rgba(108, 197, 81, .5);
+    box-shadow: 0 0 20px rgba(108, 197, 81, .2);
+}
+
+.addIncomeButton::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba(108, 197, 81, .6);
+    border-radius: 10rem;
+    z-index: 2
+}
+
+.addIncomeButton span {
+    position: relative;
+    z-index: 3;
 }

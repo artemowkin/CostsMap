@@ -8,6 +8,7 @@ import { CardsPage } from './components/Cards/CardsPage';
 import { AddCategoryPopUp } from './components/AddCategory/AddCategoryPopUp';
 import { getUser } from './hooks/Auth/getUser';
 import { CostsPage } from './components/Costs/CostsPage';
+import { AccountPage } from './components/Account/AccountPage';
 
 function App() {
   const { tokenValue } = useAuth()
@@ -39,6 +40,9 @@ function App() {
         } />
         <Route path="/costs" element={
           token ? <CostsPage token={token} user={currentUser} /> : <Navigate to="/login" />
+        } />
+        <Route path="/account" element={
+          token ? <AccountPage token={token} user={currentUser} /> : <Navigate to="/login" />
         } />
         <Route path="/login" element={<LoginPage token={token} setToken={setToken} />} />
       </Routes>
