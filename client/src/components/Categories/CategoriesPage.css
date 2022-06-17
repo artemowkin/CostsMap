@@ -1,5 +1,4 @@
 .categoriesList {
-    margin-top: 2rem;
     width: 100%;
     display: grid;
     place-content: space-evenly;
@@ -108,4 +107,18 @@
 .addIncomeButton span {
     position: relative;
     z-index: 3;
+}
+
+.monthTotals {
+    display: grid;
+    place-content: center;
+    margin: 1rem 0 .5rem;
+}
+
+.totalCosts {
+    font-size: 1.25rem;
+}
+
+.totalCosts span {
+    color: red;
 }

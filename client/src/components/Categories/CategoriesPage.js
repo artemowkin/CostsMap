@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Nav } from '../Nav/Nav';
 import './CategoriesPage.css';
 import { Category } from './Category';
+import { TotalCosts } from './TotalCosts';
 
 const getUserCategories = async (token) => {
     const response = await axios({
@@ -26,6 +27,10 @@ export const CategoriesPage = ({ token, categories, user }) => {
 
     return (
         <main className="categoriesPage bg-white dark:bg-background-black">
+            <div className="monthTotals">
+                <TotalCosts token={token} user={user} />
+            </div>
+
             <section className="categoriesList">
                 {jsxCategories}
                 <Link className="addCategoryButton text-black dark:text-white" to="/add_category">
@@ -36,6 +41,7 @@ export const CategoriesPage = ({ token, categories, user }) => {
                     <Link className="addIncomeButton bg-white dark:bg-background-black" to="/"><span>+ Income</span></Link>
                 </div>
             </section>
+
             <Nav />
         </main>
     );
