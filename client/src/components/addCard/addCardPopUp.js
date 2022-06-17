@@ -1,11 +1,24 @@
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-const createCategory = async (payload, token) => {
+const getUserCurrencies = async (token) => {
     try {
         const response = await axios({
-            url: "/categories/",
+            url: "/auth/currencies/",
+            method: "GET"
+        })
+
+        return response.data
+    } catch (err) {
+        return { currencies: [] }
+    }
+}
+
+const createCard = async (payload, token) => {
+    try {
+        const response = await axios({
+            url: "/cards/",
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -14,45 +27,46 @@ const createCategory = async (payload, token) => {
             data: payload
         })
 
-        return { status: response.status, category: response.data }
+        return { status: response.status, card: response.data }
     } catch (error) {
         return { status: error.response.status, category: null }
     }
 }
 
-export const AddCategoryPopUp = ({ token, setCategories }) => {
+export const AddCardPopUp = ({ token, setCards, user }) => {
+    const [userCurrenciesOptions, setUserCurrenciesOptions] = useState([])
     const [titleValue, setTitleValue] = useState("")
     const [titleStyle, setTitleStyle] = useState({})
-    const [costsLimitValue, setCostsLimitValue] = useState("")
-    const [costsLimitStyle, setCostsLimitStyle] = useState({})
+    const [currencyValue, setCurrencyValue] = useState(user?.currency)
     const [colorValue, setColorValue] = useState("#ff0000")
     const [uniqueMessageStyle, setUniqueMessageStyle] = useState({})
     const [errorMessageStyle, setErrorMessageStyle] = useState({})
 
     const navigate = useNavigate();
 
+    useEffect(() => {
+        getUserCurrencies(token).then(({ currencies }) => {
+            const currenciesOptions = currencies.map((currency) => <option key={currency} value={currency}>{currency}</option>)
+            setUserCurrenciesOptions(currenciesOptions)
+        })
+    }, [token, user])
+
     const titleChange = (element) => {
         const elementValue = element.target.value
 
         setTitleValue(elementValue)
 
-        if (elementValue.length < 1 || elementValue.length > 10) {
+        if (elementValue.length < 1 || elementValue.length > 20) {
             setTitleStyle({color: "red"});
         } else {
             setTitleStyle({})
         }
     }
 
-    const costsLimitChange = (element) => {
-        const elementValue = element.target.value
+    const currencyChange = (element) => {
+        const elementValue = element.target.options[element.target.selectedIndex].value;
 
-        setCostsLimitValue(elementValue)
-
-        if (elementValue !== "" && (elementValue < 1 || elementValue > 999999 || isNaN(elementValue))) {
-            setCostsLimitStyle({color: "red"})
-        } else {
-            setCostsLimitStyle({})
-        }
+        setCurrencyValue(elementValue)
     }
 
     const colorChange = (element) => {
@@ -64,20 +78,19 @@ export const AddCategoryPopUp = ({ token, setCategories }) => {
     const formSubmit = (element) => {
         element.preventDefault()
 
-        if (titleStyle.color || costsLimitStyle.color || !titleValue) return;
+        if (titleStyle.color || !titleValue) return;
 
         const payload = {
             title: titleValue,
+            currency: currencyValue,
             color: colorValue,
         }
 
-        if (costsLimitValue) payload.costs_limit = costsLimitValue;
-
-        createCategory(payload, token).then(({ status, category }) => {
+        createCard(payload, token).then(({ status, card }) => {
             switch (status) {
                 case 200:
-                    setCategories((categories) => [...categories, category])
-                    navigate('/')
+                    setCards((cards) => [...cards, card])
+                    navigate('/cards')
                     break
                 case 400:
                     setErrorMessageStyle({})
@@ -93,16 +106,18 @@ export const AddCategoryPopUp = ({ token, setCategories }) => {
 
     return (
         <div className="addPopUpContainer">
-            <Link to="/" className="backLink" />
+            <Link to="/cards" className="backLink" />
 
             <form className="addForm bg-white dark:bg-background-black text-black dark:text-white" onSubmit={formSubmit}>
-                <h2>Create category</h2>
+                <h2>Create card</h2>
 
-                <div className="addFormErrorMessage" style={uniqueMessageStyle}>Category with this title already exists</div>
+                <div className="addFormErrorMessage" style={uniqueMessageStyle}>Card with this title already exists</div>
                 <div className="addFormErrorMessage" style={errorMessageStyle}>Error with sending request</div>
 
-                <input className="bg-white dark:bg-foreground-black" placeholder='Category Title' onChange={titleChange} style={titleStyle} value={titleValue} required maxLength="10" minLength="1" />
-                <input className="bg-white dark:bg-foreground-black" placeholder='Costs Limit' onChange={costsLimitChange} style={costsLimitStyle} value={costsLimitValue} inputMode='numeric' min="1" max="999999" />
+                <input className="bg-white dark:bg-foreground-black" placeholder='Card Title' onChange={titleChange} style={titleStyle} value={titleValue} required maxLength="20" minLength="1" />
+                <select className="bg-white dark:bg-foreground-black" placeholder='Card Currency' onChange={currencyChange} value={currencyValue || user?.currency || ""} required>
+                    {userCurrenciesOptions}
+                </select>
                 <p><input onChange={colorChange} value={colorValue} type='color' required /><label>Color</label></p>
                 <button type="submit">Create</button>
             </form>

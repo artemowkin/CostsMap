@@ -67,20 +67,16 @@ const getJsxCosts = (costs, user) => {
 
 export const CostsPage = ({ token, user }) => {
     const [areCostsGetted, setAreCostsGetted] = useState(false)
-    const [formattedCosts, setFormattedCosts] = useState([])
     const [jsxCosts, setJsxCosts] = useState([])
 
     useEffect(() => {
         getCosts(token).then((costs) => {
             const fmtCosts = getFormattedCosts(costs)
-            setFormattedCosts(fmtCosts)
+            const jsxDatedCosts = getJsxDatedCosts(fmtCosts, user)
+            setJsxCosts(jsxDatedCosts)
+            setAreCostsGetted(true)
         })
     }, [token, user])
-
-    useEffect(() => {
-        const jsxDatedCosts = getJsxDatedCosts(formattedCosts, user)
-        setJsxCosts(jsxDatedCosts, () => setAreCostsGetted(true))
-    }, [formattedCosts])
 
     if (areCostsGetted && jsxCosts.length === 0)
         return (

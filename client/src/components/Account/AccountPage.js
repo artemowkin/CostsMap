@@ -27,14 +27,14 @@ export const AccountPage = ({ token, user }) => {
     return (
         <>
             <div className="accountPage">
-                <p className="themeChoicer">
+                <div className="themeChoicer">
                     <div className="themeChoiceTitle">Theme:</div>
                     <div className="themeButtons bg-white dark:bg-background-black">
                         <button onClick={setSystemTheme} className="themeButton"><img src={systemTheme} /></button>
                         <button onClick={setWhiteTheme} className="themeButton"><img src={lightTheme} /></button>
                         <button onClick={setDarkTheme} className="themeButton"><img src={darkTheme} /></button>
                     </div>
-                </p>
+                </div>
             </div>
             <Nav />
         </>
