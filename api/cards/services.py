@@ -24,7 +24,7 @@ def unique_card_handler(func):
 
 async def get_all_user_cards(user_id: int, db: Database):
     """Return all user cards using user id"""
-    get_query = cards.select().where(cards.c.user_id == user_id)
+    get_query = cards.select().where(cards.c.user_id == user_id).order_by(cards.c.id)
     db_cards = await db.fetch_all(get_query)
     return db_cards
 

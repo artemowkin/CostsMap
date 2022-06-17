@@ -28,7 +28,7 @@ def category_exists_decorator(func):
 
 async def get_all_user_categories(user: UserOut, db: Database):
     """Return all user categories"""
-    get_query = categories.select().where(categories.c.user_id == user.id)
+    get_query = categories.select().where(categories.c.user_id == user.id).order_by(categories.c.id)
     db_categories = await db.fetch_all(get_query)
     return db_categories
 
