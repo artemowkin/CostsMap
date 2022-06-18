@@ -30,7 +30,7 @@ def test_create_category():
         "costs_limit": None,
         "color": "#333333",
         "costs_sum": 0.0,
-        "id": None
+        "id": 1
     }
 
 
@@ -56,7 +56,7 @@ def test_create_category_with_costs_limit():
         "costs_limit": 500,
         "color": "#333333",
         "costs_sum": 0.0,
-        "id": None
+        "id": 2
     }
 
 

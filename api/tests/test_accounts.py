@@ -165,7 +165,7 @@ def test_change_me():
         "email": "someone@gmail.com",
         "currency": "$",
         "language": "russian",
-        "id": None
+        "id": 1
     }
 
 
@@ -191,7 +191,7 @@ def test_change_me_with_email():
         "email": "someone2@gmail.com",
         "currency": "$",
         "language": "english",
-        "id": None
+        "id": 1
     }
 
 

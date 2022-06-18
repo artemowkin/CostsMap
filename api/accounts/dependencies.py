@@ -42,13 +42,12 @@ async def get_current_user(token: str = Depends(oauth), db: Database = Depends(g
 
 
 async def change_user(
-    changing_data: UserIn, token: str = Depends(oauth),
+    changing_data: UserIn, current_user: UserOut = Depends(get_current_user),
     db: Database = Depends(get_database)
 ) -> UserOut:
     """Change the current user using data from request"""
-    decoded_token = decode_token(token)
-    await update_user_data(decoded_token['sub'], changing_data, db)
-    user_out = UserOut(**changing_data.dict())
+    await update_user_data(current_user.id, changing_data, db)
+    user_out = UserOut(id=current_user.id, **changing_data.dict())
     return user_out
 
 

@@ -82,9 +82,9 @@ async def transfer_money_between_cards(
         await db.execute(update_query_to)
 
 
-async def subtract_cost_from_card(card_id: int, new_amount: Decimal, db: Database) -> None:
+async def subtract_cost_from_card(user_id: int, card_id: int, new_amount: Decimal, db: Database) -> None:
     if new_amount < 0:
         raise HTTPException(status_code=400, detail="Cost amount is more than card amount")
 
-    query = cards.update().values(amount=new_amount).where(cards.c.id == card_id)
+    query = cards.update().values(amount=new_amount).where(cards.c.id == card_id, cards.c.user_id == user_id)
     await db.execute(query)

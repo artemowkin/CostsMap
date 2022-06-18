@@ -56,7 +56,7 @@ class UserIn(BaseUser):
 class UserOut(UserIn):
     """User pydantic model for sending user info as response"""
 
-    id: int | None = None
+    id: int
 
     class Config:
         orm_mode = True

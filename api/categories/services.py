@@ -55,7 +55,6 @@ async def create_category(category: BaseCategory, user: UserOut, db: Database) -
         **category.dict(), user_id=user.id
     )
     category_id = await db.execute(create_query)
-    print(category_id)
     return category_id
 
 

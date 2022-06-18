@@ -36,7 +36,7 @@ def user_exists_decorator(func):
 
     async def inner(*args, **kwargs):
         try:
-            await func(*args, **kwargs)
+            return await func(*args, **kwargs)
         except (UniqueViolationError, IntegrityError):
             raise HTTPException(
                 status_code=400, detail="User with this email already exists"
@@ -115,11 +115,9 @@ async def get_user_by_email(user_email: str, db: Database):
 
 
 @user_exists_decorator
-async def update_user_data(email: str, changing_data: UserIn, db: Database):
+async def update_user_data(user_id: int, changing_data: UserIn, db: Database):
     """Update the user information"""
-    update_query = users.update().values(**changing_data.dict()).where(
-        users.c.email == email
-    )
+    update_query = users.update().values(**changing_data.dict()).where(users.c.id == user_id)
     result = await db.execute(update_query)
     return result
 
