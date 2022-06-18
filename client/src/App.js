@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { CategoriesPage } from './components/Categories/CategoriesPage';
-import { LoginPage } from './components/Login/LoginPage';
-import './App.css';
-import { useAuth } from './hooks/Auth/useAuth';
-import { CardsPage } from './components/Cards/CardsPage';
-import { AddCategoryPopUp } from './components/AddCategory/AddCategoryPopUp';
-import { getUser } from './hooks/Auth/getUser';
-import { CostsPage } from './components/Costs/CostsPage';
-import { AccountPage } from './components/Account/AccountPage';
-import { AddCardPopUp } from './components/addCard/addCardPopUp';
+import { useEffect, useState } from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { CategoriesPage } from './components/Categories/CategoriesPage'
+import { LoginPage } from './components/Login/LoginPage'
+import './App.css'
+import { useAuth } from './hooks/Auth/useAuth'
+import { CardsPage } from './components/Cards/CardsPage'
+import { AddCategoryPopUp } from './components/AddCategory/AddCategoryPopUp'
+import { getUser } from './hooks/Auth/getUser'
+import { CostsPage } from './components/Costs/CostsPage'
+import { AccountPage } from './components/Account/AccountPage'
+import { AddCardPopUp } from './components/addCard/addCardPopUp'
+import { CardMenu } from './components/CardMenu/CardMenu'
+import { getUserCards } from './components/Cards/services'
 
 function App() {
   const { tokenValue } = useAuth()
@@ -28,6 +30,10 @@ function App() {
     })
   }, [token])
 
+  useEffect(() => {
+    getUserCards(token).then((cards) => setCards(cards))
+  }, [token])
+
   return (
     <>
       <Routes>
@@ -41,7 +47,10 @@ function App() {
           token ? <CardsPage token={token} cards={cards} /> : <Navigate to="/login" />
         } />
         <Route path="/add_card" element={
-          token ? (<><CardsPage token={token} /><AddCardPopUp token={token} setCards={setCards} user={currentUser} /></>) : <Navigate to="/login" />
+          token ? (<><CardsPage token={token} cards={cards} /><AddCardPopUp token={token} setCards={setCards} user={currentUser} /></>) : <Navigate to="/login" />
+        } />
+        <Route path="/card_menu/:cardId" element={
+          token ? (<><CardsPage token={token} cards={cards} /><CardMenu token={token} setCards={setCards} /></>) : <Navigate to="/login" />
         } />
         <Route path="/costs" element={
           token ? <CostsPage token={token} user={currentUser} /> : <Navigate to="/login" />
