@@ -22,7 +22,7 @@ export const CardsPage = ({ token, cards }) => {
                     <h2>There are no cards</h2>
                 </div>
                 <div className="addCardButtonContainer">
-                    <Link to="/" className="addCardButton bg-white dark:bg-background-black"><span>+ Card</span></Link>
+                    <Link to="/add_card" className="addCardButton bg-white dark:bg-background-black"><span>+ Card</span></Link>
                 </div>
                 <Nav />
             </>

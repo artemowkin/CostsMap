@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { CategoriesPage } from './components/Categories/CategoriesPage'
 import { LoginPage } from './components/Login/LoginPage'
 import { useAuth } from './hooks/Auth/useAuth'
@@ -26,13 +26,22 @@ function App() {
   const [costs, setCosts] = useState([])
   const [monthCosts, setMonthCosts] = useState(0)
 
+  const navigate = useNavigate();
+
   useEffect(() => {
-    getUser(token).then((user) => {
+    const userPromise = getUser(token)
+
+    userPromise.then((user) => {
       if (!user) {
         setToken("")
       } else {
         setCurrentUser(user)
       }
+    })
+
+    userPromise.catch(() => {
+      localStorage.clear()
+      navigate("/login")
     })
   }, [token])
 
