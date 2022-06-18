@@ -94,7 +94,7 @@ export const AddCostPopUp = ({ token, setCosts, setCategories, setMonthCosts, se
             switch (status) {
                 case 200:
                     if (costDate.getFullYear() == new Date().getFullYear() && costDate.getMonth() == new Date().getMonth()) {
-                        setCosts((costs) => [...costs, cost])
+                        setCosts((costs) => [cost, ...costs])
                         setMonthCosts((monthCosts) => +monthCosts + +costSumValue)
 
                         const newCards = cards.map((card) => {

@@ -16,7 +16,7 @@ def category_exists_decorator(func):
 
     async def inner(*args, **kwargs):
         try:
-            await func(*args, **kwargs)
+            return await func(*args, **kwargs)
         except (UniqueViolationError, IntegrityError):
             raise HTTPException(
                 status_code=400,
@@ -49,12 +49,13 @@ async def get_costs_for_categories(user: UserOut, month: str, db: Database):
 
 
 @category_exists_decorator
-async def create_category(category: BaseCategory, user: UserOut, db: Database):
+async def create_category(category: BaseCategory, user: UserOut, db: Database) -> int:
     """Create a new category and return its id"""
     create_query = categories.insert().values(
         **category.dict(), user_id=user.id
     )
     category_id = await db.execute(create_query)
+    print(category_id)
     return category_id
 
 

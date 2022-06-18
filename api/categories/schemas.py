@@ -12,7 +12,7 @@ class BaseCategory(BaseModel):
 
 class CategoryOut(BaseCategory):
     """Model for category in response"""
-    id: int | None = None
+    id: int
     costs_sum: Decimal | None = Decimal('0.0')
 
     class Config:

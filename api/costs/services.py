@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 
 from datetime import date
@@ -8,9 +7,8 @@ from databases import Database
 from sqlalchemy import desc
 
 from accounts.schemas import UserOut
-from categories.services import get_category_by_id
 from .db import costs
-from .schemas import Cost, CostOut
+from .schemas import Cost
 
 
 async def get_all_user_costs_by_month(user: UserOut, month: str, db: Database):

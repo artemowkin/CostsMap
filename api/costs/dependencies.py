@@ -59,9 +59,9 @@ async def create_new_cost(
     db: Database = Depends(get_database)
 ):
     async with db.transaction():
-        created_cost_id = await create_db_cost(user, cost_data, db)
         created_cost_category = await get_concrete_category(cost_data.category_id, user, db)
         created_cost_card = await get_concrete_card(cost_data.card_id, user, db)
+        created_cost_id = await create_db_cost(user, cost_data, db)
         subtracted_card_amount = created_cost_card.amount - cost_data.amount
         await subtract_cost_from_card(cost_data.card_id, subtracted_card_amount, db)
 

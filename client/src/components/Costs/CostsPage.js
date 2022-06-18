@@ -4,6 +4,7 @@ import { Cost } from "./Cost"
 
 import './CostsPage.css'
 import costsIcon from '../../costs.svg';
+import { roundDecimal } from "../../utils/numbers";
 
 const getFormattedCosts = (costs) => {
     let dateCosts = {};
@@ -44,12 +45,13 @@ const getJsxDatedCosts = (costs, currency) => {
     for (let date in costs) {
         const jsxCosts = getJsxCosts(costs[date].costs)
         const formattedDate = new Date(date).toDateString();
+        const roundedCostsDateSum = roundDecimal(costs[date].sum)
 
         jsxDatedCosts.push(
             <div key={date} className="costsDateContainer">
                 <div className="costsDateContainerHeader">
                     <div className="costsDate">{formattedDate}</div>
-                    <div className="costsDateSum">{costs[date].sum}{currency}</div>
+                    <div className="costsDateSum">{roundedCostsDateSum}{currency}</div>
                 </div>
 
                 <div className="costsDateList">{jsxCosts}</div>

@@ -74,6 +74,7 @@ export const AddCategoryPopUp = ({ token, setCategories }) => {
         if (costsLimitValue) payload.costs_limit = costsLimitValue;
 
         createCategory(payload, token).then(({ status, category }) => {
+            console.log(category)
             switch (status) {
                 case 200:
                     setCategories((categories) => [...categories, category])
