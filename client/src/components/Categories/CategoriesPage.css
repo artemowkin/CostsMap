@@ -115,10 +115,6 @@
     margin: 1rem 0 .5rem;
 }
 
-.totalCosts {
-    font-size: 1.25rem;
-}
-
 .totalCosts span {
     color: red;
 }

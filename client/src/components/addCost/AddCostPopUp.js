@@ -1,6 +1,8 @@
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+
+import './AddCostPopUp.css'
 
 const _convertDateToString = (date) => {
     return date.toISOString().split('T')[0]
@@ -31,6 +33,7 @@ export const AddCostPopUp = ({ token, setCosts, setCategories, setMonthCosts, se
     const [costDate, setCostDate] = useState(new Date())
     const [errorMessageStyle, setErrorMessageStyle] = useState({})
     const [jsxCards, setJsxCards] = useState([])
+    const [isWarningContinued, setIsWarningContinued] = useState(false)
 
     const navigate = useNavigate()
 
@@ -45,6 +48,8 @@ export const AddCostPopUp = ({ token, setCosts, setCategories, setMonthCosts, se
         setJsxCards(availableJsxCards)
         setCardId(cards[0]?.id)
     }, [cards, user])
+
+    const warningContinue = () => setIsWarningContinued(true)
 
     const costCardChange = (element) => {
         const elementValue = element.target.value
@@ -124,6 +129,19 @@ export const AddCostPopUp = ({ token, setCosts, setCategories, setMonthCosts, se
             }
         })
     }
+
+    if (selectedCategory.costs_limit <= selectedCategory.costs_sum && !isWarningContinued)
+        return (
+            <div className="addPopUpContainer">
+                <Link to="/" className="backLink" />
+
+                <div className="addForm bg-white dark:bg-background-black text-black dark:text-white">
+                    <div className="warningSmile">&#128546;</div>
+                    <div className="warningText">You have already exceeded the limit</div>
+                    <button className="warningButton" onClick={warningContinue}>Continue</button>
+                </div>
+            </div>
+        )
 
     return (
         <div className="addPopUpContainer">
