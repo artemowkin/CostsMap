@@ -12,6 +12,7 @@ import { AccountPage } from './components/Account/AccountPage'
 import { AddCardPopUp } from './components/addCard/addCardPopUp'
 import { CardMenu } from './components/CardMenu/CardMenu'
 import { getUserCards } from './components/Cards/services'
+import { getUserCategories } from './components/Categories/services'
 
 function App() {
   const { tokenValue } = useAuth()
@@ -32,6 +33,7 @@ function App() {
 
   useEffect(() => {
     getUserCards(token).then((cards) => setCards(cards))
+    getUserCategories(token).then((categories) => setCategories(categories))
   }, [token])
 
   return (

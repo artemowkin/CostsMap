@@ -8,12 +8,15 @@ from .services import (
     get_all_user_costs_by_month, get_total_costs_for_the_month
 )
 from categories.services import get_category_by_id
-from .schemas import CostOut, TotalCosts
+from categories.dependencies import get_concrete_category
 from categories.schemas import CategoryOut
 from accounts.schemas import UserOut
 from accounts.dependencies import get_current_user
 from cards.services import get_concrete_user_card
 from cards.schemas import CardOut
+from cards.dependencies import get_concrete_card
+from .schemas import CostOut, TotalCosts, Cost
+from .services import create_db_cost
 
 
 today_string = date.today().strftime("%Y-%m")
@@ -48,3 +51,20 @@ async def get_total_costs(
     assert user.id
     total_costs = await get_total_costs_for_the_month(user.id, month, db)
     return TotalCosts(total_costs=total_costs)
+
+
+async def create_new_cost(
+    cost_data: Cost,
+    user: UserOut = Depends(get_current_user),
+    db: Database = Depends(get_database)
+):
+    created_cost_id = await create_db_cost(user, cost_data, db)
+    created_cost_category = await get_concrete_category(cost_data.category_id, user, db)
+    created_cost_card = await get_concrete_card(cost_data.card_id, user, db)
+    created_cost_scheme = CostOut(
+        id=created_cost_id,
+        category=created_cost_category,
+        card=created_cost_card,
+        **cost_data.dict()
+    )
+    return created_cost_scheme

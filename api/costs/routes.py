@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from .schemas import CostOut, TotalCosts
 from .dependencies import (
-    get_all_costs_for_the_month, get_total_costs
+    get_all_costs_for_the_month, get_total_costs, create_new_cost
 )
 
 
@@ -21,3 +21,9 @@ def all_costs(
 def total_costs(total_costs: TotalCosts = Depends(get_total_costs)):
     """Return total costs for the month"""
     return total_costs
+
+
+@router.post('/', response_model=CostOut)
+def create_cost(created_cost: CostOut = Depends(create_new_cost)):
+    """Create a new cost for the user"""
+    return created_cost

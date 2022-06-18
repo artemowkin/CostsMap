@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Nav } from '../Nav/Nav';
@@ -6,23 +5,12 @@ import './CategoriesPage.css';
 import { Category } from './Category';
 import { TotalCosts } from './TotalCosts';
 
-const getUserCategories = async (token) => {
-    const response = await axios({
-        url: "/categories/",
-        method: "GET",
-        headers: {"Authorization": `Bearer ${token}`}
-    });
-    return response.data;
-}
-
 export const CategoriesPage = ({ token, categories, user }) => {
     const [jsxCategories, setJsxCategories] = useState([]);
 
     useEffect(() => {
-        getUserCategories(token).then((userCategories) => {
-            const formattedCategories = userCategories.map((category) => <Category key={category.id} category={category} user={user}/>);
-            setJsxCategories(formattedCategories);
-        });
+        const formattedCategories = categories.map((category) => <Category key={category.id} category={category} user={user}/>);
+        setJsxCategories(formattedCategories);
     }, [categories, user]);
 
     return (

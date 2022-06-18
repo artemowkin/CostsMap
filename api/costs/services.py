@@ -8,7 +8,9 @@ from databases import Database
 from sqlalchemy import desc
 
 from accounts.schemas import UserOut
-from costs.db import costs
+from categories.services import get_category_by_id
+from .db import costs
+from .schemas import Cost, CostOut
 
 
 async def get_all_user_costs_by_month(user: UserOut, month: str, db: Database):
@@ -35,3 +37,10 @@ async def get_total_costs_for_the_month(user_id: int, month: str, db: Database) 
         'user_id': user_id, 'start_date': month_start_date, 'end_date': month_end_date
     })
     return Decimal(total_costs or 0)
+
+
+async def create_db_cost(user: UserOut, cost_data: Cost, db: Database) -> int:
+    """Create new cost for the user and return created cost id"""
+    query = costs.insert().values(user_id=user.id, **cost_data.dict())
+    created_cost_id = await db.execute(query)
+    return created_cost_id
