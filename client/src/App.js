@@ -65,7 +65,7 @@ function App() {
           token ? (<><CardsPage token={token} cards={cards} /><CardMenu token={token} setCards={setCards} /></>) : <Navigate to="/login" />
         } />
         <Route path="/costs" element={
-          token ? <CostsPage user={currentUser} costs={costs} /> : <Navigate to="/login" />
+          token ? <CostsPage costs={costs} /> : <Navigate to="/login" />
         } />
         <Route path="/account" element={
           token ? <AccountPage token={token} user={currentUser} /> : <Navigate to="/login" />

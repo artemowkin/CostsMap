@@ -38,18 +38,18 @@ const _sortFormattedCosts = (fmtCosts) => {
     return sortedCosts
 }
 
-const getJsxDatedCosts = (costs, user) => {
+const getJsxDatedCosts = (costs, currency) => {
     const jsxDatedCosts = []
 
     for (let date in costs) {
-        const jsxCosts = getJsxCosts(costs[date].costs, user)
+        const jsxCosts = getJsxCosts(costs[date].costs)
         const formattedDate = new Date(date).toDateString();
 
         jsxDatedCosts.push(
             <div key={date} className="costsDateContainer">
                 <div className="costsDateContainerHeader">
                     <div className="costsDate">{formattedDate}</div>
-                    <div className="costsDateSum">{costs[date].sum}{user.currency}</div>
+                    <div className="costsDateSum">{costs[date].sum}{currency}</div>
                 </div>
 
                 <div className="costsDateList">{jsxCosts}</div>
@@ -60,25 +60,25 @@ const getJsxDatedCosts = (costs, user) => {
     return jsxDatedCosts
 }
 
-const getJsxCosts = (costs, user) => {
+const getJsxCosts = (costs) => {
     const jsxCostsList = []
 
 
     costs.forEach((cost) => {
-        jsxCostsList.push(<Cost key={cost.id} cost={cost} user={user} />)
+        jsxCostsList.push(<Cost key={cost.id} cost={cost} />)
     })
 
     return jsxCostsList
 }
 
-export const CostsPage = ({ user, costs }) => {
+export const CostsPage = ({ costs }) => {
     const [jsxCosts, setJsxCosts] = useState([])
 
     useEffect(() => {
         const fmtCosts = getFormattedCosts(costs)
-        const jsxDatedCosts = getJsxDatedCosts(fmtCosts, user)
+        const jsxDatedCosts = getJsxDatedCosts(fmtCosts, costs[0]?.card?.currency)
         setJsxCosts(jsxDatedCosts)
-    }, [user, costs])
+    }, [costs])
 
     if (costs.length === 0)
         return (
