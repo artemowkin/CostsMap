@@ -20,9 +20,10 @@ export const CardMenu = ({ token, setCards }) => {
     const navigate = useNavigate()
 
     const deleteClick = () => {
-        deleteCard(cardId, token)
-        setCards((cards) => cards.filter((card) => card.id != cardId))
-        navigate("/cards")
+        deleteCard(cardId, token).then(() => {
+            setCards((cards) => cards.filter((card) => card.id != cardId))
+            navigate("/cards")
+        })
     }
 
     return (

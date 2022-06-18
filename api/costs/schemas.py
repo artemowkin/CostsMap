@@ -33,6 +33,7 @@ class Cost(BaseCost):
 class CostOut(BaseCost):
     """Model for cost data returning in response"""
 
+    id: int
     category: CategoryOut
     card: CardOut
 

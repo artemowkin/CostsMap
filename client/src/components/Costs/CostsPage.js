@@ -41,7 +41,7 @@ const getJsxDatedCosts = (costs, user) => {
         const formattedDate = new Date(date).toDateString();
 
         jsxDatedCosts.push(
-            <div className="costsDateContainer">
+            <div key={date} className="costsDateContainer">
                 <div className="costsDateContainerHeader">
                     <div className="costsDate">{formattedDate}</div>
                     <div className="costsDateSum">{costs[date].sum}{user.currency}</div>
@@ -58,8 +58,9 @@ const getJsxDatedCosts = (costs, user) => {
 const getJsxCosts = (costs, user) => {
     const jsxCostsList = []
 
+
     costs.forEach((cost) => {
-        jsxCostsList.push(<Cost cost={cost} user={user} />)
+        jsxCostsList.push(<Cost key={cost.id} cost={cost} user={user} />)
     })
 
     return jsxCostsList

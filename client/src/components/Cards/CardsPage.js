@@ -14,7 +14,7 @@ export const CardsPage = ({ token, cards }) => {
         setJsxCards(formattedCards)
     }, [token, cards]);
 
-    if (jsxCards.length === 0)
+    if (cards.length === 0)
         return (
             <>
                 <div className="emptyPage">
