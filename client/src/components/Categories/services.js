@@ -8,3 +8,16 @@ export const getUserCategories = async (token) => {
     });
     return response.data;
 }
+
+export const getTotalCosts = async (token) => {
+    try {
+        const response = await axios({
+            url: "/costs/total/",
+            headers: {"Authorization": `Bearer ${token}`}
+        })
+
+        return response.data
+    } catch (error) {
+        return {total_costs: 0}
+    }
+}

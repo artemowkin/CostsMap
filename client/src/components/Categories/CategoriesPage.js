@@ -5,7 +5,7 @@ import './CategoriesPage.css';
 import { Category } from './Category';
 import { TotalCosts } from './TotalCosts';
 
-export const CategoriesPage = ({ token, categories, user }) => {
+export const CategoriesPage = ({ categories, user, monthCosts }) => {
     const [jsxCategories, setJsxCategories] = useState([]);
 
     useEffect(() => {
@@ -16,7 +16,7 @@ export const CategoriesPage = ({ token, categories, user }) => {
     return (
         <main className="categoriesPage bg-white dark:bg-background-black">
             <div className="monthTotals">
-                <TotalCosts token={token} user={user} />
+                <TotalCosts user={user} monthCosts={monthCosts} />
             </div>
 
             <section className="categoriesList">

@@ -1,19 +1,9 @@
-import axios from "axios"
 import { useEffect, useState } from "react"
 import { Nav } from "../Nav/Nav"
 import { Cost } from "./Cost"
 
 import './CostsPage.css'
 import costsIcon from '../../costs.svg';
-
-const getCosts = async (token) => {
-    const response = await axios({
-        url: "/costs/",
-        headers: {"Authorization": `Bearer ${token}`}
-    })
-
-    return response.data
-}
 
 const getFormattedCosts = (costs) => {
     let dateCosts = {};
@@ -30,7 +20,22 @@ const getFormattedCosts = (costs) => {
         }
     })
 
-    return dateCosts
+    const sortedCosts = _sortFormattedCosts(dateCosts)
+
+    return sortedCosts
+}
+
+const _sortFormattedCosts = (fmtCosts) => {
+    const sortingFunction = (date1, date2) => Date.parse(date2) - Date.parse(date1)
+
+    const sortedCosts = Object.keys(fmtCosts).sort(sortingFunction).reduce(
+        (obj, key) => {
+            obj[key] = fmtCosts[key]
+            return obj
+        }, {}
+    )
+
+    return sortedCosts
 }
 
 const getJsxDatedCosts = (costs, user) => {
@@ -66,20 +71,16 @@ const getJsxCosts = (costs, user) => {
     return jsxCostsList
 }
 
-export const CostsPage = ({ token, user }) => {
-    const [areCostsGetted, setAreCostsGetted] = useState(false)
+export const CostsPage = ({ user, costs }) => {
     const [jsxCosts, setJsxCosts] = useState([])
 
     useEffect(() => {
-        getCosts(token).then((costs) => {
-            const fmtCosts = getFormattedCosts(costs)
-            const jsxDatedCosts = getJsxDatedCosts(fmtCosts, user)
-            setJsxCosts(jsxDatedCosts)
-            setAreCostsGetted(true)
-        })
-    }, [token, user])
+        const fmtCosts = getFormattedCosts(costs)
+        const jsxDatedCosts = getJsxDatedCosts(fmtCosts, user)
+        setJsxCosts(jsxDatedCosts)
+    }, [user, costs])
 
-    if (areCostsGetted && jsxCosts.length === 0)
+    if (costs.length === 0)
         return (
             <>
                 <div className="emptyPage">
