@@ -24,7 +24,7 @@ const createCost = async (payload, token) => {
     }
 }
 
-export const AddCostPopUp = ({ token, setCosts, setCategories, setMonthCosts, user, categories, cards }) => {
+export const AddCostPopUp = ({ token, setCosts, setCategories, setMonthCosts, setCards, user, categories, cards }) => {
     const [cardId, setCardId] = useState("")
     const [costSumValue, setCostSumValue] = useState("")
     const [costSumStyle, setCostSumStyle] = useState({})
@@ -55,9 +55,11 @@ export const AddCostPopUp = ({ token, setCosts, setCategories, setMonthCosts, us
     const costSumChange = (element) => {
         const elementValue = element.target.value
 
+        const cardAmount = cards.find((card) => card.id == cardId)?.amount || 0
+
         setCostSumValue(elementValue)
 
-        if (elementValue !== "" && (elementValue < 0.01 || elementValue > 10000000 || isNaN(elementValue))) {
+        if (elementValue !== "" && (elementValue < 0.01 || elementValue > cardAmount || isNaN(elementValue))) {
             setCostSumStyle({color: "red"})
         } else {
             setCostSumStyle({})
@@ -95,14 +97,23 @@ export const AddCostPopUp = ({ token, setCosts, setCategories, setMonthCosts, us
                         setCosts((costs) => [...costs, cost])
                         setMonthCosts((monthCosts) => +monthCosts + +costSumValue)
 
-                        const changedCategories = categories.map((category) => {
-                            if (category.id != categoryId) return category
+                        const newCards = cards.map((card) => {
+                            if (card.id != cardId)
+                                return card
+
+                            card.amount = +card.amount - +costSumValue
+                            return card
+                        })
+                        setCards(newCards)
+
+                        const newCategories = categories.map((category) => {
+                            if (category.id != categoryId)
+                                return category
 
                             category.costs_sum = +category.costs_sum + +costSumValue
                             return category
                         })
-
-                        setCategories(changedCategories)
+                        setCategories(newCategories)
                     }
 
                     navigate('/')

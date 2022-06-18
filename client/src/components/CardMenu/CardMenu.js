@@ -19,7 +19,11 @@ export const CardMenu = ({ token, setCards }) => {
     const { cardId } = useParams()
     const navigate = useNavigate()
 
-    const deleteClick = () => {
+    const deleteClick = (element) => {
+        element.preventDefault()
+
+        if (!window.confirm("Are you sure you want to delete this card?")) return
+
         deleteCard(cardId, token).then(() => {
             setCards((cards) => cards.filter((card) => card.id != cardId))
             navigate("/cards")

@@ -53,7 +53,7 @@ function App() {
           token ? (<><CategoriesPage categories={categories} user={currentUser} monthCosts={monthCosts} /><AddCategoryPopUp token={token} setCategories={setCategories} /></>) : <Navigate to="/login" />
         } />
         <Route path="/add_cost/:categoryId" element={
-          token ? (<><CategoriesPage categories={categories} user={currentUser} monthCosts={monthCosts} /><AddCostPopUp token={token} setCosts={setCosts} setCategories={setCategories} setMonthCosts={setMonthCosts} user={currentUser} categories={categories} cards={cards}/></>) : <Navigate to="/login" />
+          token ? (<><CategoriesPage categories={categories} user={currentUser} monthCosts={monthCosts} /><AddCostPopUp token={token} setCosts={setCosts} setCategories={setCategories} setMonthCosts={setMonthCosts} setCards={setCards} user={currentUser} categories={categories} cards={cards}/></>) : <Navigate to="/login" />
         } />
         <Route path="/cards" element={
           token ? <CardsPage token={token} cards={cards} /> : <Navigate to="/login" />

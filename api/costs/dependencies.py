@@ -12,7 +12,7 @@ from categories.dependencies import get_concrete_category
 from categories.schemas import CategoryOut
 from accounts.schemas import UserOut
 from accounts.dependencies import get_current_user
-from cards.services import get_concrete_user_card
+from cards.services import get_concrete_user_card, subtract_cost_from_card
 from cards.schemas import CardOut
 from cards.dependencies import get_concrete_card
 from .schemas import CostOut, TotalCosts, Cost
@@ -58,9 +58,13 @@ async def create_new_cost(
     user: UserOut = Depends(get_current_user),
     db: Database = Depends(get_database)
 ):
-    created_cost_id = await create_db_cost(user, cost_data, db)
-    created_cost_category = await get_concrete_category(cost_data.category_id, user, db)
-    created_cost_card = await get_concrete_card(cost_data.card_id, user, db)
+    async with db.transaction():
+        created_cost_id = await create_db_cost(user, cost_data, db)
+        created_cost_category = await get_concrete_category(cost_data.category_id, user, db)
+        created_cost_card = await get_concrete_card(cost_data.card_id, user, db)
+        subtracted_card_amount = created_cost_card.amount - cost_data.amount
+        await subtract_cost_from_card(cost_data.card_id, subtracted_card_amount, db)
+
     created_cost_scheme = CostOut(
         id=created_cost_id,
         category=created_cost_category,
