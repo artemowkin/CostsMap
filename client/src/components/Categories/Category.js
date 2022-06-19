@@ -3,7 +3,7 @@ import { roundDecimal } from "../../utils/numbers";
 
 export const Category = ({ category, user }) => {
     const roundedCostsSum = roundDecimal(category.costs_sum)
-    const categoryCostsSumStyle = roundedCostsSum > category.costs_limit ? {color: "red"} : {}
+    const categoryCostsSumStyle = (category.costs_limit !== null && roundedCostsSum > category.costs_limit) ? {color: "red"} : {}
 
     const addCostUrl = `/add_cost/${category?.id}`
 

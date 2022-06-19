@@ -3,6 +3,7 @@ import deleteImage from '../../delete.svg'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import axios from 'axios'
+import { useState } from 'react'
 
 const deleteCard = async (cardId, token) => {
     const response = await axios({
@@ -14,8 +15,9 @@ const deleteCard = async (cardId, token) => {
     return response.data
 }
 
-export const CardMenu = ({ token, setCards }) => {
+export const CardMenu = ({ token, setCards, setCosts, setIncomes, setMonthCosts, setMonthIncomes }) => {
     const { cardId } = useParams()
+
     const navigate = useNavigate()
 
     const deleteClick = (element) => {
@@ -25,6 +27,29 @@ export const CardMenu = ({ token, setCards }) => {
 
         deleteCard(cardId, token).then(() => {
             setCards((cards) => cards.filter((card) => card.id != cardId))
+
+            let totalDeletedCosts = 0
+            let totalDeletedIncomes = 0
+
+            setCosts((costs) => {
+                const deletingCosts = costs.filter((cost) => cost.card.id == cardId)
+                const deletingCostsAmounts = deletingCosts.map((cost) => cost.amount)
+                totalDeletedCosts = deletingCostsAmounts.reduce((a, b) => a + b, 0)
+
+                return costs.filter((cost) => cost.card.id != cardId)
+            })
+
+            setIncomes((incomes) => {
+                const deletingIncomes = incomes.filter((income) => income.card.id == cardId)
+                const deletingIncomesAmounts = deletingIncomes.map((income) => income.user_currency_amount)
+                totalDeletedIncomes = deletingIncomesAmounts.reduce((a, b) => a + b, 0)
+
+                return incomes.filter((income) => income.card.id != cardId)
+            })
+
+            setMonthCosts((monthCosts) => monthCosts - totalDeletedCosts)
+            setMonthIncomes((monthIncomes) => monthIncomes - totalDeletedIncomes)
+
             navigate("/cards")
         })
     }

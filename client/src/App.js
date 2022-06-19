@@ -66,10 +66,10 @@ function App() {
           token ? <CategoriesPage categories={categories} user={currentUser} monthCosts={monthCosts} monthIncomes={monthIncomes} /> : <Navigate to="/login" />
         } />
         <Route path="/add_category" element={
-          token ? (<><CategoriesPage categories={categories} user={currentUser} monthCosts={monthCosts} /><AddCategoryPopUp token={token} setCategories={setCategories} /></>) : <Navigate to="/login" />
+          token ? (<><CategoriesPage categories={categories} user={currentUser} monthCosts={monthCosts} monthIncomes={monthIncomes} /><AddCategoryPopUp token={token} setCategories={setCategories} /></>) : <Navigate to="/login" />
         } />
         <Route path="/add_cost/:categoryId" element={
-          token ? (<><CategoriesPage categories={categories} user={currentUser} monthCosts={monthCosts} /><AddCostPopUp token={token} setCosts={setCosts} setCategories={setCategories} setMonthCosts={setMonthCosts} setCards={setCards} user={currentUser} categories={categories} cards={cards}/></>) : <Navigate to="/login" />
+          token ? (<><CategoriesPage categories={categories} user={currentUser} monthCosts={monthCosts} monthIncomes={monthIncomes} /><AddCostPopUp token={token} setCosts={setCosts} setCategories={setCategories} setMonthCosts={setMonthCosts} setCards={setCards} user={currentUser} categories={categories} cards={cards}/></>) : <Navigate to="/login" />
         } />
         <Route path="/cards" element={
           token ? <CardsPage token={token} cards={cards} /> : <Navigate to="/login" />
@@ -78,7 +78,7 @@ function App() {
           token ? (<><CardsPage token={token} cards={cards} /><AddCardPopUp token={token} setCards={setCards} user={currentUser} /></>) : <Navigate to="/login" />
         } />
         <Route path="/card_menu/:cardId" element={
-          token ? (<><CardsPage token={token} cards={cards} /><CardMenu token={token} setCards={setCards} /></>) : <Navigate to="/login" />
+          token ? (<><CardsPage token={token} cards={cards} /><CardMenu token={token} setCards={setCards} setCosts={setCosts} setIncomes={setIncomes} setMonthIncomes={setMonthIncomes} setMonthCosts={setMonthCosts} /></>) : <Navigate to="/login" />
         } />
         <Route path="/costs" element={
           token ? <CostsPage costs={costs} /> : <Navigate to="/login" />
@@ -87,7 +87,7 @@ function App() {
           token ? <IncomesPage incomes={incomes} user={currentUser} /> : <Navigate to="/login" />
         } />
         <Route path="/add_income" element={
-          token ? (<><CategoriesPage categories={categories} user={currentUser} monthCosts={monthCosts} /><AddIncomePopUp token={token} setIncomes={setIncomes} setMonthIncomes={setMonthIncomes} setCards={setCards} user={currentUser} cards={cards}/></>) : <Navigate to="/login" />
+          token ? (<><CategoriesPage categories={categories} user={currentUser} monthCosts={monthCosts} monthIncomes={monthIncomes} /><AddIncomePopUp token={token} setIncomes={setIncomes} setMonthIncomes={setMonthIncomes} setCards={setCards} user={currentUser} cards={cards}/></>) : <Navigate to="/login" />
         } />
         <Route path="/cost_menu/:costId" element={
           token ? (<><CostsPage costs={costs} /><CostMenu token={token} costs={costs} cards={cards} categories={categories} setCosts={setCosts} setCards={setCards} setCategories={setCategories} setMonthCosts={setMonthCosts} /></>) : <Navigate to="/login" />

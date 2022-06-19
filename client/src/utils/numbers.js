@@ -1,6 +1,6 @@
 export const roundDecimal = (decimal) => {
     if (isNaN(decimal))
-        return 0
+        return decimal
 
     return Math.round(decimal * 100) / 100
 }

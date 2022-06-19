@@ -130,7 +130,7 @@ export const AddCostPopUp = ({ token, setCosts, setCategories, setMonthCosts, se
         })
     }
 
-    if (selectedCategory.costs_limit <= selectedCategory.costs_sum && !isWarningContinued)
+    if (selectedCategory.costs_limit !== null && selectedCategory.costs_limit <= selectedCategory.costs_sum && !isWarningContinued)
         return (
             <div className="addPopUpContainer">
                 <Link to="/" className="backLink" />

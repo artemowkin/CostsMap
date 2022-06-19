@@ -15,7 +15,7 @@ export const CostsIncomesNav = ({ current }) => {
 
     return (
         <div className="costsIncomesNavContainer">
-            <div className="costsIncomesNavButtons">
+            <div className="costsIncomesNavButtons bg-white dark:bg-background-black">
                 <Link to="/costs" className="costsIncomesNavButton">Costs</Link>
                 <div className="costsIncomesNavButton costsIncomesNavButtonIncomes">Incomes</div>
             </div>
