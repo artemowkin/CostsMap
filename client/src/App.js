@@ -19,6 +19,7 @@ import { getUserCosts } from './components/Costs/services'
 import { CostMenu } from './components/CostMenu/CostMenu'
 import { IncomesPage } from './components/Incomes/IncomesPage'
 import { getUserIncomes } from './components/Incomes/services'
+import { AddIncomePopUp } from './components/AddIncome/AddIncomePopUp'
 
 function App() {
   const { tokenValue } = useAuth()
@@ -84,6 +85,9 @@ function App() {
         } />
         <Route path="/incomes" element={
           token ? <IncomesPage incomes={incomes} user={currentUser} /> : <Navigate to="/login" />
+        } />
+        <Route path="/add_income" element={
+          token ? (<><CategoriesPage categories={categories} user={currentUser} monthCosts={monthCosts} /><AddIncomePopUp token={token} setIncomes={setIncomes} setMonthIncomes={setMonthIncomes} setCards={setCards} user={currentUser} cards={cards}/></>) : <Navigate to="/login" />
         } />
         <Route path="/cost_menu/:costId" element={
           token ? (<><CostsPage costs={costs} /><CostMenu token={token} costs={costs} cards={cards} categories={categories} setCosts={setCosts} setCards={setCards} setCategories={setCategories} setMonthCosts={setMonthCosts} /></>) : <Navigate to="/login" />

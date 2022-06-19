@@ -43,8 +43,6 @@ const _sortFormattedIncomes = (fmtIncomes) => {
 const getJsxDatedIncomes = (incomes, currency) => {
     const jsxDatedIncomes = []
 
-    console.log(incomes)
-
     for (let date in incomes) {
         const jsxIncomes = getJsxIncomes(incomes[date].incomes, currency)
         const formattedDate = new Date(date).toDateString();

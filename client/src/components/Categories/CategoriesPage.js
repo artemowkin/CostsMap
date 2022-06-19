@@ -24,7 +24,7 @@ export const CategoriesPage = ({ categories, user, monthCosts, monthIncomes }) =
                     <div className="addCategoryButtonTitle">Add</div>
                 </Link>
                 <div className="addIncomeButtonContainer">
-                    <Link className="addIncomeButton bg-white dark:bg-background-black" to="/"><span>+ Income</span></Link>
+                    <Link className="addIncomeButton bg-white dark:bg-background-black" to="/add_income"><span>+ Income</span></Link>
                 </div>
             </section>
 
