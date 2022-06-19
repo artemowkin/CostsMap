@@ -1,3 +1,4 @@
+from typing import Mapping, Literal, Any
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -7,8 +8,8 @@ from sqlite3 import IntegrityError
 from databases import Database
 
 from accounts.schemas import UserOut
-from categories.schemas import BaseCategory
-from categories.db import categories
+from .schemas import BaseCategory, CategoryOutMapping
+from .db import categories
 
 
 def category_exists_decorator(func):
@@ -26,14 +27,16 @@ def category_exists_decorator(func):
     return inner
 
 
-async def get_all_user_categories(user: UserOut, db: Database):
+async def get_all_user_categories(user: UserOut, db: Database) -> list[CategoryOutMapping]:
     """Return all user categories"""
     get_query = categories.select().where(categories.c.user_id == user.id).order_by(categories.c.id)
     db_categories = await db.fetch_all(get_query)
     return db_categories
 
 
-async def get_costs_for_categories(user: UserOut, month: str, db: Database):
+async def get_costs_for_categories(
+        user: UserOut, month: str, db: Database
+) -> list[Mapping[Literal['id'] | Literal['costs_sum'], Any]]:
     """Return user categories with costs for the month"""
     start_date = datetime.fromisoformat(month + '-01')
     end_date = start_date + relativedelta(months=1)
@@ -58,7 +61,7 @@ async def create_category(category: BaseCategory, user: UserOut, db: Database) -
     return category_id
 
 
-async def get_category_by_id(category_id: int, user: UserOut, db: Database):
+async def get_category_by_id(category_id: int, user: UserOut, db: Database) -> CategoryOutMapping:
     """Return the concrete category by id"""
     get_query = categories.select().where(
         categories.c.id == category_id, categories.c.user_id == user.id
@@ -75,14 +78,14 @@ async def get_category_by_id(category_id: int, user: UserOut, db: Database):
 @category_exists_decorator
 async def update_category_by_id(
     category_id: int, category_data: BaseCategory, db: Database
-):
+) -> None:
     """Update the concrete category using category id"""
     update_query = categories.update().values(
         **category_data.dict()).where(categories.c.id == category_id)
     await db.execute(update_query)
 
 
-async def delete_category(category_id: int, db: Database):
+async def delete_category(category_id: int, db: Database) -> None:
     """Delete the category using id"""
     delete_query = categories.delete().where(categories.c.id == category_id)
     await db.execute(delete_query)

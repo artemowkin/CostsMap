@@ -12,11 +12,11 @@ from categories.dependencies import get_concrete_category
 from categories.schemas import CategoryOut
 from accounts.schemas import UserOut
 from accounts.dependencies import get_current_user
-from cards.services import get_concrete_user_card, subtract_cost_from_card
+from cards.services import get_concrete_user_card, update_card_amount
 from cards.schemas import CardOut
 from cards.dependencies import get_concrete_card
 from .schemas import CostOut, TotalCosts, Cost
-from .services import create_db_cost
+from .services import create_db_cost, delete_db_cost, get_concrete_user_cost
 
 
 today_string = date.today().strftime("%Y-%m")
@@ -58,17 +58,28 @@ async def create_new_cost(
     user: UserOut = Depends(get_current_user),
     db: Database = Depends(get_database)
 ):
+    """Create the new cost and subtract cost sum from card amount"""
     async with db.transaction():
         created_cost_category = await get_concrete_category(cost_data.category_id, user, db)
         created_cost_card = await get_concrete_card(cost_data.card_id, user, db)
         created_cost_id = await create_db_cost(user, cost_data, db)
         subtracted_card_amount = created_cost_card.amount - cost_data.amount
-        await subtract_cost_from_card(user.id, cost_data.card_id, subtracted_card_amount, db)
+        await update_card_amount(user.id, cost_data.card_id, subtracted_card_amount, db)
 
-    created_cost_scheme = CostOut(
-        id=created_cost_id,
-        category=created_cost_category,
-        card=created_cost_card,
-        **cost_data.dict()
-    )
+    created_cost_scheme = CostOut(id=created_cost_id, category=created_cost_category,
+                                  card=created_cost_card, **cost_data.dict())
     return created_cost_scheme
+
+
+async def delete_cost_by_id(
+    cost_id: int,
+    user: UserOut = Depends(get_current_user),
+    db: Database = Depends(get_database)
+):
+    """Delete the concrete cost by id and plus cost sum to card amount"""
+    async with db.transaction():
+        deleting_cost = await get_concrete_user_cost(cost_id, user, db)
+        deleting_cost_card = await get_concrete_card(deleting_cost.card_id, user, db)
+        plussed_card_amount = deleting_cost_card.amount + deleting_cost.amount
+        await update_card_amount(user.id, deleting_cost_card.id, plussed_card_amount, db)
+        await delete_db_cost(cost_id, user, db)

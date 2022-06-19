@@ -6,7 +6,7 @@ from sqlite3 import IntegrityError
 from databases import Database
 
 from .db import cards
-from .schemas import Card, Transfer
+from .schemas import Card, Transfer, CardOutMapping
 
 
 def unique_card_handler(func):
@@ -24,7 +24,7 @@ def unique_card_handler(func):
     return wrapper
 
 
-async def get_all_user_cards(user_id: int, db: Database):
+async def get_all_user_cards(user_id: int, db: Database) -> list[CardOutMapping]:
     """Return all user cards using user id"""
     get_query = cards.select().where(cards.c.user_id == user_id).order_by(cards.c.id)
     db_cards = await db.fetch_all(get_query)
@@ -39,20 +39,18 @@ async def create_new_user_card(card_info: Card, user_id: int, db: Database) -> i
     return created_card_id
 
 
-async def get_concrete_user_card(card_id: int, user_id: int, db: Database):
+async def get_concrete_user_card(card_id: int, user_id: int, db: Database) -> CardOutMapping:
     """Return a concrete user card using card id and user id"""
-    get_query = cards.select().where(
-        cards.c.id == card_id, cards.c.user_id == user_id
-    )
+    get_query = cards.select().where(cards.c.id == card_id, cards.c.user_id == user_id)
     card_db = await db.fetch_one(get_query)
-    if not card_db: raise HTTPException(
-        status_code=404, detail="Card with this id doesn't exist"
-    )
+    if not card_db:
+        raise HTTPException(status_code=404, detail="Card with this id doesn't exist")
+
     return card_db
 
 
 @unique_card_handler
-async def update_concrete_user_card(card_id: int, card_info: Card, db: Database):
+async def update_concrete_user_card(card_id: int, card_info: Card, db: Database) -> None:
     """Update the concrete card in db"""
     update_query = cards.update().values(**card_info.dict()).where(
         cards.c.id == card_id
@@ -60,14 +58,13 @@ async def update_concrete_user_card(card_id: int, card_info: Card, db: Database)
     await db.execute(update_query)
 
 
-async def delete_concrete_user_card(card_id: int, db: Database):
+async def delete_concrete_user_card(card_id: int, db: Database) -> None:
     """Delete the concrete card in db"""
     delete_query = cards.delete().where(cards.c.id == card_id)
     await db.execute(delete_query)
 
 
-async def transfer_money_between_cards(
-        from_card, to_card, transfer_info: Transfer, db: Database):
+async def transfer_money_between_cards(from_card, to_card, transfer_info: Transfer, db: Database) -> None:
     """Transfer money between two cards"""
     from_result_amount = from_card.amount - transfer_info.from_amount
     to_result_amount = to_card.amount + transfer_info.to_amount
@@ -82,7 +79,7 @@ async def transfer_money_between_cards(
         await db.execute(update_query_to)
 
 
-async def subtract_cost_from_card(user_id: int, card_id: int, new_amount: Decimal, db: Database) -> None:
+async def update_card_amount(user_id: int, card_id: int, new_amount: Decimal, db: Database) -> None:
     if new_amount < 0:
         raise HTTPException(status_code=400, detail="Cost amount is more than card amount")
 

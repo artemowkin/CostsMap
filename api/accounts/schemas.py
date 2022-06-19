@@ -1,6 +1,13 @@
+from typing import Mapping, Literal, Any
 from enum import Enum
 
 from pydantic import BaseModel, EmailStr, Field, validator
+
+
+UserOutMapping = Mapping[
+    Literal['id'] | Literal['email'] | Literal['password'] | Literal['currency'] | Literal['language'],
+    Any
+]
 
 
 def _validate_password_constratints(password: str):

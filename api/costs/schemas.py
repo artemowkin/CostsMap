@@ -1,3 +1,4 @@
+from typing import Mapping, Literal, Any
 from decimal import Decimal
 from datetime import date as dt_date
 
@@ -5,6 +6,12 @@ from pydantic import BaseModel, validator
 
 from cards.schemas import CardOut
 from categories.schemas import CategoryOut
+
+
+CostOutMapping = Mapping[
+    Literal['id'] | Literal['amount'] | Literal['date'] | Literal['category_id'] | Literal['card_id'] | Literal['user_id'],
+    Any
+]
 
 
 class BaseCost(BaseModel):

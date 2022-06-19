@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from databases import Database
 
 from .db import users
-from .schemas import UserRegistration, Token, UserLogIn, UserIn
+from .schemas import UserRegistration, Token, UserLogIn, UserIn, UserOutMapping
 from project.settings import config
 
 
@@ -96,14 +96,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-async def check_user_password(user: UserLogIn, db: Database):
+async def check_user_password(user: UserLogIn, db: Database) -> None:
     """Get user from db and check do passwords match"""
     db_user = await get_user_by_email(user.email, db)
     if not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=400, detail="Incorrect password")
 
 
-async def get_user_by_email(user_email: str, db: Database):
+async def get_user_by_email(user_email: str, db: Database) -> UserOutMapping:
     """Get user from DB using email"""
     get_query = users.select().where(users.c.email == user_email)
     db_user = await db.fetch_one(get_query)
