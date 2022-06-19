@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { Nav } from '../Nav/Nav';
 import './CategoriesPage.css';
 import { Category } from './Category';
-import { TotalCosts } from './TotalCosts';
+import { MonthTotals } from './MonthTotals';
 
-export const CategoriesPage = ({ categories, user, monthCosts }) => {
+export const CategoriesPage = ({ categories, user, monthCosts, monthIncomes }) => {
     const [jsxCategories, setJsxCategories] = useState([]);
 
     useEffect(() => {
@@ -15,9 +15,7 @@ export const CategoriesPage = ({ categories, user, monthCosts }) => {
 
     return (
         <main className="categoriesPage bg-white dark:bg-background-black">
-            <div className="monthTotals">
-                <TotalCosts user={user} monthCosts={monthCosts} />
-            </div>
+            <MonthTotals user={user} monthCosts={monthCosts} monthIncomes={monthIncomes} />
 
             <section className="categoriesList">
                 {jsxCategories}

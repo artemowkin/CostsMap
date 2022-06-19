@@ -21,3 +21,16 @@ export const getTotalCosts = async (token) => {
         return {total_costs: 0}
     }
 }
+
+export const getTotalIncomes = async (token) => {
+    try {
+        const response = await axios({
+            url: "/incomes/total/",
+            headers: {"Authorization": `Bearer ${token}`}
+        })
+
+        return response.data
+    } catch (error) {
+        return {total_incomes: 0}
+    }
+}

@@ -5,6 +5,7 @@ import { Cost } from "./Cost"
 import './CostsPage.css'
 import costsIcon from '../../costs.svg';
 import { roundDecimal } from "../../utils/numbers";
+import { CostsIncomesNav } from "../CostIncomesNav/CostsIncomesNav";
 
 const getFormattedCosts = (costs) => {
     let dateCosts = {};
@@ -89,6 +90,7 @@ export const CostsPage = ({ costs }) => {
                     <img src={costsIcon} />
                     <h2>There are no costs for this month</h2>
                 </div>
+                <CostsIncomesNav current="costs" />
                 <Nav />
             </>
         )
@@ -96,6 +98,7 @@ export const CostsPage = ({ costs }) => {
     return (
         <>
             <div className="costsContainer">{jsxCosts}</div>
+            <CostsIncomesNav current="costs" />
             <Nav />
         </>
     )

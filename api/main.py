@@ -6,6 +6,7 @@ from accounts.routes import router as accounts_router
 from cards.routes import router as cards_router
 from categories.routes import router as categories_router
 from costs.routes import router as costs_router
+from incomes.routes import router as incomes_router
 from project.settings import config
 from project.db import get_database, metadata
 
@@ -43,6 +44,8 @@ app.include_router(cards_router, prefix="/api/v1/cards", tags=["cards"])
 app.include_router(categories_router, prefix="/api/v1/categories", tags=["categories"])
 
 app.include_router(costs_router, prefix="/api/v1/costs", tags=["costs"])
+
+app.include_router(incomes_router, prefix="/api/v1/incomes", tags=["incomes"])
 
 
 @app.on_event("startup")

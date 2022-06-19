@@ -4,9 +4,6 @@ from fastapi import Query, Depends
 from databases import Database
 
 from project.db import get_database
-from .services import (
-    get_all_user_costs_by_month, get_total_costs_for_the_month
-)
 from categories.services import get_category_by_id
 from categories.dependencies import get_concrete_category
 from categories.schemas import CategoryOut
@@ -16,7 +13,10 @@ from cards.services import get_concrete_user_card, update_card_amount
 from cards.schemas import CardOut
 from cards.dependencies import get_concrete_card
 from .schemas import CostOut, TotalCosts, Cost
-from .services import create_db_cost, delete_db_cost, get_concrete_user_cost
+from .services import (
+    get_all_user_costs_by_month, get_total_costs_for_the_month,
+    create_db_cost, delete_db_cost, get_concrete_user_cost
+)
 
 
 today_string = date.today().strftime("%Y-%m")
@@ -26,9 +26,8 @@ async def get_all_costs_for_the_month(
     month: str = Query(today_string, regex=r"\d{4}-\d{2}"),
     user: UserOut = Depends(get_current_user),
     db: Database = Depends(get_database)
-):
+) -> list[CostOut]:
     """Return all costs for the month (current by default)"""
-    assert user.id
     db_costs = await get_all_user_costs_by_month(user, month, db)
     out_costs = []
     for db_cost in db_costs:

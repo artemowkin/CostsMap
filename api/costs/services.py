@@ -1,6 +1,6 @@
 from decimal import Decimal
-
 from datetime import date
+
 from dateutil.relativedelta import relativedelta
 from databases import Database
 from sqlalchemy import desc
@@ -11,7 +11,7 @@ from .db import costs
 from .schemas import Cost, CostOutMapping
 
 
-async def get_all_user_costs_by_month(user: UserOut, month: str, db: Database) -> list[CostOutMapping]:
+async def get_all_user_costs_by_month(user: UserOut, month: str, db: Database) -> list:
     """Return all user costs for the month"""
     month_start_date = date.fromisoformat(month + '-01')
     month_end_date = month_start_date + relativedelta(months=1)
