@@ -1,8 +1,7 @@
-import editImage from './edit.svg'
-import deleteImage from './delete.svg'
+import editImage from '../../edit.svg'
+import deleteImage from '../../delete.svg'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
-import './CardMenu.css'
 import axios from 'axios'
 
 const deleteCard = async (cardId, token) => {
@@ -31,20 +30,20 @@ export const CardMenu = ({ token, setCards }) => {
     }
 
     return (
-        <div className="cardMenuPopUp">
+        <div className="menuPopUp">
             <Link to="/cards" className="backLink" />
-            <div className="cardMenuContainer bg-white dark:bg-foreground-black">
-                <Link to="/cards" className="cardMenuContainerButton">
-                    <div className="cardMenuImageContainer">
+            <div className="menuContainer bg-white dark:bg-foreground-black">
+                <Link to="/cards" className="menuContainerButton">
+                    <div className="menuImageContainer">
                         <img src={editImage} />
                     </div>
-                    <div className="cardMenuButtonTitle">edit</div>
+                    <div className="menuButtonTitle">edit</div>
                 </Link>
-                <button onClick={deleteClick} className="cardMenuContainerButton">
-                    <div className="cardMenuImageContainer">
+                <button onClick={deleteClick} className="menuContainerButton">
+                    <div className="menuImageContainer">
                         <img src={deleteImage} />
                     </div>
-                    <div className="cardMenuButtonTitle">delete</div>
+                    <div className="menuButtonTitle">delete</div>
                 </button>
             </div>
         </div>

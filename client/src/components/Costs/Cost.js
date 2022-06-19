@@ -1,8 +1,11 @@
+import { Link } from "react-router-dom"
+
 export const Cost = ({ cost }) => {
     const costStyle = {backgroundColor: cost.category.color}
+    const costUrl = `/cost_menu/${cost.id}`
 
     return (
-        <div className="costCard bg-white dark:bg-foreground-black">
+        <Link to={costUrl} className="costCard bg-white dark:bg-foreground-black">
             <div className="costCardInfo">
                 <div className="costCategoryImage" style={costStyle}>
                     <div className="costCategoryImageSymbol">{cost.card.currency}</div>
@@ -13,6 +16,6 @@ export const Cost = ({ cost }) => {
                 </div>
             </div>
             <div className="costCardAmount">{cost.amount}{cost.card.currency}</div>
-        </div>
+        </Link>
     )
 }

@@ -16,6 +16,7 @@ import { AddCostPopUp } from './components/addCost/AddCostPopUp'
 
 import './App.css'
 import { getUserCosts } from './components/Costs/services'
+import { CostMenu } from './components/CostMenu/CostMenu'
 
 function App() {
   const { tokenValue } = useAuth()
@@ -75,6 +76,9 @@ function App() {
         } />
         <Route path="/costs" element={
           token ? <CostsPage costs={costs} /> : <Navigate to="/login" />
+        } />
+        <Route path="/cost_menu/:costId" element={
+          token ? (<><CostsPage costs={costs} /><CostMenu token={token} costs={costs} cards={cards} categories={categories} setCosts={setCosts} setCards={setCards} setCategories={setCategories} setMonthCosts={setMonthCosts} /></>) : <Navigate to="/login" />
         } />
         <Route path="/account" element={
           token ? <AccountPage token={token} user={currentUser} /> : <Navigate to="/login" />
