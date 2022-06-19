@@ -18,7 +18,7 @@ const loginUser = async (email, password) => {
     }
 }
 
-export const LoginPage = ({ token, setToken }) => {
+export const LoginPage = ({ user, setToken }) => {
     const [emailValue, setEmailValue] = useState("");
     const [passwordValue, setPasswordValue] = useState("");
     const [emailFieldStyle, setEmailFieldStyle] = useState({});
@@ -29,8 +29,8 @@ export const LoginPage = ({ token, setToken }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (token) navigate("/", { replace: true });
-    });
+        if (user === {}) navigate("/", { replace: true });
+    }, [user]);
 
     const handleSubmit = (element) => {
         element.preventDefault();

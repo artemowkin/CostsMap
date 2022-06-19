@@ -36,17 +36,16 @@ function App() {
   useEffect(() => {
     const userPromise = getUser(token)
 
-    userPromise.then((user) => {
-      if (!user) {
-        setToken("")
-      } else {
-        setCurrentUser(user)
-      }
-    })
+    userPromise.then((user) => setCurrentUser(user))
 
-    userPromise.catch(() => {
-      localStorage.clear()
-      navigate("/login")
+    userPromise.catch((error) => {
+      switch (error.response.status) {
+        case "401":
+          localStorage.clear()
+          setCurrentUser({})
+          navigate("/login")
+          break
+      }
     })
   }, [token])
 
@@ -92,7 +91,7 @@ function App() {
         <Route path="/account" element={
           token ? <AccountPage token={token} user={currentUser} /> : <Navigate to="/login" />
         } />
-        <Route path="/login" element={<LoginPage token={token} setToken={setToken} />} />
+        <Route path="/login" element={<LoginPage user={currentUser} setToken={setToken} />} />
       </Routes>
     </>
   )
