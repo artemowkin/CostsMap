@@ -1,11 +1,14 @@
 from decimal import Decimal
 from datetime import date
 
+from fastapi import HTTPException
 from databases import Database
 from dateutil.relativedelta import relativedelta
 from sqlalchemy import desc
 
+from cards.schemas import CardOut
 from accounts.schemas import UserOut
+from .schemas import Income
 from .db import incomes
 
 
@@ -33,3 +36,20 @@ async def get_total_incomes_for_the_month(user_id: int, month: str, db: Database
         'user_id': user_id, 'start_date': month_start_date, 'end_date': month_end_date
     })
     return Decimal(total_incomes or 0)
+
+
+async def create_db_income(user: UserOut, income_data: Income, db: Database) -> int:
+    """Create new income for the user and return created income id"""
+    query = incomes.insert().values(user_id=user.id, **income_data.dict())
+    created_income_id = await db.execute(query)
+    return created_income_id
+
+
+def validate_creating_income_amount_currency(income_data: Income, income_card: CardOut, user: UserOut):
+    """
+    Validate income amount currency: if card and user currencies are differrent,
+    income must contain card_currency_amount field
+    """
+    if income_card.currency != user.currency and income_data.card_currency_amount is None:
+        err_msg = "Income for card with differrent currency than default must contain `card_currency_amount field`"
+        raise HTTPException(status_code=400, detail=err_msg)

@@ -1,17 +1,20 @@
 from decimal import Decimal
 from datetime import date as dt_date
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, Field
 
 from cards.schemas import CardOut
 from utils import validate_amount_max_min
+
+
+card_currency_amount_description = "required when card currency is differrent than default user currency"
 
 
 class BaseIncome(BaseModel):
     """Base pydantic model for income with generic fields"""
 
     user_currency_amount: Decimal
-    card_currency_amount: Decimal | None = None
+    card_currency_amount: Decimal | None = Field(None, description=card_currency_amount_description)
     date: dt_date
 
     @validator('user_currency_amount')

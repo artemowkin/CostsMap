@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends
 
 from .schemas import IncomeOut, TotalIncomes
 from .dependencies import (
-    get_all_incomes_for_the_month, get_total_incomes
+    get_all_incomes_for_the_month, get_total_incomes,
+    create_new_income
 )
 
 
@@ -21,3 +22,9 @@ def all_incomes(
 def total_incomes(total_incomes: TotalIncomes = Depends(get_total_incomes)):
     """Return total incomes for the month"""
     return total_incomes
+
+
+@router.post('/', response_model=IncomeOut)
+def create_income(created_income: IncomeOut = Depends(create_new_income)):
+    """Create a new income for the user"""
+    return created_income
