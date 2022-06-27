@@ -7,10 +7,9 @@ from sqlite3 import IntegrityError
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from pydantic import BaseModel
-from databases import Database
 
-from .db import users
-from .schemas import UserRegistration, Token, UserLogIn, UserIn, UserOutMapping
+from .models import Users
+from .schemas import UserRegistration, Token, UserLogIn, UserIn
 from project.settings import config
 
 
@@ -46,12 +45,12 @@ def user_exists_decorator(func):
 
 
 @user_exists_decorator
-async def create_user_in_db(user: UserRegistration, db: Database):
+async def create_user_in_db(user: UserRegistration) -> Users:
     """Create entry in db for user"""
     hashed_user_password = hash_password(user.password1)
     creation_data = UserInDb(**user.dict(), password=hashed_user_password)
-    creation_query = users.insert().values(**creation_data.dict())
-    await db.execute(creation_query)
+    created_user = await Users.objects.create(**creation_data.dict())
+    return created_user
 
 
 def create_token_for_user(user_email: str,
@@ -96,36 +95,29 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-async def check_user_password(user: UserLogIn, db: Database) -> None:
+async def check_user_password(user: UserLogIn) -> None:
     """Get user from db and check do passwords match"""
-    db_user = await get_user_by_email(user.email, db)
+    db_user = await Users.objects.get(email=user.email)
     if not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=400, detail="Incorrect password")
 
 
-async def get_user_by_email(user_email: str, db: Database) -> UserOutMapping:
+async def get_user_by_email(user_email: str) -> Users:
     """Get user from DB using email"""
-    get_query = users.select().where(users.c.email == user_email)
-    db_user = await db.fetch_one(get_query)
-    if not db_user: raise HTTPException(
-        status_code=400, detail="User with this email doesn't exist"
-    )
+    db_user = await Users.objects.get(email=user_email)
+    if not db_user:
+        raise HTTPException(status_code=400, detail="User with this email doesn't exist")
 
     return db_user
 
 
 @user_exists_decorator
-async def update_user_data(user_id: int, changing_data: UserIn, db: Database):
+async def update_user_data(user_id: int, changing_data: UserIn):
     """Update the user information"""
-    update_query = users.update().values(**changing_data.dict()).where(users.c.id == user_id)
-    result = await db.execute(update_query)
-    return result
+    await Users.objects.filter(id=user_id).update(**changing_data.dict())
 
 
-async def update_user_password(email: str, new_password: str, db: Database):
+async def update_user_password(email: str, new_password: str):
     """Update password for user"""
     password_hash = hash_password(new_password)
-    update_query = users.update().values(password=password_hash).where(
-        users.c.email == email
-    )
-    await db.execute(update_query)
+    await Users.objects.filter(email=email).update(password=password_hash)

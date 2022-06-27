@@ -1,14 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine
 
 from accounts.routes import router as accounts_router
 from cards.routes import router as cards_router
 from categories.routes import router as categories_router
 from costs.routes import router as costs_router
 from incomes.routes import router as incomes_router
-from project.settings import config
-from project.db import get_database, metadata
+from project.models import models, connect_db
 
 
 origins = ["*"]
@@ -49,12 +47,6 @@ app.include_router(incomes_router, prefix="/api/v1/incomes", tags=["incomes"])
 
 
 @app.on_event("startup")
-def startup():
-    engine = create_engine(config.database_url)
-    metadata.create_all(engine)
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    db = await get_database()
-    await db.disconnect()
+async def startup():
+    await models.create_all()
+    await connect_db()

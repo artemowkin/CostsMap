@@ -1,13 +1,6 @@
-from typing import Mapping, Literal, Any
 from decimal import Decimal
 
 from pydantic import BaseModel, Field
-
-
-CategoryOutMapping = Mapping[
-    Literal['id'] | Literal['title'] | Literal['costs_limit'] | Literal['color'] | Literal['user_id'],
-    Any
-]
 
 
 class BaseCategory(BaseModel):

@@ -1,8 +1,6 @@
 from fastapi import Depends
 from fastapi.exceptions import HTTPException
-from databases import Database
 
-from project.db import get_database
 from accounts.dependencies import get_current_user
 from accounts.schemas import UserOut
 from .schemas import CardOut, Card, Transfer
@@ -13,42 +11,39 @@ from .services import (
 )
 
 
-async def get_all_cards(user: UserOut = Depends(get_current_user), db: Database = Depends(get_database)):
+async def get_all_cards(user: UserOut = Depends(get_current_user)):
     """Return all cards for user"""
     assert user.id is not None
-    cards = await get_all_user_cards(user.id, db)
+    cards = await get_all_user_cards(user.id)
     cards_out = [CardOut.from_orm(card) for card in cards]
     return cards_out
 
 
 async def create_new_card(
-    card_info: Card, user: UserOut = Depends(get_current_user),
-    db: Database = Depends(get_database)
+    card_info: Card, user: UserOut = Depends(get_current_user)
 ):
     """Create a new card"""
     assert user.id is not None
-    created_card_id = await create_new_user_card(card_info, user.id, db)
-    card_out = CardOut(**card_info.dict(), id=created_card_id)
+    created_card = await create_new_user_card(card_info, user)
+    card_out = CardOut.from_orm(created_card)
     return card_out
 
 
 async def get_concrete_card(
-    card_id: int, user: UserOut = Depends(get_current_user),
-    db: Database = Depends(get_database)
+    card_id: int, user: UserOut = Depends(get_current_user)
 ):
     """Return a concrete user card by id"""
     assert user.id is not None
-    card_db = await get_concrete_user_card(card_id, user.id, db)
+    card_db = await get_concrete_user_card(card_id, user.id)
     card_out = CardOut.from_orm(card_db)
     return card_out
 
 
 async def update_concrete_card(
-    card_info: Card, updating_card: CardOut = Depends(get_concrete_card),
-    db: Database = Depends(get_database)
+    card_info: Card, updating_card: CardOut = Depends(get_concrete_card)
 ):
     """Update the concrete card using data from request"""
-    await update_concrete_user_card(updating_card.id, card_info, db)
+    await update_concrete_user_card(updating_card.id, card_info)
     card_out = CardOut(
         **card_info.dict(), id=updating_card.id, amount=updating_card.amount
     )
@@ -56,11 +51,10 @@ async def update_concrete_card(
 
 
 async def delete_concrete_card(
-    deleting_card: CardOut = Depends(get_concrete_card),
-    db: Database = Depends(get_database)
+    deleting_card: CardOut = Depends(get_concrete_card)
 ):
     """Delete the concrete user card by id"""
-    await delete_concrete_user_card(deleting_card.id, db)
+    await delete_concrete_user_card(deleting_card.id)
 
 
 def _validate_to_amount(to_amount: int | None):
@@ -81,17 +75,16 @@ def _validate_has_card_transfer_money(card, transfer_sum):
 
 async def transfer_between_cards(
     transfer_info: Transfer,
-    user: UserOut = Depends(get_current_user),
-    db: Database = Depends(get_database),
+    user: UserOut = Depends(get_current_user)
 ):
     """Transfer money between two cards from transfer_info"""
     assert user.id is not None
-    from_card = await get_concrete_user_card(transfer_info.from_id, user.id, db)
+    from_card = await get_concrete_user_card(transfer_info.from_id, user.id)
     _validate_has_card_transfer_money(from_card, transfer_info.from_amount)
-    to_card = await get_concrete_user_card(transfer_info.to_id, user.id, db)
+    to_card = await get_concrete_user_card(transfer_info.to_id, user.id)
     if from_card.currency != to_card.currency:
         _validate_to_amount(transfer_info.to_amount)
     else:
         transfer_info.to_amount = transfer_info.from_amount
 
-    await transfer_money_between_cards(from_card, to_card, transfer_info, db)
+    await transfer_money_between_cards(from_card, to_card, transfer_info)

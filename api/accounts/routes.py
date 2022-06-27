@@ -31,7 +31,7 @@ def me(user: UserOut = Depends(get_current_user)):
 
 
 @router.put("/me/", response_model=UserOut)
-def me(user: UserOut = Depends(change_user)):
+def change_me(user: UserOut = Depends(change_user)):
     """Change current user data"""
     return user
 

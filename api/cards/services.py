@@ -3,9 +3,9 @@ from decimal import Decimal
 from fastapi import HTTPException
 from asyncpg.exceptions import UniqueViolationError
 from sqlite3 import IntegrityError
-from databases import Database
 
-from .db import cards
+from accounts.schemas import UserOut
+from .models import Cards
 from .schemas import Card, Transfer, CardOutMapping
 
 
@@ -24,25 +24,22 @@ def unique_card_handler(func):
     return wrapper
 
 
-async def get_all_user_cards(user_id: int, db: Database) -> list[CardOutMapping]:
+async def get_all_user_cards(user_id: int) -> list[Cards]:
     """Return all user cards using user id"""
-    get_query = cards.select().where(cards.c.user_id == user_id).order_by(cards.c.id)
-    db_cards = await db.fetch_all(get_query)
+    db_cards = await Cards.objects.filter(user__id=user_id).order_by('id').all()
     return db_cards
 
 
 @unique_card_handler
-async def create_new_user_card(card_info: Card, user_id: int, db: Database) -> int:
-    """Create a new card for user and return its id"""
-    create_query = cards.insert().values(**card_info.dict(), user_id=user_id)
-    created_card_id = await db.execute(create_query)
-    return created_card_id
+async def create_new_user_card(card_info: Card, user: UserOut) -> Cards:
+    """Create a new card for user and return it"""
+    created_card = await Cards.objects.create(**card_info.dict(), user=user)
+    return created_card
 
 
-async def get_concrete_user_card(card_id: int, user_id: int, db: Database) -> CardOutMapping:
+async def get_concrete_user_card(card_id: int, user_id: int) -> CardOutMapping:
     """Return a concrete user card using card id and user id"""
-    get_query = cards.select().where(cards.c.id == card_id, cards.c.user_id == user_id)
-    card_db = await db.fetch_one(get_query)
+    card_db = await Cards.objects.filter(user__id=user_id, id=card_id).get()
     if not card_db:
         raise HTTPException(status_code=404, detail="Card with this id doesn't exist")
 
@@ -50,38 +47,28 @@ async def get_concrete_user_card(card_id: int, user_id: int, db: Database) -> Ca
 
 
 @unique_card_handler
-async def update_concrete_user_card(card_id: int, card_info: Card, db: Database) -> None:
+async def update_concrete_user_card(card_id: int, card_info: Card) -> None:
     """Update the concrete card in db"""
-    update_query = cards.update().values(**card_info.dict()).where(
-        cards.c.id == card_id
-    )
-    await db.execute(update_query)
+    await Cards.objects.filter(id=card_id).update(**card_info.dict())
 
 
-async def delete_concrete_user_card(card_id: int, db: Database) -> None:
+async def delete_concrete_user_card(card_id: int) -> None:
     """Delete the concrete card in db"""
-    delete_query = cards.delete().where(cards.c.id == card_id)
-    await db.execute(delete_query)
+    await Cards.objects.filter(id=card_id).delete()
 
 
-async def transfer_money_between_cards(from_card, to_card, transfer_info: Transfer, db: Database) -> None:
+async def transfer_money_between_cards(from_card, to_card, transfer_info: Transfer) -> None:
     """Transfer money between two cards"""
     from_result_amount = from_card.amount - transfer_info.from_amount
     to_result_amount = to_card.amount + transfer_info.to_amount
 
-    update_query_from = cards.update().values(
-        amount=from_result_amount).where(cards.c.id == from_card.id)
-    update_query_to = cards.update().values(
-        amount=to_result_amount).where(cards.c.id == to_card.id)
-
-    async with db.transaction():
-        await db.execute(update_query_from)
-        await db.execute(update_query_to)
+    async with Cards.registry.database.transaction():
+        await Cards.objects.filter(id=from_card.id).update(amount=from_result_amount)
+        await Cards.objects.filter(id=to_card.id).update(amount=to_result_amount)
 
 
-async def update_card_amount(user_id: int, card_id: int, new_amount: Decimal, db: Database) -> None:
+async def update_card_amount(user_id: int, card_id: int, new_amount: Decimal) -> None:
     if new_amount < 0:
         raise HTTPException(status_code=400, detail="Cost amount is more than card amount")
 
-    query = cards.update().values(amount=new_amount).where(cards.c.id == card_id, cards.c.user_id == user_id)
-    await db.execute(query)
+    await Cards.objects.filter(id=card_id, user__id=user_id).update(amount=new_amount)

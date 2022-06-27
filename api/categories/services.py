@@ -5,11 +5,11 @@ from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
 from asyncpg.exceptions import UniqueViolationError
 from sqlite3 import IntegrityError
-from databases import Database
 
+from project.settings import config
 from accounts.schemas import UserOut
-from .schemas import BaseCategory, CategoryOutMapping
-from .db import categories
+from .schemas import BaseCategory
+from .models import Categories
 
 
 def category_exists_decorator(func):
@@ -27,15 +27,14 @@ def category_exists_decorator(func):
     return inner
 
 
-async def get_all_user_categories(user: UserOut, db: Database) -> list[CategoryOutMapping]:
+async def get_all_user_categories(user: UserOut) -> list[Categories]:
     """Return all user categories"""
-    get_query = categories.select().where(categories.c.user_id == user.id).order_by(categories.c.id)
-    db_categories = await db.fetch_all(get_query)
+    db_categories = await Categories.objects.filter(user__id=user.id).order_by('id').all()
     return db_categories
 
 
 async def get_costs_for_categories(
-        user: UserOut, month: str, db: Database
+    user: UserOut, month: str
 ) -> list[Mapping[Literal['id'] | Literal['costs_sum'], Any]]:
     """Return user categories with costs for the month"""
     start_date = datetime.fromisoformat(month + '-01')
@@ -47,45 +46,34 @@ async def get_costs_for_categories(
         'group by categories.id;'
     )
     values = {'start_date': start_date, 'end_date': end_date, 'user_id': user.id}
-    db_categories = await db.fetch_all(get_query, values)
+    db_categories = await config.database.fetch_all(get_query, values)
     return db_categories
 
 
 @category_exists_decorator
-async def create_category(category: BaseCategory, user: UserOut, db: Database) -> int:
+async def create_category(category: BaseCategory, user: UserOut) -> Categories:
     """Create a new category and return its id"""
-    create_query = categories.insert().values(
-        **category.dict(), user_id=user.id
-    )
-    category_id = await db.execute(create_query)
-    return category_id
+    created_category = await Categories.objects.create(**category.dict(), user=user)
+    return created_category
 
 
-async def get_category_by_id(category_id: int, user: UserOut, db: Database) -> CategoryOutMapping:
+async def get_category_by_id(category_id: int, user: UserOut) -> list[Categories]:
     """Return the concrete category by id"""
-    get_query = categories.select().where(
-        categories.c.id == category_id, categories.c.user_id == user.id
-    )
-    category = await db.fetch_one(get_query)
-    if not category:
+    db_category = await Categories.objects.get(id=category_id, user__id=user.id)
+    if not db_category:
         raise HTTPException(
             status_code=404, detail="Category with this id doesn't exist"
         )
 
-    return category
+    return db_category
 
 
 @category_exists_decorator
-async def update_category_by_id(
-    category_id: int, category_data: BaseCategory, db: Database
-) -> None:
+async def update_category_by_id(category_id: int, category_data: BaseCategory) -> None:
     """Update the concrete category using category id"""
-    update_query = categories.update().values(
-        **category_data.dict()).where(categories.c.id == category_id)
-    await db.execute(update_query)
+    await Categories.objects.filter(id=category_id).update(**category_data.dict())
 
 
-async def delete_category(category_id: int, db: Database) -> None:
+async def delete_category(category_id: int) -> None:
     """Delete the category using id"""
-    delete_query = categories.delete().where(categories.c.id == category_id)
-    await db.execute(delete_query)
+    await Categories.objects.filter(id=category_id).delete()

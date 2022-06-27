@@ -9,12 +9,6 @@ from categories.schemas import CategoryOut
 from utils import validate_amount_max_min
 
 
-CostOutMapping = Mapping[
-    Literal['id'] | Literal['amount'] | Literal['date'] | Literal['category_id'] | Literal['card_id'] | Literal['user_id'],
-    Any
-]
-
-
 class BaseCost(BaseModel):
     """Base pydantic model for cost with generic fields"""
 

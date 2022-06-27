@@ -2,29 +2,26 @@ from decimal import Decimal
 from datetime import date
 
 from fastapi import HTTPException
-from databases import Database
 from dateutil.relativedelta import relativedelta
-from sqlalchemy import desc
 
+from project.settings import config
 from cards.schemas import CardOut
 from accounts.schemas import UserOut
 from .schemas import Income
-from .db import incomes
+from .models import Incomes
 
 
-async def get_all_user_incomes_by_month(user: UserOut, month: str, db: Database) -> list:
+async def get_all_user_incomes_by_month(user: UserOut, month: str) -> list[Incomes]:
     """Return all user incomes for the month"""
     month_start_date = date.fromisoformat(month + '-01')
     month_end_date = month_start_date + relativedelta(months=1)
-    get_query = incomes.select().where(
-        incomes.c.user_id == user.id, incomes.c.date >= month_start_date,
-        incomes.c.date < month_end_date
-    ).order_by(desc(incomes.c.date))
-    db_incomes = await db.fetch_all(get_query)
+    db_incomes = await Incomes.objects.filter(
+        user__id=user.id, date__gte=month_start_date, date__lt=month_end_date
+    ).order_by('-date').all()
     return db_incomes
 
 
-async def get_total_incomes_for_the_month(user_id: int, month: str, db: Database) -> Decimal:
+async def get_total_incomes_for_the_month(user_id: int, month: str) -> Decimal:
     """Return total incomes for the month"""
     month_start_date = date.fromisoformat(month + '-01')
     month_end_date = month_start_date + relativedelta(months=1)
@@ -32,17 +29,16 @@ async def get_total_incomes_for_the_month(user_id: int, month: str, db: Database
         "select sum(user_currency_amount) as total_incomes from incomes where "
         "user_id = :user_id and date >= date(:start_date) and date < date(:end_date);"
     )
-    total_incomes = await db.fetch_val(query, {
+    total_incomes = await config.database.fetch_val(query, {
         'user_id': user_id, 'start_date': month_start_date, 'end_date': month_end_date
     })
     return Decimal(total_incomes or 0)
 
 
-async def create_db_income(user: UserOut, income_data: Income, db: Database) -> int:
+async def create_db_income(user: UserOut, income_data: Income) -> Incomes:
     """Create new income for the user and return created income id"""
-    query = incomes.insert().values(user_id=user.id, **income_data.dict())
-    created_income_id = await db.execute(query)
-    return created_income_id
+    created_income = await Incomes.objects.create(**income_data.dict(), user=user)
+    return created_income
 
 
 def validate_creating_income_amount_currency(income_data: Income, income_card: CardOut, user: UserOut):
