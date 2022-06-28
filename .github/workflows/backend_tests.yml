@@ -1,0 +1,31 @@
+name: Backend Tests
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.9, 3.10]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-veresion }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        pip install poetry
+        poetry config virtualenvs.create false
+        poetry install --no-interaction --no-ansi
+    - name: Run Tests
+      env:
+        DATABASE_URL: "sqlite:///db.sqlite"
+        SECRET_KEY: "!mg@0%q)m6bw61@!(39%q1+64imyvaa4#!n6py9+8tb2l@1(nu"
+      run: pytest
