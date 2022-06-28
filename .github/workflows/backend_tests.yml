@@ -1,4 +1,4 @@
-name: Backend Tests
+name: Backend Pipeline
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main, dev ]
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1
