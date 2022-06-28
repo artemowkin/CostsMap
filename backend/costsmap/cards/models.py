@@ -1,7 +1,10 @@
+from decimal import Decimal
+from typing import NamedTuple
+
 import orm
 
-from project.models import models
-from accounts.models import Users
+from ..project.models import models
+from ..accounts.models import Users, UserNamedTuple
 from .schemas import Currencies
 
 
@@ -16,3 +19,12 @@ class Cards(orm.Model):
         "amount": orm.Decimal(max_digits=9, decimal_places=2, default=0),
         "user": orm.ForeignKey(Users, on_delete=orm.CASCADE),
     }
+
+
+class CardNamedTuple(NamedTuple):
+    id: int
+    title: str
+    currency: Currencies
+    color: str
+    amount: Decimal
+    user: UserNamedTuple

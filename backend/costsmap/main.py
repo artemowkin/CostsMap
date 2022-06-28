@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
 
-from accounts.routes import router as accounts_router
-from cards.routes import router as cards_router
-from categories.routes import router as categories_router
-from costs.routes import router as costs_router
-from incomes.routes import router as incomes_router
-from project.models import models, connect_db
+from .accounts.routes import router as accounts_router
+from .cards.routes import router as cards_router
+from .categories.routes import router as categories_router
+from .costs.routes import router as costs_router
+from .incomes.routes import router as incomes_router
+from .project.models import models, connect_db
 
 
 origins = ["*"]
@@ -50,3 +51,7 @@ app.include_router(incomes_router, prefix="/api/v1/incomes", tags=["incomes"])
 async def startup():
     await models.create_all()
     await connect_db()
+
+
+def main():
+    uvicorn.run('costsmap.main:app', host='0.0.0.0', port=8000, reload=True)

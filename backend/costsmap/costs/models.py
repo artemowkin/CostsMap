@@ -1,11 +1,13 @@
+from decimal import Decimal
+from typing import NamedTuple
 from datetime import date
 
 import orm
 
-from project.models import models
-from accounts.models import Users
-from categories.models import Categories
-from cards.models import Cards
+from ..project.models import models
+from ..accounts.models import Users, UserNamedTuple
+from ..categories.models import Categories, CategoryNamedTuple
+from ..cards.models import Cards, CardNamedTuple
 
 
 class Costs(orm.Model):
@@ -19,3 +21,12 @@ class Costs(orm.Model):
         "card": orm.ForeignKey(Cards, on_delete=orm.CASCADE),
         "user": orm.ForeignKey(Users, on_delete=orm.CASCADE),
     }
+
+
+class CostNamedTuple(NamedTuple):
+    id: int
+    amount: Decimal
+    date: date
+    category: CategoryNamedTuple
+    card: CardNamedTuple
+    user: UserNamedTuple

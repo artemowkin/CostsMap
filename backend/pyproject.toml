@@ -4,6 +4,8 @@ version = "3.0.0"
 description = "CostsMap is an application for costs accounting"
 authors = ["artemowkin <artyom.groshev2017@gmail.com>"]
 license = "GPL-3.0"
+readme = "README.md"
+documentation = "/api/v1/redoc/"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -23,6 +25,9 @@ orm = {extras = ["postgresql"], version = "^0.3.1"}
 
 [tool.poetry.dev-dependencies]
 ipython = "^8.4.0"
+
+[tool.poetry.scripts]
+dev = "costsmap.main:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

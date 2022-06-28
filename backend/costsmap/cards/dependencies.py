@@ -1,8 +1,8 @@
 from fastapi import Depends
 from fastapi.exceptions import HTTPException
 
-from accounts.dependencies import get_current_user
-from accounts.models import Users
+from ..accounts.dependencies import get_current_user
+from ..accounts.models import UserNamedTuple
 from .schemas import CardOut, Card, Transfer
 from .services import (
     get_all_user_cards, create_new_user_card, get_concrete_user_card,
@@ -11,7 +11,7 @@ from .services import (
 )
 
 
-async def get_all_cards(user: Users = Depends(get_current_user)):
+async def get_all_cards(user: UserNamedTuple = Depends(get_current_user)):
     """Return all cards for user"""
     cards = await get_all_user_cards(user.id)
     cards_out = [CardOut.from_orm(card) for card in cards]
@@ -19,7 +19,7 @@ async def get_all_cards(user: Users = Depends(get_current_user)):
 
 
 async def create_new_card(
-    card_info: Card, user: Users = Depends(get_current_user)
+    card_info: Card, user: UserNamedTuple = Depends(get_current_user)
 ):
     """Create a new card"""
     created_card = await create_new_user_card(card_info, user)
@@ -28,7 +28,7 @@ async def create_new_card(
 
 
 async def get_concrete_card(
-    card_id: int, user: Users = Depends(get_current_user)
+    card_id: int, user: UserNamedTuple = Depends(get_current_user)
 ):
     """Return a concrete user card by id"""
     card_db = await get_concrete_user_card(card_id, user.id)
@@ -72,7 +72,7 @@ def _validate_has_card_transfer_money(card, transfer_sum):
 
 async def transfer_between_cards(
     transfer_info: Transfer,
-    user: Users = Depends(get_current_user)
+    user: UserNamedTuple = Depends(get_current_user)
 ):
     """Transfer money between two cards from transfer_info"""
     from_card = await get_concrete_user_card(transfer_info.from_id, user.id)

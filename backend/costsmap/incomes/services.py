@@ -4,14 +4,14 @@ from datetime import date
 from fastapi import HTTPException
 from dateutil.relativedelta import relativedelta
 
-from project.models import database
-from cards.models import Cards
-from accounts.models import Users
+from ..project.models import database
+from ..cards.models import CardNamedTuple
+from ..accounts.models import UserNamedTuple
 from .schemas import Income
-from .models import Incomes
+from .models import Incomes, IncomeNamedTuple
 
 
-async def get_all_user_incomes_by_month(user_id: int, month: str) -> list[Incomes]:
+async def get_all_user_incomes_by_month(user_id: int, month: str) -> list[IncomeNamedTuple]:
     """Return all user incomes for the month"""
     month_start_date = date.fromisoformat(month + '-01')
     month_end_date = month_start_date + relativedelta(months=1)
@@ -35,13 +35,13 @@ async def get_total_incomes_for_the_month(user_id: int, month: str) -> Decimal:
     return Decimal(total_incomes or 0)
 
 
-async def create_db_income(user: Users, card: Cards, income_data: Income) -> Incomes:
+async def create_db_income(user: UserNamedTuple, card: CardNamedTuple, income_data: Income) -> IncomeNamedTuple:
     """Create new income for the user and return created income id"""
     created_income = await Incomes.objects.create(**income_data.dict(), user=user, card=card)
     return created_income
 
 
-def validate_creating_income_amount_currency(income_data: Income, income_card: Cards, user: Users):
+def validate_creating_income_amount_currency(income_data: Income, income_card: CardNamedTuple, user: UserNamedTuple):
     """
     Validate income amount currency: if card and user currencies are differrent,
     income must contain card_currency_amount field

@@ -4,8 +4,8 @@ from fastapi import HTTPException
 from asyncpg.exceptions import UniqueViolationError
 from sqlite3 import IntegrityError
 
-from accounts.models import Users
-from .models import Cards
+from ..accounts.models import UserNamedTuple
+from .models import Cards, CardNamedTuple
 from .schemas import Card, Transfer
 
 
@@ -24,20 +24,20 @@ def unique_card_handler(func):
     return wrapper
 
 
-async def get_all_user_cards(user_id: int) -> list[Cards]:
+async def get_all_user_cards(user_id: int) -> list[CardNamedTuple]:
     """Return all user cards using user id"""
     db_cards = await Cards.objects.filter(user__id=user_id).order_by('id').all()
     return db_cards
 
 
 @unique_card_handler
-async def create_new_user_card(card_info: Card, user: Users) -> Cards:
+async def create_new_user_card(card_info: Card, user: UserNamedTuple) -> CardNamedTuple:
     """Create a new card for user and return it"""
     created_card = await Cards.objects.create(**card_info.dict(), user=user)
     return created_card
 
 
-async def get_concrete_user_card(card_id: int, user_id: int) -> Cards:
+async def get_concrete_user_card(card_id: int, user_id: int) -> CardNamedTuple:
     """Return a concrete user card using card id and user id"""
     card_db = await Cards.objects.filter(user__id=user_id, id=card_id).get()
     if not card_db:

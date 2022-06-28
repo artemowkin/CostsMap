@@ -1,6 +1,8 @@
+from typing import NamedTuple
+
 import orm
 
-from project.models import models
+from ..project.models import models
 
 
 class Users(orm.Model):
@@ -12,3 +14,10 @@ class Users(orm.Model):
         "password": orm.String(max_length=500, allow_blank=False, allow_null=False),
         "currency": orm.String(max_length=10, allow_blank=False, allow_null=False),
     }
+
+
+class UserNamedTuple(NamedTuple):
+    id: int
+    email: str
+    password: str
+    currency: str

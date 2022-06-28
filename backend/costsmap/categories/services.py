@@ -6,10 +6,10 @@ from fastapi import HTTPException
 from asyncpg.exceptions import UniqueViolationError
 from sqlite3 import IntegrityError
 
-from project.models import database
-from accounts.models import Users
+from ..project.models import database
+from ..accounts.models import UserNamedTuple
 from .schemas import BaseCategory
-from .models import Categories
+from .models import Categories, CategoryNamedTuple
 
 
 def category_exists_decorator(func):
@@ -27,7 +27,7 @@ def category_exists_decorator(func):
     return inner
 
 
-async def get_all_user_categories(user_id: int) -> list[Categories]:
+async def get_all_user_categories(user_id: int) -> list[CategoryNamedTuple]:
     """Return all user categories"""
     db_categories = await Categories.objects.filter(user__id=user_id).order_by('id').all()
     return db_categories
@@ -51,13 +51,13 @@ async def get_costs_for_categories(
 
 
 @category_exists_decorator
-async def create_category(category: BaseCategory, user: Users) -> Categories:
+async def create_category(category: BaseCategory, user: UserNamedTuple) -> CategoryNamedTuple:
     """Create a new category and return its id"""
     created_category = await Categories.objects.create(**category.dict(), user=user)
     return created_category
 
 
-async def get_category_by_id(category_id: int, user_id: int) -> Categories:
+async def get_category_by_id(category_id: int, user_id: int) -> CategoryNamedTuple:
     """Return the concrete category by id"""
     db_category = await Categories.objects.get(id=category_id, user__id=user_id)
     if not db_category:

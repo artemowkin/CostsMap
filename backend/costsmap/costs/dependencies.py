@@ -2,12 +2,12 @@ from datetime import date
 
 from fastapi import Query, Depends
 
-from project.models import database
-from accounts.models import Users
-from accounts.dependencies import get_current_user
-from categories.services import get_category_by_id
-from cards.services import update_card_amount, get_concrete_user_card
-from cards.dependencies import get_concrete_card
+from ..project.models import database
+from ..accounts.models import UserNamedTuple
+from ..accounts.dependencies import get_current_user
+from ..categories.services import get_category_by_id
+from ..cards.services import update_card_amount, get_concrete_user_card
+from ..cards.dependencies import get_concrete_card
 from .schemas import CostOut, TotalCosts, Cost
 from .services import (
     get_all_user_costs_by_month, get_total_costs_for_the_month,
@@ -20,7 +20,7 @@ today_string = date.today().strftime("%Y-%m")
 
 async def get_all_costs_for_the_month(
     month: str = Query(today_string, regex=r"\d{4}-\d{2}"),
-    user: Users = Depends(get_current_user),
+    user: UserNamedTuple = Depends(get_current_user),
 ) -> list[CostOut]:
     """Return all costs for the month (current by default)"""
     db_costs = await get_all_user_costs_by_month(user.id, month)
@@ -30,7 +30,7 @@ async def get_all_costs_for_the_month(
 
 async def get_total_costs(
     month: str = Query(today_string, regex=r"\d{4}-\d{2}"),
-    user: Users = Depends(get_current_user)
+    user: UserNamedTuple = Depends(get_current_user)
 ):
     """Return total costs for the month for concrete user"""
     total_costs = await get_total_costs_for_the_month(user.id, month)
@@ -39,7 +39,7 @@ async def get_total_costs(
 
 async def create_new_cost(
     cost_data: Cost,
-    user: Users = Depends(get_current_user)
+    user: UserNamedTuple = Depends(get_current_user)
 ):
     """Create the new cost and subtract cost sum from card amount"""
     async with database.transaction():
@@ -55,7 +55,7 @@ async def create_new_cost(
 
 async def delete_cost_by_id(
     cost_id: int,
-    user: Users = Depends(get_current_user)
+    user: UserNamedTuple = Depends(get_current_user)
 ):
     """Delete the concrete cost by id and plus cost sum to card amount"""
     async with database.transaction():

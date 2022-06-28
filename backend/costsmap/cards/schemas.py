@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
-from accounts.schemas import Currencies
+from ..accounts.schemas import Currencies
 
 
 class Card(BaseModel):

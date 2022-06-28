@@ -1,7 +1,9 @@
+from typing import NamedTuple
+
 import orm
 
-from project.models import models
-from accounts.models import Users
+from ..project.models import models
+from ..accounts.models import Users, UserNamedTuple
 
 
 class Categories(orm.Model):
@@ -14,3 +16,11 @@ class Categories(orm.Model):
         "color": orm.String(max_length=10, allow_blank=False, allow_null=False),
         "user": orm.ForeignKey(Users, on_delete=orm.CASCADE),
     }
+
+
+class CategoryNamedTuple(NamedTuple):
+    id: int
+    title: str
+    costs_limit: int
+    color: str
+    user: UserNamedTuple

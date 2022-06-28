@@ -1,3 +1,4 @@
+from typing import Mapping, Literal, Any
 from datetime import datetime
 import calendar
 
@@ -8,9 +9,9 @@ from passlib.context import CryptContext
 from jose import jwt, JWTError
 from pydantic import BaseModel
 
-from .models import Users
+from .models import Users, UserNamedTuple
 from .schemas import UserRegistration, Token, UserLogIn, UserIn
-from project.settings import config
+from ..project.settings import config
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -45,7 +46,7 @@ def user_exists_decorator(func):
 
 
 @user_exists_decorator
-async def create_user_in_db(user: UserRegistration) -> Users:
+async def create_user_in_db(user: UserRegistration) -> UserNamedTuple:
     """Create entry in db for user"""
     hashed_user_password = hash_password(user.password1)
     creation_data = UserInDb(**user.dict(), password=hashed_user_password)
@@ -69,7 +70,7 @@ def create_token_for_user(user_email: str,
     return Token(token=jwt_token, exptime=exp_date)
 
 
-def decode_token(token: str):
+def decode_token(token: str) -> Mapping[Literal['sub'] | Literal['exp'], Any]:
     """Decode user token and return JSON data from it"""
     unauthenticated_error = HTTPException(
         status_code=401, detail="Token is incorrect",
@@ -102,7 +103,7 @@ async def check_user_password(user: UserLogIn) -> None:
         raise HTTPException(status_code=400, detail="Incorrect password")
 
 
-async def get_user_by_email(user_email: str) -> Users:
+async def get_user_by_email(user_email: str) -> UserNamedTuple:
     """Get user from DB using email"""
     db_user = await Users.objects.get(email=user_email)
     if not db_user:
@@ -112,12 +113,12 @@ async def get_user_by_email(user_email: str) -> Users:
 
 
 @user_exists_decorator
-async def update_user_data(user_id: int, changing_data: UserIn):
+async def update_user_data(user_id: int, changing_data: UserIn) -> None:
     """Update the user information"""
     await Users.objects.filter(id=user_id).update(**changing_data.dict())
 
 
-async def update_user_password(email: str, new_password: str):
+async def update_user_password(email: str, new_password: str) -> None:
     """Update password for user"""
     password_hash = hash_password(new_password)
     await Users.objects.filter(email=email).update(password=password_hash)

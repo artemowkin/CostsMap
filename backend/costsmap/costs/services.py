@@ -4,15 +4,15 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
 
-from project.models import database
-from accounts.models import Users
-from categories.models import Categories
-from cards.models import Cards
-from .models import Costs
+from ..project.models import database
+from ..accounts.models import UserNamedTuple
+from ..categories.models import CategoryNamedTuple
+from ..cards.models import CardNamedTuple
+from .models import Costs, CostNamedTuple
 from .schemas import Cost
 
 
-async def get_all_user_costs_by_month(user_id: int, month: str) -> list[Costs]:
+async def get_all_user_costs_by_month(user_id: int, month: str) -> list[CostNamedTuple]:
     """Return all user costs for the month"""
     month_start_date = date.fromisoformat(month + '-01')
     month_end_date = month_start_date + relativedelta(months=1)
@@ -22,7 +22,7 @@ async def get_all_user_costs_by_month(user_id: int, month: str) -> list[Costs]:
     return db_costs
 
 
-async def get_concrete_user_cost(cost_id: int, user_id: int) -> Costs:
+async def get_concrete_user_cost(cost_id: int, user_id: int) -> CostNamedTuple:
     """Return the concrete user cost by id"""
     db_cost = await Costs.objects.get(id=cost_id, user__id=user_id)
     if not db_cost:
@@ -47,7 +47,10 @@ async def get_total_costs_for_the_month(user_id: int, month: str) -> Decimal:
     return Decimal(total_costs or 0)
 
 
-async def create_db_cost(user: Users, card: Cards, category: Categories, cost_data: Cost) -> Costs:
+async def create_db_cost(
+    user: UserNamedTuple, card: CardNamedTuple, category: CategoryNamedTuple,
+    cost_data: Cost
+) -> Costs:
     """Create new cost for the user and return created cost id"""
     created_cost = await Costs.objects.create(**cost_data.dict(), user=user, card=card, category=category)
     return created_cost
