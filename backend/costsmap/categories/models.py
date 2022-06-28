@@ -12,7 +12,7 @@ class Categories(orm.Model):
     fields = {
         "id": orm.Integer(primary_key=True),
         "title": orm.String(max_length=50, unique=True, allow_blank=False, allow_null=False),
-        "costs_limit": orm.Integer(minimum=0),
+        "costs_limit": orm.Integer(minimum=0, allow_null=True),
         "color": orm.String(max_length=10, allow_blank=False, allow_null=False),
         "user": orm.ForeignKey(Users, on_delete=orm.CASCADE),
     }

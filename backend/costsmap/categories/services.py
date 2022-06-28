@@ -41,8 +41,8 @@ async def get_costs_for_categories(
     end_date = start_date + relativedelta(months=1)
     get_query = (
         'select categories.id, sum(costs.amount) as costs_sum from '
-        'categories join costs on costs.category_id = categories.id '
-        'where costs.date >= date(:start_date) and costs.date < date(:end_date) and categories.user_id = :user_id '
+        'categories join costs on costs.category = categories.id '
+        'where costs.date >= date(:start_date) and costs.date < date(:end_date) and categories.user = :user_id '
         'group by categories.id;'
     )
     values = {'start_date': start_date, 'end_date': end_date, 'user_id': user_id}
@@ -59,13 +59,14 @@ async def create_category(category: BaseCategory, user: UserNamedTuple) -> Categ
 
 async def get_category_by_id(category_id: int, user_id: int) -> CategoryNamedTuple:
     """Return the concrete category by id"""
-    db_category = await Categories.objects.get(id=category_id, user__id=user_id)
-    if not db_category:
+    try:
+        db_category = await Categories.objects.get(id=category_id, user__id=user_id)
+        return db_category
+    except:
         raise HTTPException(
             status_code=404, detail="Category with this id doesn't exist"
         )
 
-    return db_category
 
 
 @category_exists_decorator

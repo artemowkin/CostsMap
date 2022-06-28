@@ -2,9 +2,9 @@ from typing import Mapping, Literal, Any
 from datetime import datetime
 import calendar
 
-from fastapi import HTTPException
 from asyncpg.exceptions import UniqueViolationError
 from sqlite3 import IntegrityError
+from fastapi import HTTPException
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from pydantic import BaseModel
@@ -23,7 +23,6 @@ class UserInDb(BaseModel):
     email: str
     password: str
     currency: str
-    language: str
 
 
 def hash_password(password: str) -> str:
