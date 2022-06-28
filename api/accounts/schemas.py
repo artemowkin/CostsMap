@@ -27,19 +27,6 @@ class SupportedCurrencies(BaseModel):
     currencies: list[str] = ['₽', '$', '€', '¥']
 
 
-class Languages(str, Enum):
-    """Enumeration of available user languages"""
-
-    russian = 'russian'
-    english = 'english'
-
-
-class SupportedLanguages(BaseModel):
-    """Model that has list of supported languages"""
-
-    languages: list[str] = ['russian', 'english']
-
-
 class BaseUser(BaseModel):
     """Base user pydantic model with base fields"""
 
@@ -50,7 +37,6 @@ class UserIn(BaseUser):
     """User pydantic model for input request data"""
 
     currency: Currencies = Field(..., description='main user currency')
-    language: Languages = Field(..., description='user language')
 
 
 class UserOut(UserIn):
@@ -75,7 +61,6 @@ class UserRegistration(BaseUser):
     """User pydantic model with data for registration"""
 
     currency: Currencies = Field(..., description='main user currency')
-    language: Languages = Field(..., description='user language')
     password1: str = Field(
         ..., min_length=6, max_length=256, description='user password'
     )

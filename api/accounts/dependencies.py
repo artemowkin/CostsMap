@@ -1,6 +1,5 @@
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from databases import Database
 
 from .schemas import (
     UserRegistration, UserLogIn, UserOut, ChangeUserPassword, UserIn
@@ -33,16 +32,15 @@ async def login_user(user: UserLogIn):
     return token
 
 
-async def get_current_user(token: str = Depends(oauth)) -> UserOut:
+async def get_current_user(token: str = Depends(oauth)) -> Users:
     """Return current user using user email from token"""
     decoded_token = decode_token(token)
     db_user = await get_user_by_email(decoded_token['sub'])
-    user = UserOut.from_orm(db_user)
-    return user
+    return db_user
 
 
 async def change_user(
-    changing_data: UserIn, current_user: UserOut = Depends(get_current_user)
+    changing_data: UserIn, current_user: Users = Depends(get_current_user)
 ) -> UserOut:
     """Change the current user using data from request"""
     await update_user_data(current_user.id, changing_data)

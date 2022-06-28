@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 
+from .models import Users
 from .schemas import (
-    Token, UserOut, SupportedCurrencies, SupportedLanguages
+    Token, UserOut, SupportedCurrencies
 )
 from .dependencies import (
     registrate_user, login_user, get_current_user, change_user,
@@ -25,9 +26,10 @@ def login(token: Token = Depends(login_user)):
 
 
 @router.get("/me/", response_model=UserOut)
-def me(user: UserOut = Depends(get_current_user)):
+def me(user: Users = Depends(get_current_user)):
     """Change current user data"""
-    return user
+    user_out = UserOut.from_orm(user)
+    return user_out
 
 
 @router.put("/me/", response_model=UserOut)
@@ -44,12 +46,6 @@ def change_me(user: UserOut = Depends(change_user)):
 def change_password():
     """Change password for user"""
     pass
-
-
-@router.get("/languages/", response_model=SupportedLanguages)
-def languages():
-    """List of all supported languages"""
-    return SupportedLanguages()
 
 
 @router.get("/currencies/", response_model=SupportedCurrencies)

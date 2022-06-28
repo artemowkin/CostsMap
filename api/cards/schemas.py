@@ -1,18 +1,8 @@
-from typing import NamedTuple
 from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
 from accounts.schemas import Currencies
-
-
-class CardOutMapping(NamedTuple):
-    id: int
-    title: str
-    currency: Currencies
-    color: str
-    amount: Decimal
-    user_id: int
 
 
 class Card(BaseModel):

@@ -6,8 +6,8 @@ from fastapi import HTTPException
 from asyncpg.exceptions import UniqueViolationError
 from sqlite3 import IntegrityError
 
-from project.settings import config
-from accounts.schemas import UserOut
+from project.models import database
+from accounts.models import Users
 from .schemas import BaseCategory
 from .models import Categories
 
@@ -27,14 +27,14 @@ def category_exists_decorator(func):
     return inner
 
 
-async def get_all_user_categories(user: UserOut) -> list[Categories]:
+async def get_all_user_categories(user_id: int) -> list[Categories]:
     """Return all user categories"""
-    db_categories = await Categories.objects.filter(user__id=user.id).order_by('id').all()
+    db_categories = await Categories.objects.filter(user__id=user_id).order_by('id').all()
     return db_categories
 
 
 async def get_costs_for_categories(
-    user: UserOut, month: str
+    user_id: int, month: str
 ) -> list[Mapping[Literal['id'] | Literal['costs_sum'], Any]]:
     """Return user categories with costs for the month"""
     start_date = datetime.fromisoformat(month + '-01')
@@ -45,21 +45,21 @@ async def get_costs_for_categories(
         'where costs.date >= date(:start_date) and costs.date < date(:end_date) and categories.user_id = :user_id '
         'group by categories.id;'
     )
-    values = {'start_date': start_date, 'end_date': end_date, 'user_id': user.id}
-    db_categories = await config.database.fetch_all(get_query, values)
+    values = {'start_date': start_date, 'end_date': end_date, 'user_id': user_id}
+    db_categories = await database.fetch_all(get_query, values)
     return db_categories
 
 
 @category_exists_decorator
-async def create_category(category: BaseCategory, user: UserOut) -> Categories:
+async def create_category(category: BaseCategory, user: Users) -> Categories:
     """Create a new category and return its id"""
     created_category = await Categories.objects.create(**category.dict(), user=user)
     return created_category
 
 
-async def get_category_by_id(category_id: int, user: UserOut) -> list[Categories]:
+async def get_category_by_id(category_id: int, user_id: int) -> Categories:
     """Return the concrete category by id"""
-    db_category = await Categories.objects.get(id=category_id, user__id=user.id)
+    db_category = await Categories.objects.get(id=category_id, user__id=user_id)
     if not db_category:
         raise HTTPException(
             status_code=404, detail="Category with this id doesn't exist"

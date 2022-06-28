@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import Depends, Query
 
 from accounts.dependencies import get_current_user
-from accounts.schemas import UserOut
+from accounts.models import Users
 from .schemas import CategoryOut, BaseCategory
 from .services import (
     get_costs_for_categories, get_all_user_categories, create_category,
@@ -15,13 +15,13 @@ today_month = datetime.now().strftime("%Y-%m")
 
 
 async def get_all_categories(
-    user: UserOut = Depends(get_current_user),
+    user: Users = Depends(get_current_user),
     month: str = Query(today_month, regex=r"\d{4}-\d{2}")
 ):
     """Return all categories with costs for the month"""
-    all_categories = await get_all_user_categories(user)
+    all_categories = await get_all_user_categories(user.id)
     categories_out = [CategoryOut.from_orm(category) for category in all_categories]
-    categories_costs = await get_costs_for_categories(user, month)
+    categories_costs = await get_costs_for_categories(user.id, month)
     for category_costs in categories_costs:
         changing_category = list(filter(lambda category: category.id == category_costs.id, categories_out))[0]
         changing_category.costs_sum = category_costs.costs_sum
@@ -31,7 +31,7 @@ async def get_all_categories(
 
 async def create_concrete_category(
     category: BaseCategory,
-    user: UserOut = Depends(get_current_user),
+    user: Users = Depends(get_current_user),
 ):
     """Create the new category"""
     created_category = await create_category(category, user)
@@ -40,10 +40,10 @@ async def create_concrete_category(
 
 
 async def get_concrete_category(
-    category_id: int, user: UserOut = Depends(get_current_user)
+    category_id: int, user: Users = Depends(get_current_user)
 ):
     """Return a concrete category by category id"""
-    category = await get_category_by_id(category_id, user)
+    category = await get_category_by_id(category_id, user.id)
     category_out = CategoryOut.from_orm(category)
     return category_out
 

@@ -2,7 +2,7 @@ from fastapi import Depends
 from fastapi.exceptions import HTTPException
 
 from accounts.dependencies import get_current_user
-from accounts.schemas import UserOut
+from accounts.models import Users
 from .schemas import CardOut, Card, Transfer
 from .services import (
     get_all_user_cards, create_new_user_card, get_concrete_user_card,
@@ -11,29 +11,26 @@ from .services import (
 )
 
 
-async def get_all_cards(user: UserOut = Depends(get_current_user)):
+async def get_all_cards(user: Users = Depends(get_current_user)):
     """Return all cards for user"""
-    assert user.id is not None
     cards = await get_all_user_cards(user.id)
     cards_out = [CardOut.from_orm(card) for card in cards]
     return cards_out
 
 
 async def create_new_card(
-    card_info: Card, user: UserOut = Depends(get_current_user)
+    card_info: Card, user: Users = Depends(get_current_user)
 ):
     """Create a new card"""
-    assert user.id is not None
     created_card = await create_new_user_card(card_info, user)
     card_out = CardOut.from_orm(created_card)
     return card_out
 
 
 async def get_concrete_card(
-    card_id: int, user: UserOut = Depends(get_current_user)
+    card_id: int, user: Users = Depends(get_current_user)
 ):
     """Return a concrete user card by id"""
-    assert user.id is not None
     card_db = await get_concrete_user_card(card_id, user.id)
     card_out = CardOut.from_orm(card_db)
     return card_out
@@ -75,10 +72,9 @@ def _validate_has_card_transfer_money(card, transfer_sum):
 
 async def transfer_between_cards(
     transfer_info: Transfer,
-    user: UserOut = Depends(get_current_user)
+    user: Users = Depends(get_current_user)
 ):
     """Transfer money between two cards from transfer_info"""
-    assert user.id is not None
     from_card = await get_concrete_user_card(transfer_info.from_id, user.id)
     _validate_has_card_transfer_money(from_card, transfer_info.from_amount)
     to_card = await get_concrete_user_card(transfer_info.to_id, user.id)
