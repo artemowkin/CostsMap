@@ -5,9 +5,9 @@ services:
     env_file:
       - docker.env
     build: .
-    command: gunicorn --workers=3 -b 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker api.main:app
+    command: gunicorn --workers=3 -b 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker costsmap.main:app
     volumes:
-      - .:/code/api
+      - ./costsmap:/code/costsmap
     ports:
       - "8000:8000"
     depends_on:
