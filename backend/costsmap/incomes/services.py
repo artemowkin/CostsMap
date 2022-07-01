@@ -47,5 +47,5 @@ def validate_creating_income_amount_currency(income_data: Income, income_card: C
     income must contain card_currency_amount field
     """
     if income_card.currency != user.currency and income_data.card_currency_amount is None:
-        err_msg = "Income for card with differrent currency than default must contain `card_currency_amount field`"
+        err_msg = "Income for card with differrent currency than default must contain `card_currency_amount` field"
         raise HTTPException(status_code=400, detail=err_msg)

@@ -44,10 +44,8 @@ async def create_new_income(
         creating_income_card = await get_concrete_user_card(income_data.card_id, user.id)
         validate_creating_income_amount_currency(income_data, creating_income_card, user)
         created_income = await create_db_income(user, creating_income_card, income_data)
-        income_amount = income_data.user_currency_amount if not income_data.card_currency_amount else income_data.card_currency_amount
-        plussed_card_amount = (
-            creating_income_card.amount + income_amount
-        )
+        income_amount = income_data.card_currency_amount if income_data.card_currency_amount else income_data.user_currency_amount
+        plussed_card_amount = creating_income_card.amount + income_amount
         await update_card_amount(user.id, income_data.card_id, plussed_card_amount)
 
     created_income_scheme = IncomeOut.from_orm(created_income)

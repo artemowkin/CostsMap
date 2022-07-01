@@ -145,7 +145,7 @@ def test_get_all_categories_with_costs():
 async def _create_testing_cost():
     create_card_query = "insert into cards (title, currency, color, amount, user) values ('smth', '$', '#333333', 1000, 1)"
     await database.execute(create_card_query)
-    query = "insert into costs (amount, category, card, user, date) values(500, 1, 1, 1, date('now'))"
+    query = "insert into costs (user_currency_amount, category, card, user, date) values(500, 1, 1, 1, date('now'))"
     await database.execute(query)
 
 

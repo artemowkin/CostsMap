@@ -15,7 +15,8 @@ class Costs(orm.Model):
     registry = models
     fields = {
         "id": orm.Integer(primary_key=True),
-        "amount": orm.Decimal(max_digits=9, decimal_places=2, minimum=0),
+        "user_currency_amount": orm.Decimal(max_digits=9, decimal_places=2, minimum=0, allow_null=False),
+        "card_currency_amount": orm.Decimal(max_digits=9, decimal_places=2, minimum=0, allow_null=True),
         "date": orm.Date(default=date.today()),
         "category": orm.ForeignKey(Categories, on_delete=orm.CASCADE),
         "card": orm.ForeignKey(Cards, on_delete=orm.CASCADE),

@@ -38,7 +38,7 @@ async def get_total_costs_for_the_month(user_id: int, month: str) -> Decimal:
     month_start_date = date.fromisoformat(month + '-01')
     month_end_date = month_start_date + relativedelta(months=1)
     query = (
-        "select sum(amount) as total_costs from costs where "
+        "select sum(user_currency_amount) as total_costs from costs where "
         "user_id = :user_id and date >= date(:start_date) and date < date(:end_date);"
     )
     total_costs = await database.fetch_val(query, {
@@ -59,3 +59,9 @@ async def create_db_cost(
 async def delete_db_cost(cost_id: int, user_id: int) -> None:
     """Delete the concrete user cost by id"""
     await Costs.objects.filter(user__id=user_id, id=cost_id).delete()
+
+
+def validate_creating_cost_amount_currency(cost_data: Cost, cost_card: CardNamedTuple, user: UserNamedTuple):
+    if cost_card.currency != user.currency and cost_data.card_currency_amount is None:
+        err_msg = "Cost for card with differrent currency than default must contain `card_currency_amount` field"
+        raise HTTPException(status_code=400, detail=err_msg)

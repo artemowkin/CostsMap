@@ -11,7 +11,8 @@ from ..cards.dependencies import get_concrete_card
 from .schemas import CostOut, TotalCosts, Cost
 from .services import (
     get_all_user_costs_by_month, get_total_costs_for_the_month,
-    create_db_cost, delete_db_cost, get_concrete_user_cost
+    create_db_cost, delete_db_cost, get_concrete_user_cost,
+    validate_creating_cost_amount_currency
 )
 
 
@@ -43,10 +44,12 @@ async def create_new_cost(
 ):
     """Create the new cost and subtract cost sum from card amount"""
     async with database.transaction():
-        created_cost_category = await get_category_by_id(cost_data.category_id, user.id)
         created_cost_card = await get_concrete_user_card(cost_data.card_id, user.id)
+        validate_creating_cost_amount_currency(cost_data, created_cost_card, user)
+        created_cost_category = await get_category_by_id(cost_data.category_id, user.id)
         created_cost = await create_db_cost(user, created_cost_card, created_cost_category, cost_data)
-        subtracted_card_amount = created_cost_card.amount - cost_data.amount
+        cost_amount = cost_data.card_currency_amount if cost_data.card_currency_amount else cost_data.user_currency_amount
+        subtracted_card_amount = created_cost_card.amount - cost_amount
         await update_card_amount(user.id, cost_data.card_id, subtracted_card_amount)
 
     created_cost_scheme = CostOut.from_orm(created_cost)

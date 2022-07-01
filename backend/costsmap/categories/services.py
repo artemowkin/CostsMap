@@ -40,7 +40,7 @@ async def get_costs_for_categories(
     start_date = datetime.fromisoformat(month + '-01')
     end_date = start_date + relativedelta(months=1)
     get_query = (
-        'select categories.id, sum(costs.amount) as costs_sum from '
+        'select categories.id, sum(costs.user_currency_amount) as costs_sum from '
         'categories join costs on costs.category = categories.id '
         'where costs.date >= date(:start_date) and costs.date < date(:end_date) and categories.user = :user_id '
         'group by categories.id;'
