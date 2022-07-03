@@ -43,3 +43,10 @@ To run tests you need to run `pytest` command in `backend` project directory:
 ```
 pytest
 ```
+
+## Documentation
+
+You can read documentation after running this project on the following endpoints:
+
+- `http://127.0.0.1:8000/api/v1/redoc/` - ReDoc
+- `http://127.0.0.1:8000/api/v1/docs/` - Swagger
