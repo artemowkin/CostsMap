@@ -1,6 +1,7 @@
 from decimal import Decimal
 from datetime import date
 
+from orm import NoMatch
 from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
 
@@ -24,13 +25,14 @@ async def get_all_user_costs_by_month(user_id: int, month: str) -> list[CostName
 
 async def get_concrete_user_cost(cost_id: int, user_id: int) -> CostNamedTuple:
     """Return the concrete user cost by id"""
-    db_cost = await Costs.objects.get(id=cost_id, user__id=user_id)
-    if not db_cost:
+    try:
+        db_cost = await Costs.objects.get(id=cost_id, user__id=user_id)
+        return db_cost
+    except NoMatch:
         raise HTTPException(
             status_code=404, detail="Cost with this id doesn't exist"
         )
 
-    return db_cost
 
 
 async def get_total_costs_for_the_month(user_id: int, month: str) -> Decimal:

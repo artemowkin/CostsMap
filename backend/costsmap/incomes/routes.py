@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from .schemas import IncomeOut, TotalIncomes
 from .dependencies import (
     get_all_incomes_for_the_month, get_total_incomes,
-    create_new_income
+    create_new_income, delete_income_by_id
 )
 
 
@@ -28,3 +28,8 @@ def total_incomes(total_incomes: TotalIncomes = Depends(get_total_incomes)):
 def create_income(created_income: IncomeOut = Depends(create_new_income)):
     """Create a new income for the user"""
     return created_income
+
+
+@router.delete('/{income_id}/', status_code=204, dependencies=[Depends(delete_income_by_id)])
+def delete_cost():
+    pass

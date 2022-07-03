@@ -8,7 +8,8 @@ from ..accounts.dependencies import get_current_user
 from ..cards.services import update_card_amount, get_concrete_user_card
 from .services import (
     get_all_user_incomes_by_month, get_total_incomes_for_the_month,
-    create_db_income, validate_creating_income_amount_currency
+    create_db_income, validate_creating_income_amount_currency,
+    get_concrete_user_income, delete_db_income
 )
 from .schemas import IncomeOut, TotalIncomes, Income, IncomeOut
 
@@ -50,3 +51,13 @@ async def create_new_income(
 
     created_income_scheme = IncomeOut.from_orm(created_income)
     return created_income_scheme
+
+
+async def delete_income_by_id(income_id: int, user: UserNamedTuple = Depends(get_current_user)):
+    """Delete the concrete income by id and subtract income sum from card amount"""
+    async with database.transaction():
+        deleting_income = await get_concrete_user_income(income_id, user.id)
+        deleting_income_card = await get_concrete_user_card(deleting_income.card.id, user.id)
+        subtracted_card_amount = deleting_income_card.amount - deleting_income.amount
+        await update_card_amount(user.id, deleting_income_card.id, subtracted_card_amount)
+        await delete_db_income(income_id, user.id)

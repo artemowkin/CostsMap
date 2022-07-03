@@ -1,6 +1,7 @@
 from decimal import Decimal
 from datetime import date
 
+from orm import NoMatch
 from fastapi import HTTPException
 from dateutil.relativedelta import relativedelta
 
@@ -21,6 +22,17 @@ async def get_all_user_incomes_by_month(user_id: int, month: str) -> list[Income
     return db_incomes
 
 
+async def get_concrete_user_income(income_id: int, user_id: int) -> IncomeNamedTuple:
+    """Return the concrete user income by id"""
+    try:
+        db_income = await Incomes.objects.get(id=income_id, user__id=user_id)
+        return db_income
+    except NoMatch:
+        raise HTTPException(
+            status_code=404, detail="Income with this id doesn't exist"
+        )
+
+
 async def get_total_incomes_for_the_month(user_id: int, month: str) -> Decimal:
     """Return total incomes for the month"""
     month_start_date = date.fromisoformat(month + '-01')
@@ -39,6 +51,11 @@ async def create_db_income(user: UserNamedTuple, card: CardNamedTuple, income_da
     """Create new income for the user and return created income id"""
     created_income = await Incomes.objects.create(**income_data.dict(), user=user, card=card)
     return created_income
+
+
+async def delete_db_income(income_id: int, user_id: int) -> None:
+    """Delete the concrete user income by id"""
+    await Incomes.objects.filter(user__id=user_id, id=income_id).delete()
 
 
 def validate_creating_income_amount_currency(income_data: Income, income_card: CardNamedTuple, user: UserNamedTuple):
