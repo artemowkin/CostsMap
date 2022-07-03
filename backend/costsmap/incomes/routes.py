@@ -24,7 +24,7 @@ def total_incomes(total_incomes: TotalIncomes = Depends(get_total_incomes)):
     return total_incomes
 
 
-@router.post('/', response_model=IncomeOut)
+@router.post('/', response_model=IncomeOut, status_code=201)
 def create_income(created_income: IncomeOut = Depends(create_new_income)):
     """Create a new income for the user"""
     return created_income

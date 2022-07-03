@@ -1,13 +1,12 @@
-from decimal import Decimal
-from typing import NamedTuple
 from datetime import date
 
 import orm
 
 from ..project.models import models
-from ..accounts.models import Users, UserNamedTuple
+from ..accounts.models import Users
 from ..categories.models import Categories, CategoryNamedTuple
-from ..cards.models import Cards, CardNamedTuple
+from ..cards.models import Cards
+from ..card_operations_generics.models import CardOperationNamedTuple
 
 
 class Costs(orm.Model):
@@ -24,10 +23,5 @@ class Costs(orm.Model):
     }
 
 
-class CostNamedTuple(NamedTuple):
-    id: int
-    amount: Decimal
-    date: date
+class CostNamedTuple(CardOperationNamedTuple):
     category: CategoryNamedTuple
-    card: CardNamedTuple
-    user: UserNamedTuple

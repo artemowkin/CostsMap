@@ -24,7 +24,7 @@ def total_costs(total_costs: TotalCosts = Depends(get_total_costs)):
     return total_costs
 
 
-@router.post('/', response_model=CostOut)
+@router.post('/', response_model=CostOut, status_code=201)
 def create_cost(created_cost: CostOut = Depends(create_new_cost)):
     """Create a new cost for the user"""
     return created_cost

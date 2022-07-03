@@ -17,7 +17,7 @@ def all_cards(cards: list[CardOut] = Depends(get_all_cards)):
     return cards
 
 
-@router.post('/', response_model=CardOut)
+@router.post('/', response_model=CardOut, status_code=201)
 def create_card(card: CardOut = Depends(create_new_card)):
     """Create a new card for current user"""
     return card

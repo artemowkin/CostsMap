@@ -24,7 +24,7 @@ def test_create_category():
             "title": "some category",
             "color": "#333333"
         })
-        assert response.status_code == 200
+        assert response.status_code == 201
         assert response.json() == {
             "title": "some category",
             "costs_limit": None,
@@ -51,7 +51,7 @@ def test_create_category_with_costs_limit():
             "costs_limit": 500,
             "color": "#333333",
         })
-        assert response.status_code == 200
+        assert response.status_code == 201
         assert response.json() == {
             "title": "some category1",
             "costs_limit": 500,

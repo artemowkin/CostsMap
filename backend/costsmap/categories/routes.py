@@ -19,7 +19,7 @@ def all_categories(
     return categories
 
 
-@router.post('/', response_model=CategoryOut)
+@router.post('/', response_model=CategoryOut, status_code=201)
 def create_categories(
     category: CategoryOut = Depends(create_concrete_category)
 ):

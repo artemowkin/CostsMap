@@ -1,49 +1,20 @@
 from decimal import Decimal
-from datetime import date as dt_date
 
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel
 
-from ..cards.schemas import CardOut
-from ..utils import validate_amount_max_min
+from ..card_operations_generics.schemas import CardOperationIn, CardOperationOut
 
 
-card_currency_amount_description = "required when card currency is differrent than default user currency"
-
-
-class BaseIncome(BaseModel):
-    """Base pydantic model for income with generic fields"""
-
-    user_currency_amount: Decimal
-    card_currency_amount: Decimal | None = Field(None, description=card_currency_amount_description)
-    date: dt_date
-
-    @validator('user_currency_amount')
-    def validate_user_currency_amount_max_and_min_value(cls, v):
-        validate_amount_max_min(v)
-        return v
-
-    @validator('card_currency_amount')
-    def validate_card_currency_amount_max_and_min_value(cls, v):
-        if v is None: return v
-
-        validate_amount_max_min(v)
-        return v
-
-
-class Income(BaseIncome):
+class IncomeIn(CardOperationIn):
     """Model for income data getting from request"""
 
-    card_id: int
+    pass
 
 
-class IncomeOut(BaseIncome):
+class IncomeOut(CardOperationOut):
     """Model for income data returning in response"""
 
-    id: int
-    card: CardOut
-
-    class Config:
-        orm_mode = True
+    pass
 
 
 class TotalIncomes(BaseModel):

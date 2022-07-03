@@ -21,7 +21,7 @@ def test_create_card():
             "currency": "$",
             "color": "#333333",
         })
-        assert response.status_code == 200
+        assert response.status_code == 201
         assert response.json() == {
             "title": "Some card",
             "currency": "$",
@@ -203,7 +203,7 @@ def test_update_concrete_card_with_already_exist_title():
             "currency": "$",
             "color": "#333333",
         })
-        assert response.status_code == 200
+        assert response.status_code == 201
         response = client.put('/api/v1/cards/1/', headers={
             "Authorization": f"Bearer {token}",
         }, json={
@@ -234,7 +234,7 @@ def test_delete_concrete_card():
             "currency": "$",
             "color": "#333333",
         })
-        assert response.status_code == 200
+        assert response.status_code == 201
         response = client.delete('/api/v1/cards/1/', headers={
             "Authorization": f"Bearer {token}",
         })
