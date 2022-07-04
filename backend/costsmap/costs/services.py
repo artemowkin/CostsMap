@@ -19,7 +19,7 @@ class CostsGetter(CardOperationGetter):
         """Return query string to get total costs sum"""
         return (
             "select sum(user_currency_amount) as total_costs from costs where "
-            "user_id = :user_id and date >= date(:start_date) and date < date(:end_date);"
+            "user = :user_id and date >= date(:start_date) and date < date(:end_date);"
         )
 
 
