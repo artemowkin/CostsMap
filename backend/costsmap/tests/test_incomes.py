@@ -173,6 +173,25 @@ def test_get_all_incomes():
         assert len(response_json) == 2
 
 
+def test_get_total_incomes():
+    with client:
+        response = client.post('/api/v1/auth/login/', json={
+            "email": "someone@gmail.com",
+            "password": "Password123",
+        })
+        print(response.json())
+        assert response.status_code == 200
+        data = response.json()
+        assert 'token' in data
+        token = data['token']
+        response = client.get('/api/v1/incomes/total/', headers={
+            "Authorization": f"Bearer {token}"
+        })
+        response_json = response.json()
+        assert response.status_code == 200
+        assert response_json['total_incomes'] == 200
+
+
 def test_get_all_incomes_for_previous_month():
     with client:
         response = client.post('/api/v1/auth/login/', json={
@@ -193,6 +212,26 @@ def test_get_all_incomes_for_previous_month():
         assert len(response_json) == 1
 
 
+def test_get_total_incomes_for_previous_month():
+    with client:
+        response = client.post('/api/v1/auth/login/', json={
+            "email": "someone@gmail.com",
+            "password": "Password123",
+        })
+        print(response.json())
+        assert response.status_code == 200
+        data = response.json()
+        assert 'token' in data
+        token = data['token']
+        previous_month = (date.today() - relativedelta(months=1)).isoformat()[:-3]
+        response = client.get(f'/api/v1/incomes/total/?month={previous_month}', headers={
+            "Authorization": f"Bearer {token}"
+        })
+        response_json = response.json()
+        assert response.status_code == 200
+        assert response_json['total_incomes'] == 100
+
+
 def test_get_all_incomes_for_next_month():
     with client:
         response = client.post('/api/v1/auth/login/', json={
@@ -211,6 +250,26 @@ def test_get_all_incomes_for_next_month():
         response_json = response.json()
         assert response.status_code == 200
         assert len(response_json) == 0
+
+
+def test_get_total_incomes_for_next_month():
+    with client:
+        response = client.post('/api/v1/auth/login/', json={
+            "email": "someone@gmail.com",
+            "password": "Password123",
+        })
+        print(response.json())
+        assert response.status_code == 200
+        data = response.json()
+        assert 'token' in data
+        token = data['token']
+        next_month = (date.today() + relativedelta(months=1)).isoformat()[:-3]
+        response = client.get(f'/api/v1/incomes/total/?month={next_month}', headers={
+            "Authorization": f"Bearer {token}"
+        })
+        response_json = response.json()
+        assert response.status_code == 200
+        assert response_json['total_incomes'] == 0
 
 
 def test_delete_income():
