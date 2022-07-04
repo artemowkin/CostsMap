@@ -1,31 +1,20 @@
+from decimal import Decimal
+from typing import Callable, Coroutine, Any
 from datetime import date
 
 from fastapi import Depends, Query
 
-from ..project.models import database
 from ..accounts.models import UserNamedTuple
 from ..accounts.dependencies import get_current_user
-from ..cards.services import update_card_amount, get_concrete_user_card
-from .services import IncomesGetter, create_db_income, validate_creating_income_amount_currency, delete_db_income
+from ..card_operations_generics.dependencies import (
+    CardOperationDeleteCommand, CardOperationCreateCommand,
+    GetAllCardOperationsCommand
+)
+from .services import IncomesGetter, create_db_income, delete_db_income
 from .schemas import IncomeOut, TotalIncomes, IncomeIn, IncomeOut
 
 
 today_string = date.today().strftime("%Y-%m")
-
-
-async def get_all_incomes_for_the_month(month: str = Query(today_string, regex=r"\d{4}-\d{2}"),
-        user: UserNamedTuple = Depends(get_current_user)) -> list[IncomeOut]:
-    """Return all incomes for the month (current by default)"""
-    incomes_getter = IncomesGetter(user.id)
-    db_incomes = await incomes_getter.get_all_for_the_month(month)
-    await _load_incomes_cards(db_incomes)
-    out_incomes = [IncomeOut.from_orm(db_income) for db_income in db_incomes]
-    return out_incomes
-
-
-async def _load_incomes_cards(incomes):
-    for income in incomes:
-        await income.card.load()
 
 
 async def get_total_incomes(month: str = Query(today_string, regex=r"\d{4}-\d{2}"),
@@ -36,33 +25,51 @@ async def get_total_incomes(month: str = Query(today_string, regex=r"\d{4}-\d{2}
     return TotalIncomes(total_incomes=total_incomes)
 
 
-async def create_new_income(income_data: IncomeIn, user: UserNamedTuple = Depends(get_current_user)):
-    """Create new income and plus income amount to card"""
-    async with database.transaction():
-        income_card = await get_concrete_user_card(income_data.card_id, user.id)
-        validate_creating_income_amount_currency(income_data, income_card, user)
-        income_amount = income_data.card_currency_amount if income_data.card_currency_amount else income_data.user_currency_amount
-        plussed_card_amount = income_card.amount + income_amount
-        await update_card_amount(income_card, plussed_card_amount)
-        created_income = await create_db_income(user, income_card, income_data)
+class GetAllIncomesCommand(GetAllCardOperationsCommand):
+    """Dependency for getting all incomes"""
 
-    created_income_schema = await _get_income_schema(created_income)
-    return created_income_schema
+    def _get_getter_class(self) -> type[IncomesGetter]:
+        return IncomesGetter
 
+    def _get_schema(self) -> type[IncomeOut]:
+        return IncomeOut
 
-async def _get_income_schema(income):
-    await income.card.load()
-    income_schema = IncomeOut.from_orm(income)
-    return income_schema
+    async def _load_foreigns(self, operations) -> None:
+        for income in operations:
+            await income.card.load()
 
 
-async def delete_income_by_id(income_id: int, user: UserNamedTuple = Depends(get_current_user)):
-    """Delete the concrete income by id and subtract income sum from card amount"""
-    incomes_getter = IncomesGetter(user.id)
-    async with database.transaction():
-        income = await incomes_getter.get_concrete(income_id)
-        income_card = await get_concrete_user_card(income.card.id, user.id)
-        income_amount = income.card_currency_amount if income.card_currency_amount else income.user_currency_amount
-        subtracted_card_amount = income_card.amount - income_amount
-        await update_card_amount(income_card, subtracted_card_amount)
-        await delete_db_income(income)
+class CreateIncomeCommand(CardOperationCreateCommand):
+    """Dependency for incomes creating"""
+
+    operation_name = "Income"
+
+    def _get_create_service(self) -> Callable[..., Coroutine[Any, Any, Any]]:
+        return create_db_income
+
+    async def _get_extra_foreigns(self, operation_data: IncomeIn, user: UserNamedTuple) -> tuple:
+        (operation_data, user) # For skipping linter warnings
+        return tuple()
+
+    def _calculate_new_card_amount(self, card_amount: Decimal, operation_amount: Decimal) -> Decimal:
+        """Plus income amount to card amount"""
+        return card_amount + operation_amount
+
+    async def _get_operation_schema(self, operation) -> IncomeOut:
+        await operation.card.load()
+        income_schema = IncomeOut.from_orm(operation)
+        return income_schema
+
+
+class DeleteIncomeCommand(CardOperationDeleteCommand):
+    """Dependency for incomes deleting"""
+
+    def _get_getter_class(self) -> type[IncomesGetter]:
+        return IncomesGetter
+
+    def _get_delete_service(self) -> Callable[..., Coroutine[Any, Any, Any]]:
+        return delete_db_income
+
+    def _calculate_new_card_amount(self, card_amount: Decimal, operation_amount: Decimal) -> Decimal:
+        """Subtract income amount from card amount"""
+        return card_amount - operation_amount

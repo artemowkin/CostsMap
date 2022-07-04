@@ -1,5 +1,3 @@
-from fastapi import HTTPException
-
 from ..cards.models import CardNamedTuple
 from ..accounts.models import UserNamedTuple
 from .schemas import IncomeIn
@@ -31,13 +29,3 @@ async def create_db_income(user: UserNamedTuple, card: CardNamedTuple, income_da
 async def delete_db_income(income) -> None:
     """Delete the concrete user income by id"""
     await income.delete()
-
-
-def validate_creating_income_amount_currency(income_data: IncomeIn, income_card: CardNamedTuple, user: UserNamedTuple):
-    """
-    Validate income amount currency: if card and user currencies are differrent,
-    income must contain card_currency_amount field
-    """
-    if income_card.currency != user.currency and income_data.card_currency_amount is None:
-        err_msg = "Income for card with differrent currency than default must contain `card_currency_amount` field"
-        raise HTTPException(status_code=400, detail=err_msg)

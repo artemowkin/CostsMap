@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 
 from .schemas import IncomeOut, TotalIncomes
 from .dependencies import (
-    get_all_incomes_for_the_month, get_total_incomes,
-    create_new_income, delete_income_by_id
+    GetAllIncomesCommand, get_total_incomes,
+    CreateIncomeCommand, DeleteIncomeCommand
 )
 
 
@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.get('/', response_model=list[IncomeOut])
 def all_incomes(
-    incomes: list[IncomeOut] = Depends(get_all_incomes_for_the_month)
+    incomes: list[IncomeOut] = Depends(GetAllIncomesCommand())
 ):
     """Return all incomes for the month (current by default)"""
     return incomes
@@ -25,11 +25,11 @@ def total_incomes(total_incomes: TotalIncomes = Depends(get_total_incomes)):
 
 
 @router.post('/', response_model=IncomeOut, status_code=201)
-def create_income(created_income: IncomeOut = Depends(create_new_income)):
+def create_income(created_income: IncomeOut = Depends(CreateIncomeCommand())):
     """Create a new income for the user"""
     return created_income
 
 
-@router.delete('/{income_id}/', status_code=204, dependencies=[Depends(delete_income_by_id)])
+@router.delete('/{operation_id}/', status_code=204, dependencies=[Depends(DeleteIncomeCommand())])
 def delete_cost():
     pass
