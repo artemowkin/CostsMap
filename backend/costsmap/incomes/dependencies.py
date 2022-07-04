@@ -18,8 +18,14 @@ async def get_all_incomes_for_the_month(month: str = Query(today_string, regex=r
     """Return all incomes for the month (current by default)"""
     incomes_getter = IncomesGetter(user.id)
     db_incomes = await incomes_getter.get_all_for_the_month(month)
+    await _load_incomes_cards(db_incomes)
     out_incomes = [IncomeOut.from_orm(db_income) for db_income in db_incomes]
     return out_incomes
+
+
+async def _load_incomes_cards(incomes):
+    for income in incomes:
+        await income.card.load()
 
 
 async def get_total_incomes(month: str = Query(today_string, regex=r"\d{4}-\d{2}"),
@@ -40,8 +46,14 @@ async def create_new_income(income_data: IncomeIn, user: UserNamedTuple = Depend
         await update_card_amount(income_card, plussed_card_amount)
         created_income = await create_db_income(user, income_card, income_data)
 
-    created_income_scheme = IncomeOut.from_orm(created_income)
-    return created_income_scheme
+    created_income_schema = await _get_income_schema(created_income)
+    return created_income_schema
+
+
+async def _get_income_schema(income):
+    await income.card.load()
+    income_schema = IncomeOut.from_orm(income)
+    return income_schema
 
 
 async def delete_income_by_id(income_id: int, user: UserNamedTuple = Depends(get_current_user)):
@@ -53,4 +65,4 @@ async def delete_income_by_id(income_id: int, user: UserNamedTuple = Depends(get
         income_amount = income.card_currency_amount if income.card_currency_amount else income.user_currency_amount
         subtracted_card_amount = income_card.amount - income_amount
         await update_card_amount(income_card, subtracted_card_amount)
-        await delete_db_income(income_id, user.id)
+        await delete_db_income(income)

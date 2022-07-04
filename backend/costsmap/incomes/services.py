@@ -28,9 +28,9 @@ async def create_db_income(user: UserNamedTuple, card: CardNamedTuple, income_da
     return created_income
 
 
-async def delete_db_income(income_id: int, user_id: int) -> None:
+async def delete_db_income(income) -> None:
     """Delete the concrete user income by id"""
-    await Incomes.objects.filter(user__id=user_id, id=income_id).delete()
+    await income.delete()
 
 
 def validate_creating_income_amount_currency(income_data: IncomeIn, income_card: CardNamedTuple, user: UserNamedTuple):
