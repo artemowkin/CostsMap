@@ -1,5 +1,3 @@
-from fastapi import HTTPException
-
 from ..accounts.models import UserNamedTuple
 from ..categories.models import CategoryNamedTuple
 from ..cards.models import CardNamedTuple
@@ -35,9 +33,3 @@ async def create_db_cost(
 async def delete_db_cost(cost) -> None:
     """Delete the concrete user cost by id"""
     await cost.delete()
-
-
-def validate_creating_cost_amount_currency(cost_data: CostIn, cost_card: CardNamedTuple, user: UserNamedTuple):
-    if cost_card.currency != user.currency and cost_data.card_currency_amount is None:
-        err_msg = "Cost for card with differrent currency than default must contain `card_currency_amount` field"
-        raise HTTPException(status_code=400, detail=err_msg)

@@ -1,3 +1,4 @@
+from typing import Literal
 from decimal import Decimal
 
 from pydantic import BaseModel
@@ -21,3 +22,11 @@ class TotalIncomes(BaseModel):
     """Model for total incomes response"""
 
     total_incomes: Decimal
+
+
+class CreateIncome400Error(BaseModel):
+    detail: Literal["Income for card with differrent currency than default must contain `card_currency_amount` field"]
+
+
+class Income404Error(BaseModel):
+    detail: Literal["Income with this id doesn't exist"]

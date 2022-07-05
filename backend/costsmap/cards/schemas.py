@@ -1,3 +1,4 @@
+from typing import Literal
 from decimal import Decimal
 
 from pydantic import BaseModel, Field
@@ -30,3 +31,11 @@ class Transfer(BaseModel):
     to_id: int
     from_amount: int
     to_amount: int | None = None
+
+
+class UniqueCardTitleError(BaseModel):
+    detail: Literal["Card with this title already exists"]
+
+
+class Card404Error(BaseModel):
+    detail: Literal["Card with this id doesn't exist"]

@@ -1,3 +1,4 @@
+from typing import Literal
 from enum import Enum
 
 from pydantic import BaseModel, EmailStr, Field, validator
@@ -75,6 +76,8 @@ class UserRegistration(BaseUser):
 
     @validator('password2')
     def passwords_match(cls, v, values, **kwargs):
+        # Skip liter warning
+        (kwargs)
         if 'password1' in values and v != values['password1']:
             raise ValueError('Passwords do not match')
 
@@ -105,3 +108,19 @@ class Token(BaseModel):
 
     token: str = Field(..., description="string with token")
     exptime: int = Field(..., description="expires date for token")
+
+
+class UniqueUserEmailError(BaseModel):
+    detail: Literal["User with this email already exists"]
+
+
+class Login400Response(BaseModel):
+    detail: Literal["Incorrect password"]
+
+
+class ChangePassword400Response(BaseModel):
+    detail: Literal["Incorrect old password"]
+
+
+class LoginRequiredResponse(BaseModel):
+    detail: Literal["Not authenticated"]

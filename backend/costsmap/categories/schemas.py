@@ -1,3 +1,4 @@
+from typing import Literal
 from decimal import Decimal
 
 from pydantic import BaseModel, Field
@@ -17,3 +18,11 @@ class CategoryOut(BaseCategory):
 
     class Config:
         orm_mode = True
+
+
+class CategoryUniqueTitleError(BaseModel):
+    detail: Literal["Category with this title already exists"]
+
+
+class Category404Error(BaseModel):
+    detail: Literal["Category with this id doesn't exist"]
