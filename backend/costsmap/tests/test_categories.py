@@ -27,9 +27,9 @@ def test_create_category():
         assert response.status_code == 201
         assert response.json() == {
             "title": "some category",
-            "costs_limit": None,
+            "costsLimit": None,
             "color": "#333333",
-            "costs_sum": 0.0,
+            "costsSum": 0.0,
             "id": 1
         }
 
@@ -48,15 +48,15 @@ def test_create_category_with_costs_limit():
             "Authorization": f"Bearer {token}"
         }, json={
             "title": "some category1",
-            "costs_limit": 500,
+            "costsLimit": 500,
             "color": "#333333",
         })
         assert response.status_code == 201
         assert response.json() == {
             "title": "some category1",
-            "costs_limit": 500,
+            "costsLimit": 500,
             "color": "#333333",
-            "costs_sum": 0.0,
+            "costsSum": 0.0,
             "id": 2
         }
 
@@ -75,7 +75,7 @@ def test_create_category_with_already_exists_title():
             "Authorization": f"Bearer {token}"
         }, json={
             "title": "some category",
-            "costs_limit": 500,
+            "costsLimit": 500,
             "color": "#333333",
         })
         assert response.status_code == 400
@@ -98,15 +98,15 @@ def test_get_all_categories():
         assert response.status_code == 200
         assert response.json() == [{
             "title": "some category",
-            "costs_limit": None,
+            "costsLimit": None,
             "color": "#333333",
-            "costs_sum": 0.0,
+            "costsSum": 0.0,
             "id": 1
         }, {
             "title": "some category1",
-            "costs_limit": 500,
+            "costsLimit": 500,
             "color": "#333333",
-            "costs_sum": 0.0,
+            "costsSum": 0.0,
             "id": 2
         }]
 
@@ -129,15 +129,15 @@ def test_get_all_categories_with_costs():
         assert response.status_code == 200
         assert response.json() == [{
             "title": "some category",
-            "costs_limit": None,
+            "costsLimit": None,
             "color": "#333333",
-            "costs_sum": 500.0,
+            "costsSum": 500.0,
             "id": 1
         }, {
             "title": "some category1",
-            "costs_limit": 500,
+            "costsLimit": 500,
             "color": "#333333",
-            "costs_sum": 0.0,
+            "costsSum": 0.0,
             "id": 2
         }]
 
@@ -165,9 +165,9 @@ def test_get_concrete_category():
         assert response.status_code == 200
         assert response.json() == {
             "title": "some category",
-            "costs_limit": None,
+            "costsLimit": None,
             "color": "#333333",
-            "costs_sum": 0.0,
+            "costsSum": 0.0,
             "id": 1
         }
 
@@ -202,15 +202,15 @@ def test_update_concrete_category():
             "Authorization": f"Bearer {token}"
         }, json={
             "title": "new category",
-            "costs_limit": 1000,
+            "costsLimit": 1000,
             "color": "#333333",
         })
         assert response.status_code == 200
         assert response.json() == {
             "title": "new category",
-            "costs_limit": 1000,
+            "costsLimit": 1000,
             "color": "#333333",
-            "costs_sum": 0.0,
+            "costsSum": 0.0,
             "id": 1
         }
 
@@ -229,7 +229,7 @@ def test_update_concrete_category_with_already_exists_title():
             "Authorization": f"Bearer {token}"
         }, json={
             "title": "some category1",
-            "costs_limit": 1000,
+            "costsLimit": 1000,
             "color": "#333333",
         })
         assert response.status_code == 400
@@ -252,7 +252,7 @@ def test_update_with_doesnt_exist_category_id():
             "Authorization": f"Bearer {token}"
         }, json={
             "title": "some category1",
-            "costs_limit": 1000,
+            "costsLimit": 1000,
             "color": "#333333",
         })
         assert response.status_code == 404

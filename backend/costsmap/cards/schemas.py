@@ -1,12 +1,13 @@
 from typing import Literal
 from decimal import Decimal
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
+from ..project.schemas import CamelModel
 from ..accounts.schemas import Currencies
 
 
-class Card(BaseModel):
+class Card(CamelModel):
     """Card pydantic model"""
 
     title: str = Field(..., min_length=1, max_length=50)
@@ -20,11 +21,11 @@ class CardOut(Card):
     id: int
     amount: Decimal = Decimal('0')
 
-    class Config:
+    class Config(Card.Config):
         orm_mode = True
 
 
-class Transfer(BaseModel):
+class Transfer(CamelModel):
     """Pydantic model for transfers between cards"""
 
     from_id: int
@@ -33,9 +34,9 @@ class Transfer(BaseModel):
     to_amount: int | None = None
 
 
-class UniqueCardTitleError(BaseModel):
+class UniqueCardTitleError(CamelModel):
     detail: Literal["Card with this title already exists"]
 
 
-class Card404Error(BaseModel):
+class Card404Error(CamelModel):
     detail: Literal["Card with this id doesn't exist"]

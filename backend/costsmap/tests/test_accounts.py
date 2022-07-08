@@ -187,8 +187,8 @@ def test_change_password():
         response = client.post('/api/v1/auth/change_password/', headers={
             'Authorization': f'Bearer {token}'
         }, json={
-            "old_password": "Password123",
-            "new_password": "NewPassword123",
+            "oldPassword": "Password123",
+            "newPassword": "NewPassword123",
         })
         assert response.status_code == 204
 
@@ -206,8 +206,8 @@ def test_change_password_with_incorrect_old_password():
         response = client.post('/api/v1/auth/change_password/', headers={
             'Authorization': f'Bearer {token}'
         }, json={
-            "old_password": "Password123",
-            "new_password": "NewPassword123",
+            "oldPassword": "Password123",
+            "newPassword": "NewPassword123",
         })
         assert response.status_code == 400
 
@@ -225,8 +225,8 @@ def test_change_password_with_incorrect_new_password():
         response = client.post('/api/v1/auth/change_password/', headers={
             'Authorization': f'Bearer {token}'
         }, json={
-            "old_password": "NewPassword123",
-            "new_password": "pass",
+            "oldPassword": "NewPassword123",
+            "newPassword": "pass",
         })
         assert response.status_code == 422
 

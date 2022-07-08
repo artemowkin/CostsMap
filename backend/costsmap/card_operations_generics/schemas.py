@@ -1,8 +1,9 @@
 from decimal import Decimal
 from datetime import date as dt_date
 
-from pydantic import BaseModel, Field, validator
+from pydantic import Field, validator
 
+from ..project.schemas import CamelModel
 from ..utils import validate_amount_max_min
 from ..cards.schemas import CardOut
 
@@ -10,7 +11,7 @@ from ..cards.schemas import CardOut
 card_currency_amount_description = "required when card currency is differrent than default user currency"
 
 
-class CardOperation(BaseModel):
+class CardOperation(CamelModel):
     """Generic schema for card operations"""
 
     user_currency_amount: Decimal
@@ -41,5 +42,5 @@ class CardOperationOut(CardOperation):
     id: int
     card: CardOut
 
-    class Config:
+    class Config(CardOperation.Config):
         orm_mode = True

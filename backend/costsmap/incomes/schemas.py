@@ -1,8 +1,7 @@
 from typing import Literal
 from decimal import Decimal
 
-from pydantic import BaseModel
-
+from ..project.schemas import CamelModel
 from ..card_operations_generics.schemas import CardOperationIn, CardOperationOut
 
 
@@ -18,15 +17,15 @@ class IncomeOut(CardOperationOut):
     pass
 
 
-class TotalIncomes(BaseModel):
+class TotalIncomes(CamelModel):
     """Model for total incomes response"""
 
     total_incomes: Decimal
 
 
-class CreateIncome400Error(BaseModel):
+class CreateIncome400Error(CamelModel):
     detail: Literal["Income for card with differrent currency than default must contain `card_currency_amount` field"]
 
 
-class Income404Error(BaseModel):
+class Income404Error(CamelModel):
     detail: Literal["Income with this id doesn't exist"]

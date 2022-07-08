@@ -1,8 +1,7 @@
 from typing import Literal
 from decimal import Decimal
 
-from pydantic import BaseModel
-
+from ..project.schemas import CamelModel
 from ..categories.schemas import CategoryOut
 from ..card_operations_generics.schemas import CardOperationIn, CardOperationOut
 
@@ -19,18 +18,18 @@ class CostOut(CardOperationOut):
     category: CategoryOut
 
 
-class TotalCosts(BaseModel):
+class TotalCosts(CamelModel):
     """Model for total costs response"""
 
     total_costs: Decimal
 
 
-class CreateCost400Error(BaseModel):
+class CreateCost400Error(CamelModel):
     detail: Literal[
         "Cost amount is more than card amount",
         "Cost for card with differrent currency than default must contain `card_currency_amount` field"
     ]
 
 
-class Cost404Error(BaseModel):
+class Cost404Error(CamelModel):
     detail: Literal["Cost with this id doesn't exist"]

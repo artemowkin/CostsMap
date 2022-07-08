@@ -1,10 +1,12 @@
 from typing import Literal
 from decimal import Decimal
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from ..project.schemas import CamelModel
 
 
-class BaseCategory(BaseModel):
+class BaseCategory(CamelModel):
     """Base model for category"""
     title: str = Field(..., max_length=50)
     costs_limit: int | None = Field(None, gt=0, lt=1000000)
@@ -16,13 +18,13 @@ class CategoryOut(BaseCategory):
     id: int
     costs_sum: Decimal | None = Decimal('0.0')
 
-    class Config:
+    class Config(BaseCategory.Config):
         orm_mode = True
 
 
-class CategoryUniqueTitleError(BaseModel):
+class CategoryUniqueTitleError(CamelModel):
     detail: Literal["Category with this title already exists"]
 
 
-class Category404Error(BaseModel):
+class Category404Error(CamelModel):
     detail: Literal["Category with this id doesn't exist"]

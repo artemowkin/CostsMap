@@ -26,14 +26,14 @@ def test_create_new_income():
         response = client.post('/api/v1/incomes/', headers={
             "Authorization": f"Bearer {token}"
         }, json={
-            "user_currency_amount": 100,
-            "card_id": card['id'],
+            "userCurrencyAmount": 100,
+            "cardId": card['id'],
         })
         assert response.status_code == 201
         income_json = response.json()
         assert "id" in income_json
-        assert income_json['user_currency_amount'] == 100
-        assert income_json['card_currency_amount'] is None
+        assert income_json['userCurrencyAmount'] == 100
+        assert income_json['cardCurrencyAmount'] is None
         assert income_json['date'] == date.today().isoformat()
         assert income_json['card']['title'] == card['title']
 
@@ -72,15 +72,15 @@ def test_create_income_with_card_currency():
         response = client.post('/api/v1/incomes/', headers={
             "Authorization": f"Bearer {token}"
         }, json={
-            "user_currency_amount": 100,
-            "card_currency_amount": 5000,
-            "card_id": card['id'],
+            "userCurrencyAmount": 100,
+            "cardCurrencyAmount": 5000,
+            "cardId": card['id'],
         })
         assert response.status_code == 201
         income_json = response.json()
         assert "id" in income_json
-        assert income_json['user_currency_amount'] == 100
-        assert income_json['card_currency_amount'] == 5000
+        assert income_json['userCurrencyAmount'] == 100
+        assert income_json['cardCurrencyAmount'] == 5000
         assert income_json['date'] == date.today().isoformat()
         assert income_json['card']['title'] == card['title']
 
@@ -100,8 +100,8 @@ def test_create_income_for_card_with_differrent_currency_and_without_card_curren
             "Authorization": f"Bearer {token}"
         }, json={
             "user_currency_amount": 100,
-            "card_id": 2,
-            "category_id": 1
+            "cardId": 2,
+            "categoryId": 1
         })
         assert response.status_code == 400
         income_json = response.json()
@@ -141,15 +141,15 @@ def test_create_income_with_date():
         response = client.post('/api/v1/incomes/', headers={
             "Authorization": f"Bearer {token}"
         }, json={
-            "user_currency_amount": 100,
-            "card_id": 1,
+            "userCurrencyAmount": 100,
+            "cardId": 1,
             "date": previous_month
         })
         assert response.status_code == 201
         income_json = response.json()
         assert "id" in income_json
-        assert income_json['user_currency_amount'] == 100
-        assert income_json['card_currency_amount'] is None
+        assert income_json['userCurrencyAmount'] == 100
+        assert income_json['cardCurrencyAmount'] is None
         assert income_json['date'] == previous_month
         assert income_json['card']['id'] == 1
 
@@ -189,7 +189,7 @@ def test_get_total_incomes():
         })
         response_json = response.json()
         assert response.status_code == 200
-        assert response_json['total_incomes'] == 200
+        assert response_json['totalIncomes'] == 200
 
 
 def test_get_all_incomes_for_previous_month():
@@ -229,7 +229,7 @@ def test_get_total_incomes_for_previous_month():
         })
         response_json = response.json()
         assert response.status_code == 200
-        assert response_json['total_incomes'] == 100
+        assert response_json['totalIncomes'] == 100
 
 
 def test_get_all_incomes_for_next_month():
@@ -269,7 +269,7 @@ def test_get_total_incomes_for_next_month():
         })
         response_json = response.json()
         assert response.status_code == 200
-        assert response_json['total_incomes'] == 0
+        assert response_json['totalIncomes'] == 0
 
 
 def test_delete_income():

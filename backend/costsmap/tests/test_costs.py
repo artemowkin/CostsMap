@@ -28,14 +28,14 @@ def test_create_new_cost():
             "Authorization": f"Bearer {token}"
         }, json={
             "user_currency_amount": 100,
-            "card_id": card['id'],
-            "category_id": category['id']
+            "cardId": card['id'],
+            "categoryId": category['id']
         })
         assert response.status_code == 201
         cost_json = response.json()
         assert "id" in cost_json
-        assert cost_json['user_currency_amount'] == 100
-        assert cost_json['card_currency_amount'] is None
+        assert cost_json['userCurrencyAmount'] == 100
+        assert cost_json['cardCurrencyAmount'] is None
         assert cost_json['date'] == date.today().isoformat()
         assert cost_json['card']['title'] == card['title']
         assert cost_json['category']['title'] == category['title']
@@ -87,16 +87,16 @@ def test_create_cost_with_card_currency():
         response = client.post('/api/v1/costs/', headers={
             "Authorization": f"Bearer {token}"
         }, json={
-            "user_currency_amount": 100,
-            "card_currency_amount": 5000,
-            "card_id": card['id'],
-            "category_id": 1
+            "userCurrencyAmount": 100,
+            "cardCurrencyAmount": 5000,
+            "cardId": card['id'],
+            "categoryId": 1
         })
         assert response.status_code == 201
         cost_json = response.json()
         assert "id" in cost_json
-        assert cost_json['user_currency_amount'] == 100
-        assert cost_json['card_currency_amount'] == 5000
+        assert cost_json['userCurrencyAmount'] == 100
+        assert cost_json['cardCurrencyAmount'] == 5000
         assert cost_json['date'] == date.today().isoformat()
         assert cost_json['card']['title'] == card['title']
         assert cost_json['category']['id'] == 1
@@ -116,9 +116,9 @@ def test_create_cost_for_card_with_differrent_currency_and_without_card_currency
         response = client.post('/api/v1/costs/', headers={
             "Authorization": f"Bearer {token}"
         }, json={
-            "user_currency_amount": 100,
-            "card_id": 2,
-            "category_id": 1
+            "userCurrencyAmount": 100,
+            "cardId": 2,
+            "categoryId": 1
         })
         assert response.status_code == 400
         cost_json = response.json()
@@ -158,16 +158,16 @@ def test_create_cost_with_date():
         response = client.post('/api/v1/costs/', headers={
             "Authorization": f"Bearer {token}"
         }, json={
-            "user_currency_amount": 100,
-            "card_id": 1,
-            "category_id": 1,
+            "userCurrencyAmount": 100,
+            "cardId": 1,
+            "categoryId": 1,
             "date": previous_month
         })
         assert response.status_code == 201
         cost_json = response.json()
         assert "id" in cost_json
-        assert cost_json['user_currency_amount'] == 100
-        assert cost_json['card_currency_amount'] is None
+        assert cost_json['userCurrencyAmount'] == 100
+        assert cost_json['cardCurrencyAmount'] is None
         assert cost_json['date'] == previous_month
         assert cost_json['card']['id'] == 1
         assert cost_json['category']['id'] == 1
@@ -189,8 +189,8 @@ def test_create_cost_with_amount_more_than_card_amount():
             "Authorization": f"Bearer {token}"
         }, json={
             "user_currency_amount": 500000,
-            "card_id": 1,
-            "category_id": 1,
+            "cardId": 1,
+            "categoryId": 1,
             "date": previous_month
         })
         assert response.status_code == 400
@@ -233,7 +233,7 @@ def test_get_total_costs():
         })
         response_json = response.json()
         assert response.status_code == 200
-        assert response_json['total_costs'] == 200
+        assert response_json['totalCosts'] == 200
 
 
 def test_get_all_costs_for_previous_month():
@@ -273,7 +273,7 @@ def test_get_total_costs_for_previous_month():
         })
         response_json = response.json()
         assert response.status_code == 200
-        assert response_json['total_costs'] == 100
+        assert response_json['totalCosts'] == 100
 
 
 def test_get_all_costs_for_next_month():
@@ -313,7 +313,7 @@ def test_get_total_costs_for_next_month():
         })
         response_json = response.json()
         assert response.status_code == 200
-        assert response_json['total_costs'] == 0
+        assert response_json['totalCosts'] == 0
 
 
 def test_delete_cost():

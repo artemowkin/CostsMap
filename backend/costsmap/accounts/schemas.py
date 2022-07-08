@@ -1,7 +1,9 @@
 from typing import Literal
 from enum import Enum
 
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import EmailStr, Field, validator
+
+from ..project.schemas import CamelModel
 
 
 def _validate_password_constratints(password: str):
@@ -22,13 +24,13 @@ class Currencies(str, Enum):
     yuan = '¥'
 
 
-class SupportedCurrencies(BaseModel):
+class SupportedCurrencies(CamelModel):
     """Model that has list of supported currencies"""
 
     currencies: list[str] = ['₽', '$', '€', '¥']
 
 
-class BaseUser(BaseModel):
+class BaseUser(CamelModel):
     """Base user pydantic model with base fields"""
 
     email: EmailStr = Field(..., description='user email')
@@ -45,7 +47,7 @@ class UserOut(UserIn):
 
     id: int
 
-    class Config:
+    class Config(UserIn.Config):
         orm_mode = True
 
 
@@ -84,7 +86,7 @@ class UserRegistration(BaseUser):
         return v
 
 
-class ChangeUserPassword(BaseModel):
+class ChangeUserPassword(CamelModel):
     """Pydantic model with data for changing user password"""
 
     old_password: str = Field(..., description="old user password")
@@ -103,24 +105,24 @@ class ChangeUserPassword(BaseModel):
         return v
 
 
-class Token(BaseModel):
+class Token(CamelModel):
     """Model with token information"""
 
     token: str = Field(..., description="string with token")
     exptime: int = Field(..., description="expires date for token")
 
 
-class UniqueUserEmailError(BaseModel):
+class UniqueUserEmailError(CamelModel):
     detail: Literal["User with this email already exists"]
 
 
-class Login400Response(BaseModel):
+class Login400Response(CamelModel):
     detail: Literal["Incorrect password"]
 
 
-class ChangePassword400Response(BaseModel):
+class ChangePassword400Response(CamelModel):
     detail: Literal["Incorrect old password"]
 
 
-class LoginRequiredResponse(BaseModel):
+class LoginRequiredResponse(CamelModel):
     detail: Literal["Not authenticated"]
