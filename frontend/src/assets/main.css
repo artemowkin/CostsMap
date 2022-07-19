@@ -50,3 +50,12 @@ form button {
   background-color: var(--blue-500);
   color: var(--background-black);
 }
+
+form .error_message {
+  width: 100%;
+  background: rgba(255, 0, 0, .15);
+  color: rgba(255, 0, 0, .8);
+  border: 2px solid rgba(255, 0, 0, .8);
+  border-radius: 10px;
+  padding: 1em;
+}
