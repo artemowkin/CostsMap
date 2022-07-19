@@ -1,0 +1,52 @@
+@import "./base.css";
+
+main {
+  width: 100%;
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  place-items: center;
+  padding: 1em;
+}
+
+input, button {
+  border: 0;
+}
+
+form {
+  width: 100%;
+  background-color: var(--background-black);
+  border-radius: 20px;
+  padding: 1.5em;
+  display: grid;
+  place-items: center;
+  gap: 1em;
+}
+
+form h2 {
+  margin: .5em 0;
+}
+
+form input {
+  width: 100%;
+  padding: 1em;
+  border-radius: 100px;
+  border: 3px solid var(--orange-500);
+  background-color: var(--background-black);
+  color: var(--color-text);
+  text-align: center;
+}
+
+form button {
+  width: 100%;
+  padding: 1em;
+  border-radius: 100px;
+  background-color: var(--blue-900);
+  color: var(--blue-500);
+  cursor: pointer;
+}
+
+.completed_submit_button {
+  background-color: var(--blue-500);
+  color: var(--background-black);
+}
