@@ -13,6 +13,11 @@ input, button {
   border: 0;
 }
 
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
 form {
   width: 100%;
   background-color: var(--background-black);
@@ -27,7 +32,7 @@ form h2 {
   margin: .5em 0;
 }
 
-form input {
+form input, form select {
   width: 100%;
   padding: 1em;
   border-radius: 100px;
@@ -58,4 +63,8 @@ form .error_message {
   border: 2px solid rgba(255, 0, 0, .8);
   border-radius: 10px;
   padding: 1em;
+}
+
+form a {
+  color: var(--blue-500);
 }

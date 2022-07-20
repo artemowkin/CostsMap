@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { checkAuthentication } from '../utils/authentication'
 import LoginView from '../views/LoginView.vue'
+import RegistrationView from '../views/RegistrationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,13 +15,18 @@ const router = createRouter({
       name: 'Login',
       component: LoginView
     },
+    {
+      path: '/registration',
+      name: 'Registration',
+      component: RegistrationView
+    }
   ]
 })
 
 router.beforeEach((to, from) => {
   const isAuthenticated = checkAuthentication() 
 
-  if (to.name !== 'Login' && !isAuthenticated)
+  if (to.name !== 'Login' && to.name !== 'Registration' && !isAuthenticated)
     return { name: 'Login' }
 })
 

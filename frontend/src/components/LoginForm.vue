@@ -64,13 +64,16 @@ const sendLogIn = async () => {
             autofocus
             @input="emailInput"
             @click="showError = false"
+            :style="!isEmailValid && email ? { borderColor: '#aa0000' } : {}"
             :value="email" />
         <input
             type="password"
             placeholder="password"
             @input="passwordInput"
             @click="showError = false"
+            :style="!isPasswordValid && password ? { borderColor: '#aa0000' } : {}"
             :value="password" />
         <button :class="submitClass" type="submit">Log In</button>
+        <p>or <RouterLink to="/registration">registration</RouterLink></p>
     </form>
 </template>
