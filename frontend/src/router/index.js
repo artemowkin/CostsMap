@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { checkAuthentication } from '../utils/authentication'
-import LoginView from '../views/LoginView.vue'
-import RegistrationView from '../views/RegistrationView.vue'
+import { checkAuthentication } from '@/utils/authentication'
+import LoginView from '@/views/LoginView.vue'
+import RegistrationView from '@/views/RegistrationView.vue'
+import CategoriesView from '@/views/CategoriesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,6 +20,11 @@ const router = createRouter({
       path: '/registration',
       name: 'Registration',
       component: RegistrationView
+    },
+    {
+      path: '/categories',
+      name: 'Categories',
+      component: CategoriesView
     }
   ]
 })

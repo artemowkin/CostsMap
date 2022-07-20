@@ -5,6 +5,13 @@ import axios from '@/axiosInstance.js'
 
 const router = useRouter()
 
+const getCurrencies = async () => {
+    const response = await axios.get('/auth/currencies/')
+    return response.data.currencies
+}
+
+const currencies = await getCurrencies()
+
 const isEmailValid = ref(false)
 const email = ref("")
 const isPassword1Valid = ref(false)
@@ -12,13 +19,6 @@ const isPassword2Valid = ref(false)
 const password1 = ref("")
 const password2 = ref("")
 const showError = ref(false)
-
-const getCurrencies = async () => {
-    const response = await axios.get('/auth/currencies/')
-    return response.data.currencies
-}
-
-const currencies = await getCurrencies()
 const selectedCurrency = ref(currencies[0])
 
 const emailInput = (el) => {

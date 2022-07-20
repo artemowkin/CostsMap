@@ -4,23 +4,23 @@ import { RouterLink } from 'vue-router'
 
 <template>
   <nav class="navigation">
-    <RouterLink to="/login">
+    <RouterLink to="/categories">
         <div class="logo_container"></div>
         <small>categories</small>
     </RouterLink>
-    <RouterLink to="/login">
+    <RouterLink to="/cards">
         <div class="logo_container"></div>
         <small>cards</small>
     </RouterLink>
-    <RouterLink to="/login">
+    <RouterLink to="/costs">
         <div class="logo_container"></div>
         <small>costs</small>
     </RouterLink>
-    <RouterLink to="/login">
+    <RouterLink to="/statistic">
         <div class="logo_container"></div>
         <small>statistic</small>
     </RouterLink>
-    <RouterLink to="/login">
+    <RouterLink to="/account">
         <div class="logo_container"></div>
         <small>account</small>
     </RouterLink>

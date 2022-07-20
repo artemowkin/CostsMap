@@ -2,10 +2,6 @@
 
 main {
   width: 100%;
-  min-height: 100vh;
-  display: grid;
-  place-content: center;
-  place-items: center;
   padding: 1em;
 }
 
@@ -30,6 +26,10 @@ form {
 
 form h2 {
   margin: .5em 0;
+}
+
+form button, form select, form input {
+  transition: background-color .25s ease-out, color .25s ease-out, border-color .25s ease-out;
 }
 
 form input, form select {
