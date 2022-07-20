@@ -4,6 +4,8 @@ import { useUserStore } from '../stores/user'
 
 const costsStore = useCostsStore()
 const userStore = useUserStore()
+
+costsStore.loadMonthCosts()
 </script>
 
 <template>
