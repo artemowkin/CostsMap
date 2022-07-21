@@ -2,6 +2,7 @@ from typing import Mapping, Literal, Any
 from datetime import datetime
 import calendar
 
+from orm.exceptions import NoMatch
 from asyncpg.exceptions import UniqueViolationError
 from sqlite3 import IntegrityError
 from fastapi import HTTPException
@@ -104,8 +105,9 @@ async def check_user_password(user: UserLogIn) -> None:
 
 async def get_user_by_email(user_email: str) -> UserNamedTuple:
     """Get user from DB using email"""
-    db_user = await Users.objects.get(email=user_email)
-    if not db_user:
+    try:
+        db_user = await Users.objects.get(email=user_email)
+    except NoMatch:
         raise HTTPException(status_code=400, detail="User with this email doesn't exist")
 
     return db_user

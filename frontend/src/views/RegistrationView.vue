@@ -20,5 +20,6 @@ import RegistrationForm from '@/components/RegistrationForm.vue'
     bottom: 0;
     display: grid;
     place-content: center;
+    padding: 0;
 }
 </style>

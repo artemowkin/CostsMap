@@ -17,5 +17,6 @@ import LoginForm from '@/components/LoginForm.vue'
     bottom: 0;
     display: grid;
     place-content: center;
+    padding: 0;
 }
 </style>
