@@ -3,6 +3,7 @@ import { checkAuthentication } from '@/utils/authentication'
 import LoginView from '@/views/LoginView.vue'
 import RegistrationView from '@/views/RegistrationView.vue'
 import CategoriesView from '@/views/CategoriesView.vue'
+import CardsView from '@/views/CardsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,6 +26,11 @@ const router = createRouter({
       path: '/categories',
       name: 'Categories',
       component: CategoriesView
+    },
+    {
+      path: '/cards',
+      name: 'Cards',
+      component: CardsView
     }
   ]
 })
