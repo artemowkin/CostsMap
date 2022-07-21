@@ -69,3 +69,55 @@ form .error_message {
 form a {
   color: var(--blue-500);
 }
+
+.popup_form_container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 5000;
+  background: rgba(0, 0, 0, .5);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 1em;
+}
+
+.close_div {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 5001;
+}
+
+.popup_form_container form {
+  z-index: 9999;
+}
+
+.popup_form-enter-from, .popup_form-leave-to {
+  opacity: 0;
+}
+
+.popup_form-enter-from form, .popup_form-leave-to form {
+  transform: translateY(200px);
+}
+
+.popup_form-enter-to, .popup_form-leave-from {
+  opacity: 1;
+}
+
+.popup_form-enter-active {
+  transition: opacity .25s ease-out;
+}
+
+.popup_form-leave-active {
+  transition: opacity .25s .15s ease-out;
+}
+
+.popup_form-enter-active form, .popup_form-leave-active form {
+  transition: transform .5s ease-out;
+}

@@ -35,6 +35,11 @@ const toLocaleDate = (dateString) => {
 </template>
 
 <style>
+.costs_container {
+    display: grid;
+    gap: 1em;
+}
+
 .dated_costs_container {
     display: grid;
     gap: 1em;

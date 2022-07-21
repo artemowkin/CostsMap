@@ -1,6 +1,9 @@
 <script setup>
 import { useCategoriesStore } from '../stores/categories'
 import { useUserStore } from '../stores/user'
+import { defineProps } from 'vue'
+
+const props = defineProps(['setSelectedCategoryId'])
 
 const categoriesStore = useCategoriesStore()
 
@@ -13,7 +16,7 @@ userStore.loadUser()
 
 <template>
     <div class="categories_container">
-        <div v-for="category in categoriesStore.categories" class="category" :key="category.id">
+        <div v-for="category in categoriesStore.categories" class="category" :key="category.id" @click="props.setSelectedCategoryId(category.id)">
             <div class="category_title">{{ category.title }}</div>
             <div class="category_costs_limit">{{ category.costsLimit || 0 }}{{ userStore.user.currency }}</div>
             <div class="category_icon" :style="{ backgroundColor: category.color }">{{ userStore.user.currency }}</div>
@@ -34,6 +37,7 @@ userStore.loadUser()
     display: grid;
     place-items: center;
     gap: .25em;
+    cursor: pointer;
 }
 
 .category_icon {

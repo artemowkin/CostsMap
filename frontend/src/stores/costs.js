@@ -36,14 +36,16 @@ export const useCostsStore = defineStore({
       this.monthCosts = response.data.totalCosts
     },
 
-    async loadCosts() {
-      const token = JSON.parse( localStorage.getItem('tokenData') ).token
+    async loadCosts(reload=false) {
+      if (this.costs.length === 0 || reload) {
+        const token = JSON.parse( localStorage.getItem('tokenData') ).token
 
-      const response = await axios.get('/costs/', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        const response = await axios.get('/costs/', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
 
-      this.costs = response.data
+        this.costs = response.data
+      }
     }
   },
 })
