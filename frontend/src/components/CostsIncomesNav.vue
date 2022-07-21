@@ -21,15 +21,18 @@ const props = defineProps(['now'])
     position: fixed;
     left: 1em;
     right: 1em;
-    bottom: 130px;
+    bottom: 120px;
     display: grid;
     place-content: center;
 }
 
 .costs_incomes_links {
-    padding: 1em 0;
     border-radius: 100px;
     background-color: var(--background-blacker);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
 }
 
 .costs_incomes_links a {

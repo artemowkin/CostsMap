@@ -30,11 +30,10 @@ import { RouterLink } from 'vue-router'
 <style>
 .navigation {
   position: fixed;
-  bottom: 1em;
-  left: 1em;
-  right: 1em;
+  bottom: 0;
+  left: 0;
+  right: 0;
   padding: 1em .5em;
-  border-radius: 20px;
   background-color: var(--background-black);
   display: grid;
   grid-template-columns: repeat(5, 1fr);
