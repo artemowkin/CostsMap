@@ -18,9 +18,6 @@ export const useCardsStore = defineStore({
         })
 
         this.cards = response.data
-
-        console.log(response.data[0].amount)
-        console.log(this.cards[0].amount)
       }
     }
   },

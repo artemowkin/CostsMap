@@ -5,6 +5,7 @@ import RegistrationView from '@/views/RegistrationView.vue'
 import CategoriesView from '@/views/CategoriesView.vue'
 import CardsView from '@/views/CardsView.vue'
 import CostsView from '@/views/CostsView.vue'
+import IncomesView from '@/views/IncomesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,6 +38,11 @@ const router = createRouter({
       path: '/costs',
       name: 'Costs',
       component: CostsView
+    },
+    {
+      path: '/incomes',
+      name: 'Incomes',
+      component: IncomesView
     }
   ]
 })
