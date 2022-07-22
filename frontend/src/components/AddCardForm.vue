@@ -7,22 +7,23 @@ import axios from '../axiosInstance'
 const cardsStore = useCardsStore()
 const userStore = useUserStore()
 
-await userStore.loadUser()
-
 const props = defineProps(['setShowAddCard'])
+
+const currencies = ref([])
+const title = ref("")
+const currency = ref("")
+const color = ref("")
+const isTitleValid = ref(false)
+const showError = ref(false)
 
 const getCurrencies = async () => {
     const response = await axios.get('/auth/currencies/')
     return response.data.currencies
 }
 
-const currencies = await getCurrencies()
+userStore.loadUser().then(() => currency.value = userStore.user.currency)
 
-const title = ref("")
-const currency = ref(userStore.user.currency)
-const color = ref("")
-const isTitleValid = ref(false)
-const showError = ref(false)
+getCurrencies().then((responseCurrencies) => currencies.value = responseCurrencies)
 
 const titleInput = (el) => {
     const elementValue = el.target.value

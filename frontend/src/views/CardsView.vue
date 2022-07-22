@@ -1,7 +1,7 @@
 <script setup>
 import CardsList from '../components/CardsList.vue'
 import Navigation from '../components/Navigation.vue'
-import { ref, Suspense } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { checkAuthentication } from '../utils/authentication'
 import AddButton from '../components/AddButton.vue'
@@ -24,9 +24,7 @@ const setShowAddCardForm = (value) => {
     </main>
     <AddButton :showForm="setShowAddCardForm" />
     <Transition name="popup_form">
-        <Suspense>
-            <AddCardForm v-if="showAddCardForm" :setShowAddCard="setShowAddCardForm" />
-        </Suspense>
+        <AddCardForm v-if="showAddCardForm" :setShowAddCard="setShowAddCardForm" />
     </Transition>
     <Navigation />
 </template>

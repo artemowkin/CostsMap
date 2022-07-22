@@ -18,5 +18,6 @@ const props = defineProps(['showForm'])
     display: grid;
     place-items: center;
     border-radius: 100px;
+    cursor: pointer;
 }
 </style>
