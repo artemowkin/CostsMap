@@ -1,9 +1,9 @@
 <script setup>
-const props = defineProps(['setShowAddIncomes'])
+const props = defineProps(['showForm'])
 </script>
 
 <template>
-    <button class="add_income_button" @click="props.setShowAddIncomes(true)">+</button>
+    <button class="add_income_button" @click="props.showForm(true)">+</button>
 </template>
 
 <style>

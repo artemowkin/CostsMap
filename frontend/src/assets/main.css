@@ -33,7 +33,7 @@ form button, form select, form input {
   transition: background-color .25s ease-out, color .25s ease-out, border-color .25s ease-out;
 }
 
-form input, form select {
+form input:not([type="color"]), form select {
   width: 100%;
   padding: 1em;
   border-radius: 100px;
@@ -41,6 +41,28 @@ form input, form select {
   background-color: var(--background-black);
   color: var(--color-text);
   text-align: center;
+}
+
+form input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 50%;
+  overflow: hidden;
+  background-size: 200%;
+  background: transparent;
+}
+
+form input[type="color"]::-webkit-color-swatch {
+  border-radius: 50%;
+  border: 0;
+}
+
+form input[type="color"]::-moz-color-swatch {
+  border-radius: 50%;
+  border: 0;
 }
 
 form button {

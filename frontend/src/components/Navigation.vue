@@ -20,10 +20,10 @@ import { RouterLink } from 'vue-router'
         <div class="logo_container"></div>
         <small>statistic</small>
     </RouterLink>
-    <RouterLink to="/account">
+    <!-- <RouterLink to="/account">
         <div class="logo_container"></div>
         <small>account</small>
-    </RouterLink>
+    </RouterLink> -->
   </nav>
 </template>
 
@@ -36,8 +36,8 @@ import { RouterLink } from 'vue-router'
   padding: 1em .5em;
   background-color: var(--background-black);
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  place-content: center space-between;
+  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+  place-content: center space-evenly;
   place-items: center;
   z-index: 1000;
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineProps, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useCategoriesStore } from '../stores/categories'
 import { useCardsStore } from '../stores/cards'
 import { dateToLocalizedISO } from '../utils/time'

@@ -8,7 +8,7 @@ import { useRouter } from 'vue-router';
 import MonthTotalInfo from '../components/MonthTotalInfo.vue'
 import { checkAuthentication } from '../utils/authentication'
 import { useCardsStore } from '../stores/cards'
-import AddIncomeButton from '../components/AddIncomeButton.vue'
+import AddButton from '../components/AddButton.vue'
 
 const router = useRouter()
 
@@ -44,7 +44,7 @@ const setSelectedCategoryId = (categoryId) => {
     <main>
         <CategoriesList :setSelectedCategoryId="setSelectedCategoryId" />
     </main>
-    <AddIncomeButton :setShowAddIncomes="setShowAddIncomes" />
+    <AddButton :showForm="setShowAddIncomes" />
     <Navigation />
     <Transition name="popup_form">
         <AddCostForm v-if="showAddCosts" :categoryId="selectedCategoryId" :setShowAddCosts="setShowAddCosts" />

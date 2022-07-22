@@ -19,6 +19,11 @@ cardsStore.loadCards()
 </template>
 
 <style>
+.cards_container {
+    display: grid;
+    gap: 1em;
+}
+
 .card_item {
     width: 100%;
     background-color: var(--background-black);
