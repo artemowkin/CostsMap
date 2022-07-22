@@ -2,11 +2,13 @@
 import CategoriesList from '@/components/CategoriesList.vue'
 import Navigation from '@/components/Navigation.vue'
 import AddCostForm from '@/components/AddCostForm.vue'
+import AddIncomeForm from '@/components/AddIncomeForm.vue'
 import { ref, Transition } from 'vue'
 import { useRouter } from 'vue-router';
 import MonthTotalInfo from '../components/MonthTotalInfo.vue'
 import { checkAuthentication } from '../utils/authentication'
 import { useCardsStore } from '../stores/cards'
+import AddIncomeButton from '../components/AddIncomeButton.vue'
 
 const router = useRouter()
 
@@ -17,11 +19,18 @@ cardsStore.loadCards()
 
 const selectedCategoryId = ref(null)
 const showAddCosts = ref(false)
+const showAddIncomes = ref(false)
 
 const setShowAddCosts = (value) => {
     if (cardsStore.cards.length === 0) return
 
     showAddCosts.value = value
+}
+
+const setShowAddIncomes = (value) => {
+    if (cardsStore.cards.length === 0) return
+
+    showAddIncomes.value = value
 }
 
 const setSelectedCategoryId = (categoryId) => {
@@ -35,8 +44,12 @@ const setSelectedCategoryId = (categoryId) => {
     <main>
         <CategoriesList :setSelectedCategoryId="setSelectedCategoryId" />
     </main>
+    <AddIncomeButton :setShowAddIncomes="setShowAddIncomes" />
     <Navigation />
     <Transition name="popup_form">
         <AddCostForm v-if="showAddCosts" :categoryId="selectedCategoryId" :setShowAddCosts="setShowAddCosts" />
+    </Transition>
+    <Transition name="popup_form">
+        <AddIncomeForm v-if="showAddIncomes" :setShowAddIncomes="setShowAddIncomes" />
     </Transition>
 </template>
