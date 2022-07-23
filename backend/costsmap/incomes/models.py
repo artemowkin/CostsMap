@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 import orm
 
@@ -17,7 +17,8 @@ class Incomes(orm.Model):
         "card_currency_amount": orm.Decimal(max_digits=9, decimal_places=2, minimum=0, allow_null=True),
         "date": orm.Date(default=date.today),
         "card": orm.ForeignKey(Cards, on_delete=orm.CASCADE),
-        "user": orm.ForeignKey(Users, on_delete=orm.CASCADE)
+        "user": orm.ForeignKey(Users, on_delete=orm.CASCADE),
+        "pub_datetime": orm.DateTime(default=datetime.now),
     }
 
 

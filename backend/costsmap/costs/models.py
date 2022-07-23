@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 import orm
 
@@ -20,6 +20,7 @@ class Costs(orm.Model):
         "category": orm.ForeignKey(Categories, on_delete=orm.CASCADE),
         "card": orm.ForeignKey(Cards, on_delete=orm.CASCADE),
         "user": orm.ForeignKey(Users, on_delete=orm.CASCADE),
+        "pub_datetime": orm.DateTime(default=datetime.now),
     }
 
 

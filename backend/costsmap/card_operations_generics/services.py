@@ -28,7 +28,7 @@ class CardOperationGetter(ABC):
         month_end_date = month_start_date + relativedelta(months=1)
         db_operations = await self._model.objects.filter(
             user__id=self._user_id, date__gte=month_start_date, date__lt=month_end_date
-        ).order_by('-date').all()
+        ).order_by('-pub_datetime').all()
         return db_operations
 
     async def get_concrete(self, operation_id: int) -> CardOperationNamedTuple:
