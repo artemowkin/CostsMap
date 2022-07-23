@@ -3,6 +3,7 @@ import { checkAuthentication } from '@/utils/authentication'
 import LoginView from '@/views/LoginView.vue'
 import RegistrationView from '@/views/RegistrationView.vue'
 import CategoriesView from '@/views/CategoriesView.vue'
+import EditCategoriesView from '@/views/EditCategoriesView.vue'
 import CardsView from '@/views/CardsView.vue'
 import CostsView from '@/views/CostsView.vue'
 import IncomesView from '@/views/IncomesView.vue'
@@ -28,6 +29,11 @@ const router = createRouter({
       path: '/categories',
       name: 'Categories',
       component: CategoriesView
+    },
+    {
+      path: '/edit_categories',
+      name: 'EditCategories',
+      component: EditCategoriesView
     },
     {
       path: '/cards',

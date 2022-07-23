@@ -1,9 +1,9 @@
 <script setup>
 import { useCategoriesStore } from '../stores/categories'
 import { useUserStore } from '../stores/user'
-import { defineProps } from 'vue'
+import AddCategoryButton from './AddCategoryButton.vue';
 
-const props = defineProps(['setSelectedCategoryId'])
+const props = defineProps(['setSelectedCategoryId', 'withAddButton', 'setShowForm'])
 
 const categoriesStore = useCategoriesStore()
 
@@ -22,6 +22,7 @@ userStore.loadUser()
             <div class="category_icon" :style="{ backgroundColor: category.color }">{{ userStore.user.currency }}</div>
             <div class="category_costs_sum">{{ category.costsSum }}{{ userStore.user.currency }}</div>
         </div>
+        <AddCategoryButton v-if="props.withAddButton" :setShowForm="props.setShowForm" />
     </div>
 </template>
 
@@ -35,7 +36,7 @@ userStore.loadUser()
 
 .category {
     display: grid;
-    place-items: center;
+    place-items: start center;
     gap: .25em;
     cursor: pointer;
 }

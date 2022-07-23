@@ -3,6 +3,7 @@ import CategoriesList from '@/components/CategoriesList.vue'
 import Navigation from '@/components/Navigation.vue'
 import AddCostForm from '@/components/AddCostForm.vue'
 import AddIncomeForm from '@/components/AddIncomeForm.vue'
+import EditCategoriesButton from '@/components/EditCategoriesButton.vue'
 import { ref, Transition } from 'vue'
 import { useRouter } from 'vue-router';
 import MonthTotalInfo from '../components/MonthTotalInfo.vue'
@@ -41,6 +42,7 @@ const setSelectedCategoryId = (categoryId) => {
 
 <template>
     <MonthTotalInfo />
+    <EditCategoriesButton to="/edit_categories" />
     <main>
         <CategoriesList :setSelectedCategoryId="setSelectedCategoryId" />
     </main>
