@@ -1,23 +1,35 @@
 <script setup>
 import { RouterLink } from 'vue-router'
+import Categories from '../assets/icons/categories.svg'
+import Cards from '../assets/icons/cards.svg'
+import Costs from '../assets/icons/costs.svg'
+import Statistic from '../assets/icons/statistic.svg'
 </script>
 
 <template>
   <nav class="navigation">
     <RouterLink to="/categories">
-        <div class="logo_container"></div>
+        <div class="logo_container">
+          <img :src="Categories" />
+        </div>
         <small>categories</small>
     </RouterLink>
     <RouterLink to="/cards">
-        <div class="logo_container"></div>
+        <div class="logo_container">
+          <img :src="Cards" />
+        </div>
         <small>cards</small>
     </RouterLink>
     <RouterLink to="/costs">
-        <div class="logo_container"></div>
+        <div class="logo_container">
+          <img :src="Costs" />
+        </div>
         <small>costs</small>
     </RouterLink>
     <RouterLink to="/statistic">
-        <div class="logo_container"></div>
+        <div class="logo_container">
+          <img :src="Statistic" />
+        </div>
         <small>statistic</small>
     </RouterLink>
     <!-- <RouterLink to="/account">
@@ -53,5 +65,13 @@ import { RouterLink } from 'vue-router'
   height: 50px;
   border-radius: 10px;
   background-color: var(--orange-800);
+  display: grid;
+  place-content: center;
+}
+
+.logo_container img {
+  width: 30px;
+  height: 30px;
+  background-size: cover;
 }
 </style>

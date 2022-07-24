@@ -49,7 +49,7 @@ const toLocaleDate = (dateString) => {
 
 .income_item {
     display: grid;
-    grid-template-columns: 50px 1fr 150px;
+    grid-template-columns: 50px 1fr 100px;
     gap: 1em;
     background-color: var(--background-black);
     padding: 1em;
