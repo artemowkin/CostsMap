@@ -1,6 +1,8 @@
 <script setup>
 import { useCardsStore } from '../stores/cards'
 
+const props = defineProps(['showForm'])
+
 const cardsStore = useCardsStore()
 
 cardsStore.loadCards()
@@ -8,7 +10,7 @@ cardsStore.loadCards()
 
 <template>
     <div class="cards_container">
-        <div v-for="card in cardsStore.cards" class="card_item" :key="card.id">
+        <div v-for="card in cardsStore.cards" class="card_item" :key="card.id" @click="props.showForm(true, card.id)">
             <div class="card_icon" :style="{ backgroundColor: card.color }"></div>
             <div class="card_info_block">
                 <h2 class="card_title">{{ card.title }}</h2>
@@ -33,6 +35,7 @@ cardsStore.loadCards()
     place-items: center start;
     grid-template-columns: repeat(2, min-content);
     gap: 1em;
+    cursor: pointer;
 }
 
 .card_icon {
