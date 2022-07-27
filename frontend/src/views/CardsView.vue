@@ -52,7 +52,6 @@ const deleteCardAction = async () => {
 
     cardsStore.loadCards(true)
     categoriesStore.loadCategories(true)
-    costsStore.loadMonthCosts()
     costsStore.loadCosts(true)
     incomesStore.loadIncomes(true)
 
