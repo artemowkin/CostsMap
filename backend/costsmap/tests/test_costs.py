@@ -195,7 +195,7 @@ def test_create_cost_with_amount_more_than_card_amount():
         })
         assert response.status_code == 400
         cost_json = response.json()
-        assert cost_json['detail'] == 'Cost amount is more than card amount'
+        assert cost_json['detail'] == 'Operation amount is more than card amount'
 
 
 def test_get_all_costs():
@@ -314,6 +314,27 @@ def test_get_total_costs_for_next_month():
         response_json = response.json()
         assert response.status_code == 200
         assert response_json['totalCosts'] == 0
+
+
+def test_get_costs_by_categories_statistic():
+    with client:
+        response = client.post('/api/v1/auth/login/', json={
+            "email": "someone@gmail.com",
+            "password": "Password123",
+        })
+        print(response.json())
+        assert response.status_code == 200
+        data = response.json()
+        assert 'token' in data
+        token = data['token']
+        response = client.get(f'/api/v1/costs/statistic/by_categories/', headers={
+            "Authorization": f"Bearer {token}"
+        })
+        response_json = response.json()
+        assert response.status_code == 200
+        assert len(response_json) == 1
+        assert response_json[0]['categoryTitle'] == 'Category1'
+        assert response_json[0]['categoryCosts'] == 200
 
 
 def test_delete_cost():

@@ -11,8 +11,11 @@ from ..card_operations_generics.dependencies import (
     CardOperationDeleteCommand, CardOperationCreateCommand,
     GetAllCardOperationsCommand
 )
-from .schemas import CostOut, TotalCosts, CostIn
-from .services import CostsGetter, create_db_cost, delete_db_cost
+from .schemas import CostOut, TotalCosts, CostIn, CategoryCosts
+from .services import (
+    CostsGetter, create_db_cost, delete_db_cost,
+    get_categories_costs_for_the_month
+)
 
 
 today_string = date.today().strftime("%Y-%m")
@@ -81,3 +84,20 @@ class DeleteCostCommand(CardOperationDeleteCommand):
     def _calculate_new_card_amount(self, card_amount: Decimal, operation_amount: Decimal) -> Decimal:
         """Plus cost amount to card amount"""
         return card_amount + operation_amount
+
+
+async def _get_category_costs_schema(category_costs: dict, user: UserNamedTuple) -> CategoryCosts:
+    category = await get_category_by_id(category_costs['category_id'], user.id)
+    category_statistic = CategoryCosts(
+        category_title=category.title,
+        category_color=category.color,
+        category_costs=category_costs['category_costs']
+    )
+    return category_statistic
+
+
+async def get_costs_by_categories_statistic(month: str = today_string,
+        user: UserNamedTuple = Depends(get_current_user)) -> list[CategoryCosts]:
+    categories_costs = await get_categories_costs_for_the_month(month, user)
+    statistic = [await _get_category_costs_schema(category_costs, user) for category_costs in categories_costs]
+    return statistic

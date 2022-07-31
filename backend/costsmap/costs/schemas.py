@@ -24,6 +24,14 @@ class TotalCosts(CamelModel):
     total_costs: Decimal
 
 
+class CategoryCosts(CamelModel):
+    """Model for costs statistic by categories"""
+
+    category_title: str
+    category_color: str
+    category_costs: Decimal
+
+
 class CreateCost400Error(CamelModel):
     detail: Literal[
         "Cost amount is more than card amount",

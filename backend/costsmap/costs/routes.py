@@ -2,10 +2,13 @@ from fastapi import APIRouter, Depends
 
 from ..accounts.schemas import LoginRequiredResponse
 from ..cards.schemas import Card404Error
-from .schemas import CostOut, TotalCosts, CreateCost400Error, Cost404Error
+from .schemas import (
+    CostOut, TotalCosts, CreateCost400Error, Cost404Error,
+    CategoryCosts
+)
 from .dependencies import (
     GetAllCostsCommand, get_total_costs, CreateCostCommand,
-    DeleteCostCommand
+    DeleteCostCommand, get_costs_by_categories_statistic
 )
 
 
@@ -46,3 +49,8 @@ def create_cost(created_cost: CostOut = Depends(CreateCostCommand())):
 })
 def delete_cost():
     return
+
+
+@router.get('/statistic/by_categories/', status_code=200, response_model=list[CategoryCosts])
+def costs_by_categories(statistic: list[CategoryCosts] = Depends(get_costs_by_categories_statistic)):
+    return statistic
