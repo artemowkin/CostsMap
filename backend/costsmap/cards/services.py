@@ -71,6 +71,6 @@ async def transfer_money_between_cards(from_card, to_card, transfer_info: Transf
 
 async def update_card_amount(card: CardNamedTuple, new_amount: Decimal) -> None:
     if new_amount < 0:
-        raise HTTPException(status_code=400, detail="Cost amount is more than card amount")
+        raise HTTPException(status_code=400, detail="Operation amount is more than card amount")
 
     await card.update(amount=new_amount)

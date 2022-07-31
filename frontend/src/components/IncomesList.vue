@@ -2,6 +2,8 @@
 import { useIncomesStore } from '../stores/incomes'
 import { useUserStore } from '../stores/user'
 
+const props = defineProps(['showForm'])
+
 const incomesStore = useIncomesStore()
 const userStore = useUserStore()
 
@@ -22,7 +24,7 @@ const toLocaleDate = (dateString) => {
                 <div class="income_date_value">{{ toLocaleDate(date) }}</div>
                 <div class="income_date_total">+ {{ dateIncomes.total }}{{ userStore.user.currency }}</div>
             </div>
-            <div class="income_item" v-for="income in dateIncomes.incomes" :key="income.id">
+            <div class="income_item" v-for="income in dateIncomes.incomes" :key="income.id" @click="props.showForm(true, income.id)" >
                 <div class="income_card_image" :style="{ backgroundColor: income.card.color }"></div>
                 <h3 class="income_card_title">{{ income.card.title }}</h3>
                 <div class="income_amount">+ {{ income.userCurrencyAmount }}{{ userStore.user.currency }}</div>
@@ -54,6 +56,7 @@ const toLocaleDate = (dateString) => {
     background-color: var(--background-black);
     padding: 1em;
     border-radius: 10px;
+    cursor: pointer;
 }
 
 .income_card_image {
