@@ -98,7 +98,11 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 async def check_user_password(user: UserLogIn) -> None:
     """Get user from db and check do passwords match"""
-    db_user = await Users.objects.get(email=user.email)
+    try:
+        db_user = await Users.objects.get(email=user.email)
+    except NoMatch:
+        raise HTTPException(status_code=404, detail="There is no user with this email")
+
     if not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=400, detail="Incorrect password")
 
