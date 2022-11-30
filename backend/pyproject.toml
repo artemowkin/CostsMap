@@ -1,35 +1,33 @@
 [tool.poetry]
-name = "CostsMap"
-version = "3.0.0"
-description = "CostsMap is an application for costs accounting"
+name = "costsmap"
+version = "0.1.0"
+description = ""
 authors = ["artemowkin <artyom.groshev2017@gmail.com>"]
-license = "GPL-3.0"
 readme = "README.md"
-documentation = "/api/v1/redoc/"
+packages = [
+    { include = 'costsmap' }
+]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-fastapi = {extras = ["all"], version = "^0.75.2"}
-gunicorn = "^20.1.0"
-aiopg = "^1.3.3"
-SQLAlchemy = "^1.4.35"
-databases = "^0.5.5"
+python = "^3.11"
+fastapi = "^0.88.0"
+uvicorn = "^0.20.0"
+pydantic = {extras = ["dotendv"], version = "^1.10.2"}
+databases = "^0.6.2"
+SQLAlchemy = "^1.4.41"
+asyncpg = "^0.27.0"
 passlib = "^1.7.4"
+python-dotenv = "^0.21.0"
+psycopg2-binary = "^2.9.5"
 python-jose = "^3.3.0"
-asyncpg = "^0.25.0"
-aiosqlite = "^0.17.0"
-python-dateutil = "^2.8.2"
-async-lru = "^1.0.3"
-orm = {extras = ["postgresql"], version = "^0.3.1"}
-pyhumps = "^3.7.2"
+pytz = "^2022.6"
 
-[tool.poetry.dev-dependencies]
-ipython = "^8.4.0"
-pytest = "^7.1.1"
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 dev = "costsmap.main:main"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
