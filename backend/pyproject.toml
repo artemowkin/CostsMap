@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "costsmap"
-version = "0.1.0"
-description = ""
+version = "4.0.0"
+description = "CostsMap is an application for costs accounting"
 authors = ["artemowkin <artyom.groshev2017@gmail.com>"]
 readme = "README.md"
 packages = [
@@ -9,7 +9,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 fastapi = "^0.88.0"
 uvicorn = "^0.20.0"
 pydantic = {extras = ["dotendv"], version = "^1.10.2"}
