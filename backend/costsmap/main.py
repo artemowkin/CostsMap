@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from .project.databases import database
@@ -14,9 +15,22 @@ parser.add_argument('--host', default='0.0.0.0', type=str)
 parser.add_argument('--port', default=8000, type=int)
 
 
+origins = [
+    'http://localhost:3000',
+]
+
+
 app = FastAPI()
 
 app.include_router(authentication_router, prefix='/api/auth', tags=['auth'])
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
 
 @app.on_event('startup')

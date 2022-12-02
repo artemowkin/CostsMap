@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useRouter } from 'vue-router'
 import { apiFetch } from '@/globals'
+import cookieStorage from '@/stores/cookieStorage'
 
 interface User {
   uuid: string
@@ -82,5 +83,14 @@ export const useUserStore = defineStore('user', () => {
     if (user) currentUser.value = user
   }
 
-  return { accessToken, refreshToken, currentUser, refresh, load }
+  const setTokens = (tokenPair: TokenPair): void => {
+    accessToken.value = tokenPair.access_token
+    refreshToken.value = tokenPair.refresh_token
+  }
+
+  return { accessToken, refreshToken, currentUser, refresh, load, setTokens }
+}, {
+  persist: {
+    storage: cookieStorage
+  }
 })

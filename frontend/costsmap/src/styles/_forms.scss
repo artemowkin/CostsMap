@@ -1,0 +1,42 @@
+form {
+
+  .input_field {
+    display: grid;
+    gap: 1rem;
+
+    input {
+      width: 100%;
+      font-size: 1rem;
+      color: $input-text-color;
+      box-shadow: 0 0 0 3px $input-shadow;
+      border-radius: 10rem;
+      padding: 1rem;
+      background-color: $input-background;
+      text-align: center;
+      transition: background-color .25s ease-in-out, color .25s ease-in-out;
+
+      &:focus {
+        background-color: transparent;
+      }
+
+      &::placeholder {
+        color: $input-text-color;
+      }
+    }
+
+    span {
+      color: $red-color;
+      padding-left: 1rem;
+    }
+  }
+
+  button {
+    width: fit-content;
+    place-self: center;
+    padding: 1rem 4rem;
+    border-radius: 10rem;
+    border: 0;
+    background: $button-gradient-background;
+    color: white;
+  }
+}

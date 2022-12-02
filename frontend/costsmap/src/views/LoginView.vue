@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import AppLoginForm from '@/components/AppLoginForm.vue'
 </script>
 
 <template>
-  <h1>Log In</h1>
+  <AppLoginForm />
 </template>
 
 <style lang="scss" scoped>
