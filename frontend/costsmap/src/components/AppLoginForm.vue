@@ -75,7 +75,7 @@ const onSubmit = async () => {
   height: 100vh;
   padding: 2rem;
   display: grid;
-  place-content: center;
+  place-items: center;
   grid-template-columns: 1fr;
 
   h3 {
@@ -90,6 +90,7 @@ const onSubmit = async () => {
     box-shadow: 0 0 40px 0 rgba(0, 0, 0, .25);
     display: grid;
     gap: 1.25rem;
+    max-width: 500px;
   }
 }
 </style>
