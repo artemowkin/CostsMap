@@ -5,6 +5,3 @@ import AppLoginForm from '@/components/AppLoginForm.vue'
 <template>
   <AppLoginForm />
 </template>
-
-<style lang="scss" scoped>
-</style>

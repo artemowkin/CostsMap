@@ -9,6 +9,8 @@ users = Table(
     Column('uuid', String(36), primary_key=True),
     Column('username', String(500), nullable=False, unique=True),
     Column('password', String(500), nullable=False),
+    Column('currency', String(1), nullable=False),
+    Column('language', String(50), nullable=False),
 )
 
 sessions = Table(

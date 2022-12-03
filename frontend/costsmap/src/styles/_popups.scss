@@ -1,0 +1,39 @@
+@mixin popup {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  padding: 0 1rem 4rem;
+  z-index: 1000;
+  display: grid;
+  place-content: end;
+  grid-template-columns: 1fr;
+
+  .popup_background {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: $popup-background-color;
+    backdrop-filter: blur(5px);
+  }
+
+  .popup_content {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 1rem;
+    background-color: $popup-content-background-color;
+    z-index: 1001;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+
+    h3 {
+      font-size: 1.5rem;
+      text-align: center;
+      font-weight: 700;
+    }
+  }
+}

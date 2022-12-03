@@ -4,7 +4,16 @@ $input-background: rgba(196, 196, 196, .25);
 $input-shadow: rgba(249, 160, 63, .3);
 $input-text-color: #c4c4c4;
 $red-color: #EE2E31;
+$transparent-red-color: rgba(238, 46, 49, .25);
 $button-gradient-background: linear-gradient(to right bottom, #F9A03F 20%, #201E1F 80%);
+$category-transparent: rgba(0, 0, 0, .25);
+$navigation-background: rgba(249, 160, 63, .05);
+$navigation-icon-background: #feedda;
+$navigation-text-color: rgba(0, 0, 0, .8);
+$add-category-icon-background: rgba(249, 160, 63, .10);
+$add-category-plus-color: #f9a03f;
+$popup-background-color: rgba(0, 0, 0, .25);
+$popup-content-background-color: white;
 
 *,
 *::before,

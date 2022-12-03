@@ -33,13 +33,15 @@ const onSubmit = async () => {
       body: loginData,
       method: 'POST'
     })
-    userStore.setTokens(response)
-    router.push('/')
+    await userStore.setTokens(response)
+    router.push({ name: 'categories' })
   } catch (err) {
-    console.log(err)
     switch (err?.response?.status) {
       case 422:
         formError.value = "Incorrect input"
+        break
+      case 401:
+        formError.value = "Incorrect username or password"
         break
       default:
         formError.value = "Server error"
@@ -65,32 +67,16 @@ const onSubmit = async () => {
       </div>
 
       <button type="submit">Log In</button>
+
+      <div class="registration_link">
+        or <RouterLink :to="{ name: 'registration' }">registration</RouterLink>
+      </div>
     </Form>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .login_form__container {
-  width: 100%;
-  height: 100vh;
-  padding: 2rem;
-  display: grid;
-  place-items: center;
-  grid-template-columns: 1fr;
-
-  h3 {
-    font-size: 1.5rem;
-    text-align: center;
-  }
-
-  form {
-    width: 100%;
-    padding: 2rem 1rem;
-    border-radius: 1.5rem;
-    box-shadow: 0 0 40px 0 rgba(0, 0, 0, .25);
-    display: grid;
-    gap: 1.25rem;
-    max-width: 500px;
-  }
+  @include authenticationForm();
 }
 </style>

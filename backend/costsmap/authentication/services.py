@@ -93,7 +93,10 @@ class Authentication:
     async def registrate(self, user_data: UserRegistration) -> Token:
         uuid = str(uuid4())
         hashed_password = pwd_context.hash(user_data.password1)
-        query = self.table.insert().values(uuid=uuid, username=user_data.username, password=hashed_password)
+        query = self.table.insert().values(
+            uuid=uuid, username=user_data.username, password=hashed_password,
+            currency=user_data.currency, language=user_data.language
+        )
         try:
             await database.execute(query)
             token = await self._create_token_pair(uuid)
