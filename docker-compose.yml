@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=fastapi
+      - POSTGRES_PASSWORD=fastapi
+      - POSTGRES_DB=costsmap
+  redis:
+    image: redis:latest
+  backend:
+    depends_on:
+      - db
+      - redis
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile.dev
+    environment:
+      - DATABASE_URL
+      - REDIS_URL
+    volumes:
+      - ./backend/app/:/code/app
+    ports:
+      - 8000:8000
+    command: python -m poetry run dev

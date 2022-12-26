@@ -1,33 +1,31 @@
 [tool.poetry]
 name = "costsmap"
-version = "4.0.0"
-description = "CostsMap is an application for costs accounting"
-authors = ["artemowkin <artyom.groshev2017@gmail.com>"]
+version = "0.1.0"
+description = ""
+authors = ["Artyom <artyom.groshev2017@gmail.com>"]
 readme = "README.md"
 packages = [
-    { include = 'costsmap' }
+    { include = "app" }
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.9"
+hypercorn = "^0.14.3"
 fastapi = "^0.88.0"
-uvicorn = "^0.20.0"
-pydantic = {extras = ["dotendv"], version = "^1.10.2"}
-databases = "^0.6.2"
-SQLAlchemy = "^1.4.41"
-asyncpg = "^0.27.0"
-passlib = "^1.7.4"
+pydantic = "^1.10.2"
 python-dotenv = "^0.21.0"
+asyncpg = "^0.27.0"
 psycopg2-binary = "^2.9.5"
-python-jose = "^3.3.0"
-pytz = "^2022.6"
+ormar = "^0.12.0"
+aioredis = "^2.0.1"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.2.0"
+
+[tool.poetry.scripts]
+dev = "app.main:main"
+
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-dev = "costsmap.main:main"

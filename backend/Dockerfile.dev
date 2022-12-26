@@ -1,0 +1,5 @@
+FROM python:latest
+WORKDIR /code
+COPY backend/pyproject.toml backend/poetry.lock backend/app /code
+RUN pip install poetry
+RUN python -m poetry install
