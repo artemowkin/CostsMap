@@ -6,6 +6,7 @@ from hypercorn.config import Config
 from hypercorn.asyncio import serve
 
 from .project.db import database, metadata
+from .authentication.routes import router as authentication_router
 
 
 parser = ArgumentParser()
@@ -16,6 +17,8 @@ parser.add_argument('--port', type=int, default=8000)
 
 
 app = FastAPI(title='CostsMap')
+
+app.include_router(authentication_router, prefix='/api/auth', tags=['authentication'])
 
 
 @app.on_event('startup')

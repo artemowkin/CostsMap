@@ -19,6 +19,7 @@ services:
     environment:
       - DATABASE_URL
       - REDIS_URL
+      - SECRET_KEY
     volumes:
       - ./backend/app/:/code/app
     ports:
