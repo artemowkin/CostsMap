@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from .schemas import TokenPair, LoginData, RegistrationData
-from .dependencies import use_auth_store, use_token
+from .dependencies import use_auth_store, use_token, auth_required
 from .services import AuthStore
 from .models import User
 
@@ -28,8 +28,7 @@ async def refresh(token: str = Depends(use_token), auth_store: AuthStore = Depen
 
 
 @router.get('/me/', response_model=User.get_pydantic(exclude={'password'}))
-async def me(token: str = Depends(use_token), auth_store: AuthStore = Depends(use_auth_store)):
-    user = await auth_store.get_user_from_token(token)
+async def me(user: User = Depends(auth_required)):
     return user
 
 
