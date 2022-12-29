@@ -8,6 +8,8 @@ from hypercorn.asyncio import serve
 from .project.db import database, metadata
 from .authentication.routes import router as authentication_router
 from .categories.routes import router as categories_router
+from .cards.routes import router as cards_router
+from .costs.routes import router as costs_router
 
 
 parser = ArgumentParser()
@@ -22,6 +24,10 @@ app = FastAPI(title='CostsMap')
 app.include_router(authentication_router, prefix='/api/auth', tags=['authentication'])
 
 app.include_router(categories_router, prefix='/api/categories', tags=['categories'])
+
+app.include_router(cards_router, prefix='/api/cards', tags=['cards'])
+
+app.include_router(costs_router, prefix='/api/costs', tags=['costs'])
 
 
 @app.on_event('startup')
