@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Cookie
 
 from .schemas import TokenPair, LoginData, RegistrationData
 from .dependencies import use_auth_store, use_token, auth_required
@@ -22,8 +22,8 @@ async def registration(registration_data: RegistrationData, auth_store: AuthStor
 
 
 @router.post('/refresh/', response_model=TokenPair)
-async def refresh(token: str = Depends(use_token), auth_store: AuthStore = Depends(use_auth_store)):
-    token_pair = await auth_store.refresh(token)
+async def refresh(refresh_token: str = Cookie(...), auth_store: AuthStore = Depends(use_auth_store)):
+    token_pair = await auth_store.refresh(refresh_token)
     return token_pair
 
 

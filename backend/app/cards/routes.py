@@ -10,7 +10,7 @@ from .schemas import CardIn
 
 router = APIRouter()
 
-card_response_schema = Card.get_pydantic(exclude={'owner'})
+card_response_schema = Card.get_pydantic(exclude={'owner', 'costs'})
 
 
 @router.get('/', response_model=list[card_response_schema])

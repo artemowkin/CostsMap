@@ -15,5 +15,5 @@ def use_token(credentials: HTTPAuthorizationCredentials = Security(oauth2_scheme
 
 
 async def auth_required(token: str = Depends(use_token), auth_store: AuthStore = Depends(use_auth_store)) -> User:
-    user = await auth_store.get_user_from_token(token)
+    user = await auth_store.get_user_from_access_token(token)
     return user

@@ -89,12 +89,22 @@ class SessionStorage:
     async def add(self, email: str, token_pair: TokenPair):
         await self._db.hset(email, token_pair.access_token, token_pair.refresh_token)
 
-    async def clear(self, email: str):
-        await self._db.delete(email)
+    async def delete(self, email: str, token: str):
+        await self._db.hdel(email, token)
+
+    async def clear_refresh_token_sessions(self, email: str, token: str):
+        sessions = await self._db.hgetall(email)
+        access_tokens = [access_token for access_token in sessions if sessions[access_token] == token.encode()]
+        if not access_tokens: return
+        await self._db.hdel(email, *access_tokens)
 
     async def check_is_session_active(self, email: str, access_token: str) -> bool:
         refresh_token = await self._db.hget(email, access_token)
         return bool(refresh_token)
+
+    async def check_refresh_token(self, email: str, refresh_token: str) -> bool:
+        sessions = await self._db.hgetall(email)
+        return refresh_token.encode() in sessions.values()
 
 
 class AuthStore:
@@ -126,23 +136,38 @@ class AuthStore:
         await self._session.add(db_user.email, token_pair)
         return token_pair
 
-    async def get_user_from_token(self, token: str) -> User:
-        incorrect_token_exception = HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect token")
+    async def _get_user_from_token(self, token: str) -> User:
         payload = self._jwt.decode_token(token)
         db_user = await self._db.get_user_by_email(payload['email'])
-        if not db_user: raise incorrect_token_exception
+        if not db_user:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect token")
+
+        return db_user
+
+    async def get_user_from_access_token(self, token: str) -> User:
+        db_user = await self._get_user_from_token(token)
         is_session_active = await self._session.check_is_session_active(db_user.email, token)
-        if not is_session_active: raise incorrect_token_exception
+        if not is_session_active:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect token")
+
+        return db_user
+
+    async def _get_user_from_refresh_token(self, token: str) -> User:
+        db_user = await self._get_user_from_token(token)
+        is_token_in_session = await self._session.check_refresh_token(db_user.email, token)
+        if not is_token_in_session:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect token")
+
         return db_user
 
     async def refresh(self, token: str) -> TokenPair:
-        db_user = await self.get_user_from_token(token)
-        await self._session.clear(db_user.email)
+        db_user = await self._get_user_from_refresh_token(token)
+        await self._session.clear_refresh_token_sessions(db_user.email, token)
         access_token = self._jwt.create_access_token({'email': db_user.email})
         token_pair = TokenPair(access_token=access_token, refresh_token=token)
         await self._session.add(db_user.email, token_pair)
         return token_pair
 
     async def logout(self, token: str) -> None:
-        db_user = await self.get_user_from_token(token)
-        await self._session.clear(db_user.email)
+        db_user = await self.get_user_from_access_token(token)
+        await self._session.delete(db_user.email, token)
