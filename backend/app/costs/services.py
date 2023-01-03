@@ -34,6 +34,9 @@ class CostsSet:
 
         return cost
 
+    async def get_category_sum(self, category: Category) -> int:
+        return await self._model.objects.filter(owner=self._user, category=category).sum('amount')
+
     async def _get_card_with_amount_validation(self, cost_data: CostIn) -> Card:
         card = await self._cards_set.get_concrete(str(cost_data.card))
         if card.amount < cost_data.amount: # type: ignore

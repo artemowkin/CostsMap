@@ -1,0 +1,4 @@
+FROM node:latest
+WORKDIR /code
+COPY frontend/costsmap/ /code/
+RUN npm install

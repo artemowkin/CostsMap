@@ -1,5 +1,3 @@
-from functools import reduce
-
 from fastapi import HTTPException, status
 from ormar import NoMatch
 from asyncpg.exceptions import UniqueViolationError
@@ -7,6 +5,7 @@ from asyncpg.exceptions import UniqueViolationError
 from .models import Category
 from .schemas import CategoryIn
 from ..authentication.models import User
+from ..costs.models import Cost
 
 
 def _handle_unique_violation(func):
@@ -24,16 +23,12 @@ class CategoriesSet:
 
     def __init__(self, owner: User):
         self._model = Category
+        self._costs_model = Cost
         self._owner = owner
 
     async def all(self) -> list[Category]:
         all_categories = await self._model.objects.filter(owner__uuid=self._owner.uuid).order_by('title').all()
         return all_categories
-
-    async def get_costs_sum(self, category: Category) -> int:
-        category_costs = await self._model.objects.select_related('costs').filter(uuid=category.uuid).all()
-        reduce(lambda total, cost: total + cost.uuid, category_costs, 0)
-        assert 0, f"{category_costs}"
 
     @_handle_unique_violation
     async def create(self, category_data: CategoryIn) -> Category:
