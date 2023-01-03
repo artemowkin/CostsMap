@@ -9,7 +9,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 hypercorn = "^0.14.3"
 fastapi = "^0.88.0"
 pydantic = {extras = ["email"], version = "^1.10.2"}
@@ -20,6 +20,7 @@ ormar = "^0.12.0"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 redis = "^4.4.0"
+uvicorn = "^0.20.0"
 
 
 [tool.poetry.scripts]

@@ -25,3 +25,14 @@ services:
     ports:
       - 8000:8000
     command: python -m poetry run dev
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile.dev
+    environment:
+      - VITE_BACKEND_URL
+    volumes:
+      - ./frontend/costsmap/src/:/code/src
+    ports:
+      - 3000:3000
+    command: npx vite
