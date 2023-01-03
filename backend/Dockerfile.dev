@@ -1,5 +1,6 @@
 FROM python:latest
 WORKDIR /code
-COPY backend/pyproject.toml backend/poetry.lock backend/app /code
+COPY backend/pyproject.toml backend/poetry.lock backend/README.md /code/
+COPY backend/app /code/app
 RUN pip install poetry
 RUN python -m poetry install

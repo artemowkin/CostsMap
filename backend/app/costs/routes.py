@@ -29,3 +29,9 @@ async def new_cost(cost_data: CostIn, costs_set: CostsSet = Depends(use_costs_se
 async def delete_cost(cost_uuid: UUID, costs_set: CostsSet = Depends(use_costs_set)):
     cost = await costs_set.get_concrete(str(cost_uuid))
     await costs_set.delete(cost)
+
+
+@router.put('/{cost_uuid}/', response_model=cost_response_schema)
+async def update_cost(cost_uuid: UUID, cost_data: CostIn, costs_set: CostsSet = Depends(use_costs_set)):
+    cost = await costs_set.get_concrete(str(cost_uuid))
+    await costs_set.update(cost, cost_data)

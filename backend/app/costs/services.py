@@ -1,7 +1,10 @@
+from decimal import Decimal
+
 from fastapi import status, HTTPException
 
 from ..authentication.models import User
 from ..categories.services import CategoriesSet
+from ..categories.models import Category
 from ..cards.services import CardsSet
 from ..cards.models import Card
 from .models import Cost
@@ -33,8 +36,8 @@ class CostsSet:
 
     async def _get_card_with_amount_validation(self, cost_data: CostIn) -> Card:
         card = await self._cards_set.get_concrete(str(cost_data.card))
-        if card.amount < cost_data.amount:
-            raise HTTPException(status.HTTP_409_CONFLICT, "Card amount is less than cost amount")
+        if card.amount < cost_data.amount: # type: ignore
+            raise HTTPException(status.HTTP_409_CONFLICT, "Card amount is less than cost amountd")
 
         return card
 
@@ -52,3 +55,31 @@ class CostsSet:
         await cost.card.load()
         await cost.delete()
         await self._cards_set.add_income(cost.card, cost.amount)
+
+    async def _get_old_cost_data(self, cost: Cost) -> tuple[Card, Decimal]:
+        await cost.card.load()
+        old_card = cost.card
+        old_cost_amount = cost.amount
+        return old_card, old_cost_amount
+
+    async def _get_new_cost_data(self, cost_data: CostIn) -> tuple[Card, Category]:
+        new_card = await self._cards_set.get_concrete(str(cost_data.card))
+        new_category = await self._categories_set.get_concrete(str(cost_data.category))
+        return new_card, new_category
+
+    async def _update_card_amount(self, old_card: Card, new_card: Card, old_cost_amount: Decimal, cost_data: CostIn):
+        if str(old_card.uuid) != str(cost_data.card):
+            await self._cards_set.add_income(old_card, old_cost_amount)
+            await self._cards_set.add_cost(new_card, cost_data.amount) # type: ignore
+        else:
+            await self._cards_set.add_income(new_card, old_cost_amount)
+            await self._cards_set.add_cost(new_card, cost_data.amount) # type: ignore
+
+    async def update(self, cost: Cost, cost_data: CostIn) -> Cost:
+        old_card, old_cost_amount = await self._get_old_cost_data(cost)
+        new_card, new_category = await self._get_new_cost_data(cost_data)
+        await cost.update(**cost.dict(exclude={'card', 'category'}), card=new_card, category=new_category)
+        await cost.load()
+        if old_cost_amount == cost_data.amount: return cost # type: ignore
+        await self._update_card_amount(old_card, new_card, old_cost_amount, cost_data)
+        return cost

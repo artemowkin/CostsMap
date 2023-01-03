@@ -32,6 +32,10 @@ app.include_router(costs_router, prefix='/api/costs', tags=['costs'])
 
 @app.on_event('startup')
 async def on_startup():
+    from .authentication.models import User
+    from .categories.models import Category
+    from .cards.models import Card
+    from .costs.models import Cost
     metadata.create_all()
     await database.connect()
 
