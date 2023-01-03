@@ -5,6 +5,7 @@ from asyncpg.exceptions import UniqueViolationError
 from .models import Category
 from .schemas import CategoryIn
 from ..authentication.models import User
+from ..costs.models import Cost
 
 
 def _handle_unique_violation(func):
@@ -22,14 +23,12 @@ class CategoriesSet:
 
     def __init__(self, owner: User):
         self._model = Category
+        self._costs_model = Cost
         self._owner = owner
 
     async def all(self) -> list[Category]:
         all_categories = await self._model.objects.filter(owner__uuid=self._owner.uuid).order_by('title').all()
         return all_categories
-
-    async def get_costs_sum(self, category: Category) -> int:
-        return 0
 
     @_handle_unique_violation
     async def create(self, category_data: CategoryIn) -> Category:

@@ -6,20 +6,25 @@ from .models import Category
 from .dependencies import use_categories_set
 from .services import CategoriesSet
 from .schemas import CategoryIn, CategoryOut
+from ..costs.services import CostsSet
+from ..costs.dependencies import use_costs_set
 
 
 router = APIRouter()
 
 
-async def _construct_category_out(category: Category, categories_set: CategoriesSet) -> CategoryOut:
-    costs_sum = await categories_set.get_costs_sum(category)
+async def _construct_category_out(category: Category, costs_set: CostsSet) -> CategoryOut:
+    costs_sum = await costs_set.get_category_sum(category)
     return CategoryOut(**category.dict(), costs_sum=costs_sum)
 
 
 @router.get('/', response_model=list[CategoryOut])
-async def get_all(categories_set: CategoriesSet = Depends(use_categories_set)):
+async def get_all(
+        categories_set: CategoriesSet = Depends(use_categories_set),
+        costs_set: CostsSet = Depends(use_costs_set)
+    ):
     all_categories = await categories_set.all()
-    categories_out = [await _construct_category_out(category, categories_set) for category in all_categories]
+    categories_out = [await _construct_category_out(category, costs_set) for category in all_categories]
     return categories_out
 
 
@@ -35,10 +40,11 @@ async def create(
 @router.get('/{category_uuid}/', response_model=CategoryOut)
 async def get_concrete(
         category_uuid: UUID,
-        categories_set: CategoriesSet = Depends(use_categories_set)
+        categories_set: CategoriesSet = Depends(use_categories_set),
+        costs_set: CostsSet = Depends(use_costs_set)
     ):
     category = await categories_set.get_concrete(str(category_uuid))
-    costs_sum = await categories_set.get_costs_sum(category)
+    costs_sum = await costs_set.get_category_sum(category)
     return CategoryOut(**category.dict(), costs_sum=costs_sum)
 
 
@@ -55,9 +61,10 @@ async def delete_concrete(
 async def update_category(
         category_uuid: UUID,
         category_data: CategoryIn,
-        categories_set: CategoriesSet = Depends(use_categories_set)
+        categories_set: CategoriesSet = Depends(use_categories_set),
+        costs_set: CostsSet = Depends(use_costs_set)
     ):
     category = await categories_set.get_concrete(str(category_uuid))
     updated_category = await categories_set.update(category, category_data)
-    costs_sum = await categories_set.get_costs_sum(category)
+    costs_sum = await costs_set.get_category_sum(category)
     return CategoryOut(**updated_category.dict(), costs_sum=costs_sum)

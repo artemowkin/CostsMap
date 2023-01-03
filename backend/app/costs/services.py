@@ -2,6 +2,7 @@ from fastapi import status, HTTPException
 
 from ..authentication.models import User
 from ..categories.services import CategoriesSet
+from ..categories.models import Category
 from ..cards.services import CardsSet
 from ..cards.models import Card
 from .models import Cost
@@ -30,6 +31,9 @@ class CostsSet:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Cost with this uuid for current user doesn't exist")
 
         return cost
+
+    async def get_category_sum(self, category: Category) -> int:
+        return await self._model.objects.filter(owner=self._user, category=category).sum('amount')
 
     async def _get_card_with_amount_validation(self, cost_data: CostIn) -> Card:
         card = await self._cards_set.get_concrete(str(cost_data.card))
