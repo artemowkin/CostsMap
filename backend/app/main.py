@@ -1,9 +1,7 @@
-import asyncio
 from argparse import ArgumentParser
 
+import uvicorn
 from fastapi import FastAPI
-from hypercorn.config import Config
-from hypercorn.asyncio import serve
 
 from .project.db import database, metadata
 from .authentication.routes import router as authentication_router
@@ -47,10 +45,7 @@ async def on_shutdown():
 
 def main():
     args = parser.parse_args()
-    config = Config()
-    config.bind = [f"{args.host}:{args.port}"]
-    config.use_reloader = True
-    asyncio.run(serve(app, config)) # type: ignore
+    uvicorn.run('app.main:app', host=args.host, port=args.port, reload=True)
 
 
 if __name__ == '__main__':

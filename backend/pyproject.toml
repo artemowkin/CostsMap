@@ -10,7 +10,6 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-hypercorn = "^0.14.3"
 fastapi = "^0.88.0"
 pydantic = {extras = ["email"], version = "^1.10.2"}
 python-dotenv = "^0.21.0"
