@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from .project.db import database, metadata
 from .authentication.routes import router as authentication_router
@@ -26,6 +27,15 @@ app.include_router(categories_router, prefix='/api/categories', tags=['categorie
 app.include_router(cards_router, prefix='/api/cards', tags=['cards'])
 
 app.include_router(costs_router, prefix='/api/costs', tags=['costs'])
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*']
+)
 
 
 @app.on_event('startup')

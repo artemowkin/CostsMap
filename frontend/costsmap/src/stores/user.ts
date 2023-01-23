@@ -1,25 +1,14 @@
 import type { Ref } from 'vue'
+import type { User, TokenPair } from '@/interfaces/auth'
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useRouter } from 'vue-router'
 import { apiFetch } from '@/globals'
 import cookieStorage from '@/stores/cookieStorage'
 
-interface User {
-  uuid: string
-  username: string
-  currency: '$' | '₽'
-  language: 'russian' | 'english'
-}
-
-interface TokenPair {
-  access_token: string
-  refresh_token: string
-}
-
 const refreshTokens = async (refreshToken: string): Promise<TokenPair | void> => {
   const { data } = await apiFetch('/api/auth/refresh', {
-    headers: { Authorization: `Bearer ${refreshToken}` },
+    credentials: 'include',
     method: 'POST'
   })
 
@@ -58,6 +47,7 @@ const _resetStoreOnError = (
       accessToken.value = null
       refreshToken.value = null
       currentUser.value = null
+      throw err
     }
   }
 

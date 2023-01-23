@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import type { LoginData } from '@/interfaces/auth'
+import { login } from '@/api/auth'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Form, Field, ErrorMessage } from 'vee-validate'
 import * as yup from 'yup'
-import { apiFetch } from '@/globals';
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
@@ -13,41 +14,19 @@ const router = useRouter()
 const formError = ref<string | null>(null)
 
 const schema = yup.object({
-  username: yup.string().required().min(5),
-  password: yup.string().required().min(8),
+  email: yup.string().required().email(),
+  password: yup.string().required(),
 })
 
-interface LoginData {
-  username: string
-  password: string
-}
-
 const loginData = reactive<LoginData>({
-  username: '',
+  email: '',
   password: '',
 })
 
 const onSubmit = async () => {
-  try {
-    const response = await apiFetch('/api/auth/login', {
-      body: loginData,
-      method: 'POST'
-    })
-    await userStore.setTokens(response)
-    router.push({ name: 'categories' })
-  } catch (err) {
-    switch (err?.response?.status) {
-      case 422:
-        formError.value = "Incorrect input"
-        break
-      case 401:
-        formError.value = "Incorrect username or password"
-        break
-      default:
-        formError.value = "Server error"
-        break
-    }
-  }
+  const tokenPair = await login(loginData, (msg) => formError.value = msg)
+  await userStore.setTokens(tokenPair)
+  router.push({ name: 'categories' })
 }
 </script>
 
@@ -57,8 +36,8 @@ const onSubmit = async () => {
       <h3>Log In</h3>
       <div v-if="formError" class="form_error">{{ formError }}</div>
       <div class="input_field">
-        <Field name="username" v-model="loginData.username" placeholder="username" />
-        <ErrorMessage name="username" />
+        <Field name="email" v-model="loginData.email" placeholder="email" />
+        <ErrorMessage name="email" />
       </div>
 
       <div class="input_field">

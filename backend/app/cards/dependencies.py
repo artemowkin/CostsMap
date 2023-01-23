@@ -6,4 +6,5 @@ from .services import CardsSet
 
 
 def use_cards_set(user: User = Depends(auth_required)) -> CardsSet:
+    """Returns initialized cards set for current user"""
     return CardsSet(user)

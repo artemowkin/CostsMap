@@ -12,6 +12,12 @@ from .schemas import CostIn
 
 
 class CostsSet:
+    """Costs logic container
+    
+    :param user: Current user instance
+    :param categories_set: Categories logic container
+    :param cards_set: Cards logic container
+    """
 
     def __init__(self, user: User, categories_set: CategoriesSet, cards_set: CardsSet):
         self._user = user
@@ -20,6 +26,10 @@ class CostsSet:
         self._cards_set = cards_set
 
     async def all(self) -> list[Cost]:
+        """Returns all user costs
+        
+        :returns: All costs filtered by user
+        """
         all_costs = await self._model.objects.filter(owner__uuid=self._user.uuid).order_by('-pub_datetime').all()
         for cost in all_costs:
             await cost.category.load()
@@ -28,6 +38,12 @@ class CostsSet:
         return all_costs
 
     async def get_concrete(self, cost_uuid: str) -> Cost:
+        """Returns cocnrete user cost by uuid
+
+        :param cost_uuid: Cost uuid
+        :raises: HTTPException(404) if cost with this uuid for user doesn't exists
+        :returns: Getted cost with this uuid
+        """
         cost = await self._model.objects.get_or_none(uuid=cost_uuid, owner__uuid=self._user.uuid)
         if not cost:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Cost with this uuid for current user doesn't exist")
@@ -35,9 +51,20 @@ class CostsSet:
         return cost
 
     async def get_category_sum(self, category: Category) -> int:
+        """Returns category costs sum
+        
+        :param category: Category instance
+        :returns: Sum of costs in this category
+        """
         return await self._model.objects.filter(owner=self._user, category=category).sum('amount') or 0
 
     async def _get_card_with_amount_validation(self, cost_data: CostIn) -> Card:
+        """Returns card with validation of cost amount
+        
+        :param cost_data: Creating cost data
+        :raises HTTPException(409) if card amount is less than cost amount
+        :returns: Updating card
+        """
         card = await self._cards_set.get_concrete(str(cost_data.card))
         if card.amount < cost_data.amount: # type: ignore
             raise HTTPException(status.HTTP_409_CONFLICT, "Card amount is less than cost amountd")
@@ -45,6 +72,11 @@ class CostsSet:
         return card
 
     async def create(self, cost_data: CostIn) -> Cost:
+        """Creates a new cost for user and card from cost_data
+        
+        :param cost_data: Creating cost data
+        :returns: Created cost instance
+        """
         category = await self._categories_set.get_concrete(str(cost_data.category))
         card = await self._get_card_with_amount_validation(cost_data)
         creation_data = cost_data.dict(exclude={'category', 'card'})
@@ -55,22 +87,43 @@ class CostsSet:
         return created_cost
 
     async def delete(self, cost: Cost) -> None:
+        """Deletes concrete user cost
+        
+        :param cost: Deleting cost instance
+        """
         await cost.card.load()
         await cost.delete()
         await self._cards_set.add_income(cost.card, cost.amount)
 
     async def _get_old_cost_data(self, cost: Cost) -> tuple[Card, Decimal]:
+        """Returns old cost card and amount
+        
+        :params cost: Cost that old data will be returned
+        :returns: tuple with old cost card and old cost amount
+        """
         await cost.card.load()
         old_card = cost.card
         old_cost_amount = cost.amount
         return old_card, old_cost_amount
 
     async def _get_new_cost_data(self, cost_data: CostIn) -> tuple[Card, Category]:
+        """Returns new cost card and new cost category
+        
+        :param cost_data: New cost data
+        :returns: Tuple with new cost card and new cost category
+        """
         new_card = await self._cards_set.get_concrete(str(cost_data.card))
         new_category = await self._categories_set.get_concrete(str(cost_data.category))
         return new_card, new_category
 
     async def _update_card_amount(self, old_card: Card, new_card: Card, old_cost_amount: Decimal, cost_data: CostIn):
+        """Updates cost card amount
+        
+        :param old_card: old cost card
+        :param new_card: new cost card
+        :old_cost_amount: old cost amount
+        :cost_data: new cost data
+        """
         if str(old_card.uuid) != str(cost_data.card):
             await self._cards_set.add_income(old_card, old_cost_amount)
             await self._cards_set.add_cost(new_card, cost_data.amount) # type: ignore
@@ -79,6 +132,11 @@ class CostsSet:
             await self._cards_set.add_cost(new_card, cost_data.amount) # type: ignore
 
     async def update(self, cost: Cost, cost_data: CostIn) -> Cost:
+        """Updates concrete user cost and card amount
+        
+        :param cost: Updating cost
+        :param cost_data: New cost data
+        """
         old_card, old_cost_amount = await self._get_old_cost_data(cost)
         new_card, new_category = await self._get_new_cost_data(cost_data)
         await cost.update(**cost.dict(exclude={'card', 'category'}), card=new_card, category=new_category)

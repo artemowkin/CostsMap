@@ -14,4 +14,5 @@ def use_costs_set(
         categories_set: CategoriesSet = Depends(use_categories_set),
         cards_set: CardsSet = Depends(use_cards_set),
     ) -> CostsSet:
+    """Returns initialized costs set for current user"""
     return CostsSet(user, categories_set, cards_set)

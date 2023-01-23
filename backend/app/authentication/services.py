@@ -55,13 +55,13 @@ class JWTManager:
         return token
 
     def decode_token(self, token: str) -> dict:
-        credentials_exception = HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect token")
+        credentials_exception = HTTPException(status.HTTP_403_FORBIDDEN, "Incorrect token")
         try:
             payload = jwt.decode(token, self._secret, algorithms=[self._alg])
             if not 'email' in payload or not 'exp' in payload or payload['exp'] <= datetime.utcnow().timestamp():
                 raise credentials_exception
 
-            return payload
+            return dict(payload)
         except JWTError:
             raise credentials_exception
 
@@ -87,24 +87,25 @@ class SessionStorage:
         self._db = redis_db
 
     async def add(self, email: str, token_pair: TokenPair):
-        await self._db.hset(email, token_pair.access_token, token_pair.refresh_token)
+        await self._db.hset(email, token_pair.refresh_token, token_pair.access_token)
 
-    async def delete(self, email: str, token: str):
-        await self._db.hdel(email, token)
+    async def delete_by_access_token(self, email: str, token: str):
+        sessions = await self._db.hgetall(email)
+        refresh_tokens = [refresh for refresh in sessions if sessions[refresh] == token.encode()]
+        if not refresh_tokens: return
+        await self._db.hdel(email, refresh_tokens[0].decode())
 
     async def clear_refresh_token_sessions(self, email: str, token: str):
-        sessions = await self._db.hgetall(email)
-        access_tokens = [access_token for access_token in sessions if sessions[access_token] == token.encode()]
-        if not access_tokens: return
-        await self._db.hdel(email, *access_tokens)
+        await self._db.hdel(email, token)
 
-    async def check_is_session_active(self, email: str, access_token: str) -> bool:
-        refresh_token = await self._db.hget(email, access_token)
-        return bool(refresh_token)
-
-    async def check_refresh_token(self, email: str, refresh_token: str) -> bool:
+    async def check_is_session_active(self, email: str, refresh_token: str) -> bool:
         sessions = await self._db.hgetall(email)
-        return refresh_token.encode() in sessions.values()
+        return refresh_token.encode() in sessions
+
+    async def check_access_token(self, email: str, access_token: str) -> bool:
+        sessions = await self._db.hgetall(email)
+        current_sessions = [refresh for refresh in sessions if sessions[refresh] == access_token.encode()]
+        return bool(current_sessions)
 
 
 class AuthStore:
@@ -122,7 +123,7 @@ class AuthStore:
     async def login(self, login_data: LoginData) -> TokenPair:
         user = await self._db.get_user_by_email(login_data.email)
         if not user or not pwd_context.verify(login_data.password, user.password):
-            raise HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail="Incorrect email or password")
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password")
 
         token_pair = self._generate_token_pair(login_data.email)
         await self._session.add(login_data.email, token_pair)
@@ -140,23 +141,23 @@ class AuthStore:
         payload = self._jwt.decode_token(token)
         db_user = await self._db.get_user_by_email(payload['email'])
         if not db_user:
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect token")
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Incorrect token")
 
         return db_user
 
     async def get_user_from_access_token(self, token: str) -> User:
         db_user = await self._get_user_from_token(token)
-        is_session_active = await self._session.check_is_session_active(db_user.email, token)
+        is_session_active = await self._session.check_access_token(db_user.email, token)
         if not is_session_active:
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect token")
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Incorrect token")
 
         return db_user
 
     async def _get_user_from_refresh_token(self, token: str) -> User:
         db_user = await self._get_user_from_token(token)
-        is_token_in_session = await self._session.check_refresh_token(db_user.email, token)
+        is_token_in_session = await self._session.check_is_session_active(db_user.email, token)
         if not is_token_in_session:
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect token")
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Incorrect token")
 
         return db_user
 
@@ -170,4 +171,4 @@ class AuthStore:
 
     async def logout(self, token: str) -> None:
         db_user = await self.get_user_from_access_token(token)
-        await self._session.delete(db_user.email, token)
+        await self._session.delete_by_access_token(db_user.email, token)
