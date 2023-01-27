@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from .models import Category
 from .dependencies import use_categories_set
@@ -8,25 +8,33 @@ from .services import CategoriesSet
 from .schemas import CategoryIn, CategoryOut
 from ..costs.services import CostsSet
 from ..costs.dependencies import use_costs_set
+from ..utils.dates import get_current_month
 
 
 router = APIRouter()
 
 
-async def _construct_category_out(category: Category, costs_set: CostsSet) -> CategoryOut:
-    """Constructs category out schema with category costs sum"""
-    costs_sum = await costs_set.get_category_sum(category)
+async def _construct_category_out(month: str, category: Category, costs_set: CostsSet) -> CategoryOut:
+    """Constructs category out schema with category costs sum
+    
+    :param month: Month in format YYYY-MM
+    :param category: Constructing category
+    :param costs_set: CostsSet to get category costs for the month
+    """
+    costs_sum = await costs_set.get_category_sum(category, month)
     return CategoryOut(**category.dict(), costs_sum=costs_sum)
 
 
 @router.get('/', response_model=list[CategoryOut])
 async def get_all(
+        month: str | None = Query(None, regex=r"\d{4}-\d{2}"),
         categories_set: CategoriesSet = Depends(use_categories_set),
         costs_set: CostsSet = Depends(use_costs_set)
     ):
     """Returns all current user categories"""
+    month = month if month else get_current_month()
     all_categories = await categories_set.all()
-    categories_out = [await _construct_category_out(category, costs_set) for category in all_categories]
+    categories_out = [await _construct_category_out(month, category, costs_set) for category in all_categories]
     return categories_out
 
 

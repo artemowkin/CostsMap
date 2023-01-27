@@ -1,6 +1,7 @@
 FROM python:latest
 WORKDIR /code
-COPY backend/pyproject.toml backend/poetry.lock backend/README.md /code/
+# ENV PDM_USE_VENV=0
+COPY backend/pyproject.toml backend/pdm.lock /code/
 COPY backend/app/ /code/app/
-RUN pip install poetry
-RUN python -m poetry install
+RUN pip install pdm
+RUN python -m pdm install

@@ -16,6 +16,12 @@ dependencies = [
     "asyncpg>=0.27.0",
     "passlib>=1.7.4",
     "redis>=4.4.2",
+    "python-dateutil>=2.8.2",
+    "psycopg2-binary>=2.9.5",
+    "pydantic[email]>=1.10.2",
 ]
 requires-python = ">=3.9"
 license = {text = "MIT"}
+
+[tool.pdm.scripts]
+dev = "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"

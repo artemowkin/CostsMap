@@ -24,7 +24,7 @@ services:
       - ./backend/app/:/code/app
     ports:
       - 8000:8000
-    command: python -m poetry run dev
+    command: python -m pdm run dev
   frontend:
     build:
       context: .

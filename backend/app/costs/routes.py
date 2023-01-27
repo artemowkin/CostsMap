@@ -1,11 +1,12 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from .models import Cost
 from .dependencies import use_costs_set
 from .services import CostsSet
 from .schemas import CostIn
+from ..utils.dates import get_current_month
 
 
 router = APIRouter()
@@ -15,9 +16,10 @@ cost_response_schema = Cost.get_pydantic(exclude={'owner', 'card__owner', 'categ
 
 
 @router.get('/', response_model=list[cost_response_schema])
-async def all_costs(costs_set: CostsSet = Depends(use_costs_set)):
+async def all_costs(month: str | None = Query(None, regex=r"\d{4}-\d{2}"), costs_set: CostsSet = Depends(use_costs_set)):
     """Returns all current user costs"""
-    costs = await costs_set.all()
+    month = month if month else get_current_month()
+    costs = await costs_set.all(month)
     return costs
 
 

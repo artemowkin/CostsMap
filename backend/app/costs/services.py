@@ -1,5 +1,7 @@
+from datetime import date
 from decimal import Decimal
 
+from dateutil.relativedelta import relativedelta
 from fastapi import status, HTTPException
 
 from ..authentication.models import User
@@ -25,12 +27,32 @@ class CostsSet:
         self._categories_set = categories_set
         self._cards_set = cards_set
 
-    async def all(self) -> list[Cost]:
+    async def _get_all_month_categories_uuids(self, month: str) -> list[str]:
+        """Returns all costs uuids for month
+        
+        :param month: Month to get costs in format YYYY-MM
+        :returns: All costs uuids filtered by user and month
+        """
+        year, month = month.split('-')
+        query = (
+            "select uuid from costs "
+            "where owner = :owner_id and "
+            "extract(year from date) = :year and extract(month from date) = :month"
+        )
+        uuids = await Cost.Meta.database.fetch_all(query, {
+            'owner_id': self._user.uuid, 'year': year, 'month': month
+        })
+        uuids = [record.uuid for record in uuids]
+        return uuids
+
+    async def all(self, month: str) -> list[Cost]:
         """Returns all user costs
         
-        :returns: All costs filtered by user
+        :param month: Month to get costs in format YYYY-MM
+        :returns: All costs filtered by user and month
         """
-        all_costs = await self._model.objects.filter(owner__uuid=self._user.uuid).order_by('-pub_datetime').all()
+        uuids = await self._get_all_month_categories_uuids(month)
+        all_costs = await self._model.objects.filter(uuid__in=uuids).order_by('-pub_datetime').all()
         for cost in all_costs:
             await cost.category.load()
             await cost.card.load()
@@ -50,13 +72,23 @@ class CostsSet:
 
         return cost
 
-    async def get_category_sum(self, category: Category) -> int:
+    async def get_category_sum(self, category: Category, month: str) -> int:
         """Returns category costs sum
         
         :param category: Category instance
+        :param month: Costs month in format YYYY-MM
         :returns: Sum of costs in this category
         """
-        return await self._model.objects.filter(owner=self._user, category=category).sum('amount') or 0
+        year, month = month.split('-')
+        query = (
+            f"select sum(amount) from costs "
+            "where owner = :owner_id and category = :category_id and "
+            "extract(year from date) = :year and extract(month from date) = :month"
+        )
+        return await Cost.Meta.database.fetch_val(query, {
+            'owner_id': self._user.uuid,
+            'category_id': category.uuid, 'year': year, 'month': month
+        }) or 0
 
     async def _get_card_with_amount_validation(self, cost_data: CostIn) -> Card:
         """Returns card with validation of cost amount
