@@ -19,7 +19,7 @@ services:
       - POSTGRES_USER=fastapi
       - POSTGRES_PASSWORD=fastapi
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - smth:/var/lib/postgresql/data/
 
 volumes:
-  postgres_data:
+  smth:

@@ -9,7 +9,7 @@ const props = defineProps(['setShowForm'])
 
 const title = ref("")
 const costsLimit = ref("")
-const color = ref("")
+const color = ref("#000000")
 const isTitleValid = ref(false)
 const isCostsLimitValid = ref(true)
 const showError = ref(false)

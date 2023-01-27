@@ -26,12 +26,12 @@ import Statistic from '../assets/icons/statistic.svg'
         </div>
         <small>costs</small>
     </RouterLink>
-    <RouterLink to="/statistic">
+    <!-- <RouterLink to="/statistic">
         <div class="logo_container">
           <img :src="Statistic" />
         </div>
         <small>statistic</small>
-    </RouterLink>
+    </RouterLink> -->
     <!-- <RouterLink to="/account">
         <div class="logo_container"></div>
         <small>account</small>

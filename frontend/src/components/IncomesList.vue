@@ -25,7 +25,7 @@ const toLocaleDate = (dateString) => {
                 <div class="income_date_total">+ {{ dateIncomes.total }}{{ userStore.user.currency }}</div>
             </div>
             <div class="income_item" v-for="income in dateIncomes.incomes" :key="income.id" @click="props.showForm(true, income.id)" >
-                <div class="income_card_image" :style="{ backgroundColor: income.card.color }"></div>
+                <div class="income_card_image" :style="{ backgroundColor: income.card.color }">{{ userStore.user.currency }}</div>
                 <h3 class="income_card_title">{{ income.card.title }}</h3>
                 <div class="income_amount">+ {{ income.userCurrencyAmount }}{{ userStore.user.currency }}</div>
             </div>

@@ -12,7 +12,7 @@ const props = defineProps(['setShowAddCard'])
 const currencies = ref([])
 const title = ref("")
 const currency = ref("")
-const color = ref("")
+const color = ref("#000000")
 const isTitleValid = ref(false)
 const showError = ref(false)
 

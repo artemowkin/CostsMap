@@ -11,7 +11,7 @@ cardsStore.loadCards()
 <template>
     <div class="cards_container">
         <div v-for="card in cardsStore.cards" class="card_item" :key="card.id" @click="props.showForm(true, card.id)">
-            <div class="card_icon" :style="{ backgroundColor: card.color }"></div>
+            <div class="card_icon" :style="{ backgroundColor: card.color }">{{ card.currency }}</div>
             <div class="card_info_block">
                 <h2 class="card_title">{{ card.title }}</h2>
                 <div class="card_amount">{{ card.amount }}{{ card.currency }}</div>
@@ -43,6 +43,9 @@ cardsStore.loadCards()
     height: 60px;
     border-radius: 100px;
     opacity: .6;
+    display: grid;
+    place-content: center;
+    font-size: 2rem;
 }
 
 .card_info_block {
