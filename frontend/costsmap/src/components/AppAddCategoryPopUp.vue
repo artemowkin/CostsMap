@@ -44,7 +44,7 @@ const onSubmit = async () => {
     })
     await categoriesStore.load()
     emits('close')
-  } catch (err) {
+  } catch (err: any) {
     switch (err?.response?.status) {
       case 401:
       case 403:

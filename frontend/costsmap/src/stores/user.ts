@@ -3,25 +3,7 @@ import type { User, TokenPair } from '@/interfaces/auth'
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useRouter } from 'vue-router'
-import { apiFetch } from '@/globals'
-import cookieStorage from '@/stores/cookieStorage'
-
-const refreshTokens = async (refreshToken: string): Promise<TokenPair | void> => {
-  const { data } = await apiFetch('/api/auth/refresh', {
-    credentials: 'include',
-    method: 'POST'
-  })
-
-  return data
-}
-
-const loadCurrentUser = async (accessToken: string): Promise<User | void> => {
-  const response = await apiFetch('/api/auth/me', {
-    headers: { Authorization: `Bearer ${accessToken}` }
-  })
-
-  return response
-}
+import { refreshTokens, loadCurrentUser } from '@/api/auth'
 
 const _redirectNotAuthorized = (accessToken: string | null, refreshToken: string | null) => {
   const router = useRouter()
@@ -55,14 +37,14 @@ const _resetStoreOnError = (
 }
 
 export const useUserStore = defineStore('user', () => {
-  const accessToken = ref<string | null>(localStorage.getItem('accessToken'))
-  const refreshToken = ref<string | null>(localStorage.getItem('refreshToken'))
+  const accessToken = ref<string | null>(null)
+  const refreshToken = ref<string | null>(null)
   const currentUser = ref<User | null>(null)
 
   const refresh = _resetStoreOnError(async () => {
     _redirectNotAuthorized(accessToken.value, refreshToken.value)
 
-    const tokenPair = await refreshTokens(refreshToken.value as string)
+    const tokenPair = await refreshTokens()
 
     if (tokenPair) {
       accessToken.value = tokenPair.access_token
@@ -86,7 +68,5 @@ export const useUserStore = defineStore('user', () => {
 
   return { accessToken, refreshToken, currentUser, refresh, load, setTokens }
 }, {
-  persist: {
-    storage: cookieStorage
-  }
+  persist: true
 })

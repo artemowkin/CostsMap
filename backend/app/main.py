@@ -9,6 +9,7 @@ from .authentication.routes import router as authentication_router
 from .categories.routes import router as categories_router
 from .cards.routes import router as cards_router
 from .costs.routes import router as costs_router
+from .incomes.routes import router as incomes_router
 
 
 parser = ArgumentParser()
@@ -28,6 +29,8 @@ app.include_router(cards_router, prefix='/api/cards', tags=['cards'])
 
 app.include_router(costs_router, prefix='/api/costs', tags=['costs'])
 
+app.include_router(incomes_router, prefix='/api/incomes', tags=['incomes'])
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,6 +47,7 @@ async def on_startup():
     from .categories.models import Category
     from .cards.models import Card
     from .costs.models import Cost
+    from .incomes.models import Income
     metadata.create_all()
     await database.connect()
 

@@ -26,6 +26,7 @@ const loginData = reactive<LoginData>({
 const onSubmit = async () => {
   const tokenPair = await login(loginData, (msg) => formError.value = msg)
   await userStore.setTokens(tokenPair)
+  console.log('redirecting on categories')
   router.push({ name: 'categories' })
 }
 </script>

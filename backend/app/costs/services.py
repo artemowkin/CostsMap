@@ -1,7 +1,5 @@
-from datetime import date
 from decimal import Decimal
 
-from dateutil.relativedelta import relativedelta
 from fastapi import status, HTTPException
 
 from ..authentication.models import User
@@ -27,7 +25,7 @@ class CostsSet:
         self._categories_set = categories_set
         self._cards_set = cards_set
 
-    async def _get_all_month_categories_uuids(self, month: str) -> list[str]:
+    async def _get_all_month_costs_uuids(self, month: str) -> list[str]:
         """Returns all costs uuids for month
         
         :param month: Month to get costs in format YYYY-MM
@@ -46,12 +44,12 @@ class CostsSet:
         return uuids
 
     async def all(self, month: str) -> list[Cost]:
-        """Returns all user costs
+        """Returns all user costs for the month
         
         :param month: Month to get costs in format YYYY-MM
         :returns: All costs filtered by user and month
         """
-        uuids = await self._get_all_month_categories_uuids(month)
+        uuids = await self._get_all_month_costs_uuids(month)
         all_costs = await self._model.objects.filter(uuid__in=uuids).order_by('-pub_datetime').all()
         for cost in all_costs:
             await cost.category.load()
@@ -153,8 +151,8 @@ class CostsSet:
         
         :param old_card: old cost card
         :param new_card: new cost card
-        :old_cost_amount: old cost amount
-        :cost_data: new cost data
+        :param old_cost_amount: old cost amount
+        :param cost_data: new cost data
         """
         if str(old_card.uuid) != str(cost_data.card):
             await self._cards_set.add_income(old_card, old_cost_amount)

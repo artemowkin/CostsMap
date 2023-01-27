@@ -29,7 +29,7 @@ const _loadUserData = async (userStore: any): Promise<{ name: string } | void> =
   try {
     await userStore.refresh()
     await userStore.load()
-  } catch (err) {
+  } catch (err: any) {
     switch (err?.response?.status) {
       case 401:
       case 403:
