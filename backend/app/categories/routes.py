@@ -22,7 +22,9 @@ async def _construct_category_out(month: str, category: Category, costs_set: Cos
     :param costs_set: CostsSet to get category costs for the month
     """
     costs_sum = await costs_set.get_category_sum(category, month)
-    return CategoryOut(**category.dict(), costs_sum=costs_sum)
+    schema = CategoryOut.from_orm(category)
+    schema.costs_sum = costs_sum
+    return schema
 
 
 @router.get('/', response_model=list[CategoryOut])
@@ -45,19 +47,20 @@ async def create(
     ):
     """Creates new category for current user"""
     created_category = await categories_set.create(category_data)
-    return CategoryOut(**created_category.dict(), costs_sum=0)
+    return CategoryOut.from_orm(created_category)
 
 
 @router.get('/{category_uuid}/', response_model=CategoryOut)
 async def get_concrete(
         category_uuid: UUID,
+        month: str | None = Query(None, regex=r"\d{4}-\d{2}"),
         categories_set: CategoriesSet = Depends(use_categories_set),
         costs_set: CostsSet = Depends(use_costs_set)
     ):
     """Returns cocnrete user category by uuid"""
+    month = month if month else get_current_month()
     category = await categories_set.get_concrete(str(category_uuid))
-    costs_sum = await costs_set.get_category_sum(category)
-    return CategoryOut(**category.dict(), costs_sum=costs_sum)
+    return await _construct_category_out(month, category, costs_set)
 
 
 @router.delete('/{category_uuid}/', status_code=204)
@@ -78,7 +81,7 @@ async def update_category(
         costs_set: CostsSet = Depends(use_costs_set)
     ):
     """Updates concrete user category by uuid using data from request"""
+    month = get_current_month()
     category = await categories_set.get_concrete(str(category_uuid))
     updated_category = await categories_set.update(category, category_data)
-    costs_sum = await costs_set.get_category_sum(category)
-    return CategoryOut(**updated_category.dict(), costs_sum=costs_sum)
+    return await _construct_category_out(month, updated_category, costs_set)

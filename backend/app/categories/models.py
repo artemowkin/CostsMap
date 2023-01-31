@@ -1,17 +1,22 @@
 from uuid import uuid4
 
-import ormar
+from sqlalchemy import ForeignKey, CheckConstraint
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import relationship
+from sqlalchemy.types import UUID, String
 
 from ..authentication.models import User
-from ..project.models import BaseMeta
+from ..project.db import Base
 
 
-class Category(ormar.Model):
-    uuid: str = ormar.String(primary_key=True, max_length=36, default=lambda: str(uuid4())) # type: ignore
-    title: str = ormar.String(max_length=50) # type: ignore
-    costs_limit: int = ormar.Integer(minimum=0, nullable=False) # type: ignore
-    color: str = ormar.String(max_length=8) # type: ignore
-    owner: User | dict | None = ormar.ForeignKey(User, ondelete='CASCADE')
+class Category(Base):
+    __tablename__ = "categories"
 
-    class Meta(BaseMeta):
-        constraints = [ormar.UniqueColumns('title', 'owner')]
+    uuid = mapped_column(UUID, primary_key=True, default=uuid4)
+    title: Mapped[str] = mapped_column(String(length=50), unique=True)
+    costs_limit: Mapped[int] = mapped_column(nullable=False)
+    color: Mapped[str] = mapped_column(String(length=8))
+    owner_id: Mapped[str] = mapped_column(ForeignKey(User.uuid, ondelete='CASCADE'))
+    owner: Mapped[User] = relationship()
+    costs = relationship('Cost', back_populates='category')

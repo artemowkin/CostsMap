@@ -4,11 +4,13 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from fastapi.security import HTTPBearer
 from fastapi import HTTPException, status
-from asyncpg.exceptions import UniqueViolationError
+from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound, IntegrityError
 
 from .schemas import LoginData, TokenPair, RegistrationData
 from .models import User
 from ..project.redis import redis_db
+from ..project.db import async_session
 
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -25,8 +27,19 @@ def _handle_unique_violation(func):
     async def wrapper(*args, **kwargs):
         try:
             return await func(*args, **kwargs)
-        except UniqueViolationError:
+        except IntegrityError:
             raise HTTPException(status.HTTP_409_CONFLICT, "User with this email already exists")
+
+    return wrapper
+
+
+def _handle_not_found_error(func):
+
+    async def wrapper(*args, **kwargs):
+        try:
+            return await func(*args, **kwargs)
+        except NoResultFound:
+            return None
 
     return wrapper
 
@@ -71,14 +84,22 @@ class DBAuth:
     def __init__(self):
         self._model = User
 
+    @_handle_not_found_error
     async def get_user_by_email(self, email: str) -> User | None:
-        user = await self._model.objects.get_or_none(email=email)
-        return user
+        async with async_session() as session:
+            stmt = select(User).where(User.email == email)
+            result = await session.execute(stmt)
+            return result.scalar_one()
 
     async def create_user(self, registration_data: RegistrationData, hashed_password: str) -> User:
-        user_data = registration_data.dict(exclude={'password1': True, 'password2': True})
-        user = await self._model.objects.create(**user_data, password=hashed_password)
-        return user
+        async with async_session() as session:
+            user = User(
+                **registration_data.dict(exclude={'password1': True, 'password2': True}),
+                password=hashed_password
+            )
+            session.add(user)
+            await session.commit()
+            return user
 
 
 class SessionStorage:

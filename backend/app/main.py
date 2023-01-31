@@ -4,12 +4,12 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .project.db import database, metadata
 from .authentication.routes import router as authentication_router
 from .categories.routes import router as categories_router
 from .cards.routes import router as cards_router
 from .costs.routes import router as costs_router
 from .incomes.routes import router as incomes_router
+from .project.db import Base, engine
 
 
 parser = ArgumentParser()
@@ -43,18 +43,13 @@ app.add_middleware(
 
 @app.on_event('startup')
 async def on_startup():
-    from .authentication.models import User
-    from .categories.models import Category
-    from .cards.models import Card
-    from .costs.models import Cost
-    from .incomes.models import Income
-    metadata.create_all()
-    await database.connect()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 
 @app.on_event('shutdown')
 async def on_shutdown():
-    await database.disconnect()
+    await engine.dispose()
 
 
 def main():

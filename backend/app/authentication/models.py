@@ -1,15 +1,16 @@
 from uuid import uuid4
 
-import ormar
+from sqlalchemy.types import UUID, String
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
 
-from ..project.models import BaseMeta
-from .schemas import CurrenciesEnum
+from ..project.db import Base
 
 
-class User(ormar.Model):
-    uuid: str = ormar.String(primary_key=True, max_length=36, default=lambda: str(uuid4())) # type: ignore
-    email: str = ormar.String(unique=True, max_length=100) # type: ignore
-    password: str = ormar.String(max_length=500) # type: ignore
-    currency: CurrenciesEnum = ormar.String(max_length=1) # type: ignore
+class User(Base):
+    __tablename__ = 'users'
 
-    class Meta(BaseMeta): ...
+    uuid = mapped_column(UUID, primary_key=True, default=uuid4)
+    email: Mapped[str] = mapped_column(String(length=200), unique=True)
+    password: Mapped[str] = mapped_column(String(length=500))
+    currency: Mapped[str] = mapped_column(String(length=1))

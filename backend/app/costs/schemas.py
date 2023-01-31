@@ -1,11 +1,27 @@
+import datetime
+from decimal import Decimal
 from uuid import UUID
 
-from .models import Cost
+from pydantic import BaseModel, Field
+
+from ..cards.schemas import CardOut
+from ..categories.schemas import CategoryWithoutCostsSum
 
 
-BaseCost = Cost.get_pydantic(exclude={'uuid', 'owner', 'category', 'card', 'pub_datetime'})
+class BaseCost(BaseModel):
+    amount: Decimal = Field(..., gt=0.01)
+    date: datetime.date
 
 
 class CostIn(BaseCost):
-    category: UUID
-    card: UUID
+    category_id: UUID
+    card_id: UUID
+
+
+class CostOut(BaseCost):
+    uuid: UUID
+    card: CardOut
+    category: CategoryWithoutCostsSum
+
+    class Config:
+        orm_mode = True

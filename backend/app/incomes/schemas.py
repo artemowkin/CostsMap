@@ -1,10 +1,24 @@
+import datetime
+from decimal import Decimal
 from uuid import UUID
 
-from .models import Income
+from pydantic import BaseModel, Field
+
+from ..cards.schemas import CardOut
 
 
-BaseIncome = Income.get_pydantic(exclude={'uuid', 'owner', 'category', 'card', 'pub_datetime'})
+class BaseIncome(BaseModel):
+    amount: Decimal = Field(..., gt=0)
+    date: datetime.date
 
 
 class IncomeIn(BaseIncome):
-    card: UUID
+    card_id: UUID
+
+
+class IncomeOut(BaseIncome):
+    uuid: UUID
+    card: CardOut
+
+    class Config:
+        orm_mode = True

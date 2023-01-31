@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, Cookie
 
-from .schemas import TokenPair, LoginData, RegistrationData
+from .schemas import TokenPair, LoginData, RegistrationData, UserOut
 from .dependencies import use_auth_store, use_token, auth_required
 from .services import AuthStore
-from .models import User
 
 
 router = APIRouter()
@@ -27,9 +26,9 @@ async def refresh(refresh_token: str = Cookie(...), auth_store: AuthStore = Depe
     return token_pair
 
 
-@router.get('/me/', response_model=User.get_pydantic(exclude={'password'}))
-async def me(user: User = Depends(auth_required)):
-    return user
+@router.get('/me/', response_model=UserOut)
+async def me(user: UserOut = Depends(auth_required)):
+    return UserOut.from_orm(user)
 
 
 @router.post('/logout/', status_code=204)

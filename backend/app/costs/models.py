@@ -1,22 +1,32 @@
 from uuid import uuid4
-from datetime import date as date_, datetime
-from decimal import Decimal
+import datetime
 
-import ormar
+from sqlalchemy import ForeignKey, CheckConstraint
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import relationship
+from sqlalchemy.types import UUID, Numeric
+from sqlalchemy import func
 
 from ..authentication.models import User
 from ..categories.models import Category
 from ..cards.models import Card
-from ..project.models import BaseMeta
+from ..project.db import Base
 
 
-class Cost(ormar.Model):
-    uuid: str = ormar.String(primary_key=True, max_length=36, default=lambda: str(uuid4())) # type: ignore
-    amount: Decimal = ormar.Decimal(minimum=0.01, max_digits=12, decimal_places=2) # type: ignore
-    date: date_ = ormar.Date()
-    category: Category = ormar.ForeignKey(Category, ondelete='CASCADE', skip_reverse=False)
-    card: Card = ormar.ForeignKey(Card, ondelete='CASCADE')
-    owner: User = ormar.ForeignKey(User, ondelete='CASCADE')
-    pub_datetime: datetime = ormar.DateTime(default=datetime.now) # type: ignore
+class Cost(Base):
+    __tablename__ = 'costs'
+    __table_args__ = (
+        CheckConstraint('amount > 0'),
+    )
 
-    class Meta(BaseMeta): ...
+    uuid = mapped_column(UUID, primary_key=True, default=uuid4)
+    amount = mapped_column(Numeric(precision=12, scale=2))
+    date: Mapped[datetime.date] = mapped_column(server_default=func.now())
+    category_id: Mapped[str] = mapped_column(ForeignKey(Category.uuid))
+    category: Mapped[Category] = relationship(back_populates='costs')
+    card_id: Mapped[str] = mapped_column(ForeignKey(Card.uuid))
+    card: Mapped[Card] = relationship(back_populates='costs')
+    owner_id: Mapped[str] = mapped_column(ForeignKey(User.uuid))
+    owner: Mapped[User] = relationship()
+    pub_datetime: Mapped[datetime.datetime] = mapped_column(server_default=func.now())

@@ -8,6 +8,14 @@ class CurrenciesEnum(str, Enum):
     dollars = '$'
 
 
+class UserOut(BaseModel):
+    email: EmailStr
+    currency: CurrenciesEnum
+
+    class Config:
+        orm_mode = True
+
+
 class TokenPair(BaseModel):
     access_token: str
     refresh_token: str
