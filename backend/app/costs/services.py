@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from dateutil.relativedelta import relativedelta
 from fastapi import status, HTTPException
-from sqlalchemy import select, delete, update
+from sqlalchemy import select, delete, update, insert
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,11 +41,12 @@ class CostsSet:
     :param cards_set: Cards logic container
     """
 
-    def __init__(self, user: User, categories_set: CategoriesSet, cards_set: CardsSet):
+    def __init__(self, user: User, categories_set: CategoriesSet, cards_set: CardsSet, session: AsyncSession):
         self._user = user
         self._model = Cost
         self._categories_set = categories_set
         self._cards_set = cards_set
+        self._session = session
 
     async def all(self, month: str) -> list[Cost]:
         """Returns all user costs for the month
@@ -55,13 +56,12 @@ class CostsSet:
         """
         month_date = datetime.date.fromisoformat(month + '-01')
         next_month = month_date + relativedelta(months=1) - relativedelta(days=1)
-        async with async_session() as session:
-            stmt = select(Cost).options(selectinload(Cost.card), selectinload(Cost.category)).where(
-                Cost.owner_id == self._user.uuid, 
-                Cost.date.between(month_date, next_month)
-            ).order_by(Cost.date, Cost.pub_datetime)
-            result = await session.execute(stmt)
-            return result.scalars().all()
+        stmt = select(Cost).options(selectinload(Cost.card), selectinload(Cost.category)).where(
+            Cost.owner_id == self._user.uuid, 
+            Cost.date.between(month_date, next_month)
+        ).order_by(Cost.date, Cost.pub_datetime)
+        result = await self._session.execute(stmt)
+        return result.scalars().all()
 
     @_handle_not_found_error
     async def get_concrete(self, cost_uuid: str) -> Cost:
@@ -71,10 +71,11 @@ class CostsSet:
         :raises: HTTPException(404) if cost with this uuid for user doesn't exists
         :returns: Getted cost with this uuid
         """
-        async with async_session() as session:
-            stmt = select(Cost).where(Cost.uuid == cost_uuid, Cost.owner_id == self._user.uuid)
-            result = await session.execute(stmt)
-            return result.scalar_one()
+        stmt = select(Cost).options(selectinload(Cost.card), selectinload(Cost.category)).where(
+            Cost.uuid == cost_uuid, Cost.owner_id == self._user.uuid
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one()
 
     async def get_category_sum(self, category: Category, month: str) -> int:
         """Returns category costs sum
@@ -85,26 +86,12 @@ class CostsSet:
         """
         month_date = datetime.date.fromisoformat(month + '-01')
         next_month = month_date + relativedelta(months=1) - relativedelta(days=1)
-        async with async_session() as session:
-            stmt = select(func.sum(Cost.amount)).where(
-                Cost.owner_id == self._user.uuid, Cost.category_id == category.uuid,
-                Cost.date.between(month_date, next_month)
-            )
-            result = await session.execute(stmt)
-            return result.scalar_one_or_none() or 0
-
-    async def _get_card_with_amount_validation(self, cost_data: CostIn) -> Card:
-        """Returns card with validation of cost amount
-        
-        :param cost_data: Creating cost data
-        :raises HTTPException(409) if card amount is less than cost amount
-        :returns: Updating card
-        """
-        card = await self._cards_set.get_concrete(str(cost_data.card_id))
-        if card.amount < cost_data.amount:
-            raise HTTPException(status.HTTP_409_CONFLICT, "Card amount is less than cost amount")
-
-        return card
+        stmt = select(func.sum(Cost.amount)).where(
+            Cost.owner_id == self._user.uuid, Cost.category_id == category.uuid,
+            Cost.date.between(month_date, next_month)
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none() or 0
 
     async def create(self, cost_data: CostIn) -> Cost:
         """Creates a new cost for user and card from cost_data
@@ -113,25 +100,22 @@ class CostsSet:
         :returns: Created cost instance
         """
         category = await self._categories_set.get_concrete(str(cost_data.category_id))
-        card = await self._get_card_with_amount_validation(cost_data)
+        card = await self._cards_set.get_concrete(str(cost_data.card_id))
         creation_data = cost_data.dict(exclude={'category_id', 'card_id'})
-        async with async_session() as session:
-            cost = Cost(**creation_data, category=category, card=card, owner_id=self._user.uuid)
-            session.add(cost)
-            await self._cards_set.add_cost(card, cost.amount)
-            await session.commit()
-
-        return cost
+        stmt = insert(Cost).returning(Cost).options(selectinload(Cost.category), selectinload(Cost.card)).values(
+            **creation_data, category_id=category.uuid, owner_id=self._user.uuid, card_id=card.uuid
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one()
 
     async def delete(self, cost: Cost) -> None:
         """Deletes concrete user cost
         
         :param cost: Deleting cost instance
         """
-        async with async_session() as session:
-            await delete(Cost).where(Cost.uuid == cost.uuid)
-            await self._cards_set.add_income(cost.card, cost.amount)
-            await session.commit()
+        stmt = delete(Cost).where(Cost.uuid == cost.uuid)
+        await self._session.execute(stmt)
+        await self._cards_set.add_income(cost.card, cost.amount)
 
     async def _get_old_cost_data(self, cost: Cost) -> tuple[Card, Decimal]:
         """Returns old cost card and amount
@@ -149,8 +133,8 @@ class CostsSet:
         :param cost_data: New cost data
         :returns: Tuple with new cost card and new cost category
         """
-        new_card = await self._cards_set.get_concrete(str(cost_data.card))
-        new_category = await self._categories_set.get_concrete(str(cost_data.category))
+        new_card = await self._cards_set.get_concrete(str(cost_data.card_id))
+        new_category = await self._categories_set.get_concrete(str(cost_data.category_id))
         return new_card, new_category
 
     async def _update_card_amount(self, old_card: Card, new_card: Card, old_cost_amount: Decimal, cost_data: CostIn):
@@ -161,7 +145,7 @@ class CostsSet:
         :param old_cost_amount: old cost amount
         :param cost_data: new cost data
         """
-        if str(old_card.uuid) != str(cost_data.card):
+        if str(old_card.uuid) != str(cost_data.card_id):
             await self._cards_set.add_income(old_card, old_cost_amount)
             await self._cards_set.add_cost(new_card, cost_data.amount)
         else:
@@ -169,29 +153,19 @@ class CostsSet:
             await self._cards_set.add_cost(new_card, cost_data.amount)
 
     async def _set_new_cost_data(
-        self, cost: Cost, cost_data: CostIn, new_card: Card,
-        new_category: Category, session: AsyncSession
-    ):
+        self, cost: Cost, cost_data: CostIn, new_card: Card, new_category: Category
+    ) -> Cost:
         """Updates concrete user cost data to new data
 
         :param cost: Updating cost
         :param cost_data: New cost data
         """
-        stmt = update(Cost).values(
-            **cost_data.dict(exclude={'card', 'category'}), card_id=new_card.uuid,
+        stmt = update(Cost).returning(Cost).options(selectinload(Cost.card), selectinload(Cost.category)).values(
+            **cost_data.dict(exclude={'card_id', 'category_id'}), card_id=new_card.uuid,
             category_id=new_category.uuid
         ).where(Cost.uuid == cost.uuid, Cost.owner_id == self._user.uuid)
-        await session.execute(stmt)
-
-    async def _get_updated_cost(self, cost: Cost, session: AsyncSession) -> Cost:
-        """Gets updated cost from db and returns it
-        
-        :param cost: Updating cost entry
-        """
-        stmt = select(Cost).where(Cost.uuid == cost.uuid)
-        result = await session.execute(stmt)
-        new_cost = result.scalar_one()
-        return new_cost
+        result = await self._session.execute(stmt)
+        return result.scalar_one()
 
     async def update(self, cost: Cost, cost_data: CostIn) -> Cost:
         """Updates concrete user cost and card amount
@@ -201,9 +175,8 @@ class CostsSet:
         """
         old_card, old_cost_amount = await self._get_old_cost_data(cost)
         new_card, new_category = await self._get_new_cost_data(cost_data)
-        async with async_session() as session:
-            await self._set_new_cost_data(cost, cost_data, new_card, new_category, session)
-            new_cost = await self._get_updated_cost(cost, session)
-            if old_cost_amount == cost_data.amount: return new_cost
+        if old_cost_amount != cost_data.amount:
             await self._update_card_amount(old_card, new_card, old_cost_amount, cost_data)
-            return new_cost
+
+        new_cost = await self._set_new_cost_data(cost, cost_data, new_card, new_category)
+        return new_cost

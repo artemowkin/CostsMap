@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from dateutil.relativedelta import relativedelta
 from fastapi import status, HTTPException
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, insert
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -37,22 +37,10 @@ class IncomesSet:
     :param cards_set: Cards logic container
     """
 
-    def __init__(self, user: User, cards_set: CardsSet):
+    def __init__(self, user: User, cards_set: CardsSet, session: AsyncSession):
         self._user = user
         self._cards_set = cards_set
-
-    async def _get_all_month_incomes_uuids(self, month: str) -> list[str]:
-        year, month = month.split('-')
-        query = (
-            "select uuid from incomes "
-            "where owner = :owner_id and "
-            "extract(year from date) = :year and extract(month from date) = :month"
-        )
-        uuids = await Income.Meta.database.fetch_all(query, {
-            'owner_id': self._user.uuid, 'year': year, 'month': month
-        })
-        uuids = [record.uuid for record in uuids]
-        return uuids
+        self._session = session
 
     async def all(self, month: str) -> list[Income]:
         """Returns all user incomes for the month
@@ -62,13 +50,11 @@ class IncomesSet:
         """
         month_date = datetime.date.fromisoformat(month + '-01')
         next_month = month_date + relativedelta(months=1) - relativedelta(days=1)
-        async with async_session() as session:
-            stmt = select(Income).options(selectinload(Income.card)).where(
-                Income.owner_id == self._user.uuid, 
-                Income.date.between(month_date, next_month)
-            ).order_by(Income.date, Income.pub_datetime)
-            result = await session.execute(stmt)
-            return result.scalars().all()
+        stmt = select(Income).options(selectinload(Income.card)).where(
+            Income.owner_id == self._user.uuid, Income.date.between(month_date, next_month)
+        ).order_by(Income.date, Income.pub_datetime)
+        result = await self._session.execute(stmt)
+        return result.scalars().all()
 
     @_handle_not_found_error
     async def get_concrete(self, uuid: str) -> Income:
@@ -78,12 +64,11 @@ class IncomesSet:
         :raises: HTTPException(404) if income with this uuid for user doesn't exists
         :returns: Getted income with this uuid
         """
-        async with async_session() as session:
-            stmt = select(Income).options(selectinload(Income.card)).where(
-                Income.uuid == uuid, Income.owner_id == self._user.uuid
-            )
-            result = await session.execute(stmt)
-            return result.scalar_one()
+        stmt = select(Income).options(selectinload(Income.card)).where(
+            Income.uuid == uuid, Income.owner_id == self._user.uuid
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one()
 
     async def create(self, data: IncomeIn) -> Income:
         """Creates a new income for user and card from data
@@ -93,23 +78,20 @@ class IncomesSet:
         """
         card = await self._cards_set.get_concrete(str(data.card_id))
         creation_data = data.dict(exclude={'card_id'})
-        async with async_session() as session:
-            income = Income(**creation_data, card=card, owner_id=self._user.uuid)
-            session.add(income)
-            await self._cards_set.add_income(card, income.amount)
-            await session.commit()
-
-        return income
+        stmt = insert(Income).returning(Income).options(selectinload(Income.card)).values(
+            **creation_data, owner_id=self._user.uuid, card_id=card.uuid
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one()
 
     async def delete(self, income: Income) -> None:
         """Deletes concrete user income
         
         :param income: Deleting income instance
         """
-        async with async_session() as session:
-            await delete(Income).where(Income.uuid == income.uuid)
-            await self._cards_set.add_cost(income.card, income.amount)
-            await session.commit()
+        stmt = delete(Income).where(Income.uuid == income.uuid)
+        await self._session.execute(stmt)
+        await self._cards_set.add_cost(income.card, income.amount)
 
     async def _get_old_income_data(self, income: Income) -> tuple[Card, Decimal]:
         """Returns old income card and amount
@@ -137,7 +119,7 @@ class IncomesSet:
             await self._cards_set.add_income(new_card, data.amount)
 
     async def _set_new_income_data(
-        self, income: Income, data: IncomeIn, new_card: Card, session: AsyncSession
+        self, income: Income, data: IncomeIn, new_card: Card
     ):
         """Updates concrete user income data to new data
 
@@ -146,20 +128,10 @@ class IncomesSet:
         :param new card: New income card
         :param session: SQLAlchemy session
         """
-        stmt = update(Income).values(
+        stmt = update(Income).returning(selectinload(Income.card)).values(
             **data.dict(exclude={'card_id'}), card_id=new_card.uuid,
         ).where(Income.uuid == income.uuid, Income.owner_id == self._user.uuid)
-        await session.execute(stmt)
-
-    async def _get_updated_income(self, income: Income, session: AsyncSession) -> Income:
-        """Gets updated income from db and returns it
-        
-        :param income: Updating income entry
-        """
-        stmt = select(Income).options(selectinload(Income.card)).where(Income.uuid == income.uuid)
-        result = await session.execute(stmt)
-        new_cost = result.scalar_one()
-        return new_cost
+        await self._session.execute(stmt)
 
     async def update(self, income: Income, data: IncomeIn) -> Income:
         """Updates concrete user income and card amount
@@ -169,11 +141,7 @@ class IncomesSet:
         """
         old_card, old_income_amount = await self._get_old_income_data(income)
         new_card = await self._cards_set.get_concrete(str(data.card_id))
-        async with async_session() as session:
-            await self._set_new_income_data(income, data, new_card, session)
-            if old_income_amount != data.amount:
-                await self._update_card_amount(old_card, new_card, old_income_amount, data)
-                await session.commit()
-
-            new_income = await self._get_updated_income(income, session)
-            return new_income
+        new_income = await self._set_new_income_data(income, data, new_card)
+        if old_income_amount == data.amount: return new_income
+        await self._update_card_amount(old_card, new_card, old_income_amount, data)
+        return new_income

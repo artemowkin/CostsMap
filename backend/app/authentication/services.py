@@ -4,13 +4,13 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from fastapi.security import HTTPBearer
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, insert
 from sqlalchemy.exc import NoResultFound, IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .schemas import LoginData, TokenPair, RegistrationData
 from .models import User
 from ..project.redis import redis_db
-from ..project.db import async_session
 
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -81,25 +81,21 @@ class JWTManager:
 
 class DBAuth:
 
-    def __init__(self):
+    def __init__(self, session: AsyncSession):
         self._model = User
+        self._session = session
 
     @_handle_not_found_error
     async def get_user_by_email(self, email: str) -> User | None:
-        async with async_session() as session:
-            stmt = select(User).where(User.email == email)
-            result = await session.execute(stmt)
-            return result.scalar_one()
+        stmt = select(User).where(User.email == email)
+        result = await self._session.execute(stmt)
+        return result.scalar_one()
 
     async def create_user(self, registration_data: RegistrationData, hashed_password: str) -> User:
-        async with async_session() as session:
-            user = User(
-                **registration_data.dict(exclude={'password1': True, 'password2': True}),
-                password=hashed_password
-            )
-            session.add(user)
-            await session.commit()
-            return user
+        creation_data = registration_data.dict(exclude={'password1', 'password2'})
+        stmt = insert(User).returning(User).values(**creation_data, password=hashed_password)
+        response = await self._session.execute(stmt)
+        return response.scalar_one()
 
 
 class SessionStorage:
@@ -131,9 +127,9 @@ class SessionStorage:
 
 class AuthStore:
 
-    def __init__(self, secret_key: str):
+    def __init__(self, secret_key: str, session: AsyncSession):
         self._jwt = JWTManager(secret_key)
-        self._db = DBAuth()
+        self._db = DBAuth(session)
         self._session = SessionStorage()
 
     def _generate_token_pair(self, email) -> TokenPair:

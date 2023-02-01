@@ -1,14 +1,16 @@
 from fastapi import Security, Depends
 from fastapi.security import HTTPAuthorizationCredentials
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .services import AuthStore, oauth2_scheme
 from .models import User
 from ..project.settings import settings
+from ..project.dependencies import use_session
 
 
-def use_auth_store() -> AuthStore:
+def use_auth_store(session: AsyncSession = Depends(use_session)) -> AuthStore:
     """Returns initialized auth store with secret key from project settings"""
-    return AuthStore(settings.secret_key)
+    return AuthStore(settings.secret_key, session)
 
 
 def use_token(credentials: HTTPAuthorizationCredentials = Security(oauth2_scheme)) -> str:

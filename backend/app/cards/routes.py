@@ -1,10 +1,9 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends
 
 from .services import CardsSet
-from .dependencies import use_cards_set
+from .dependencies import use_cards_set, valid_card_uuid
 from .schemas import CardIn, CardOut
+from .models import Card
 
 
 router = APIRouter()
@@ -27,24 +26,21 @@ async def create_card(card_data: CardIn, cards_set: CardsSet = Depends(use_cards
 
 
 @router.get('/{card_uuid}/', response_model=CardOut)
-async def concrete_card(card_uuid: UUID, cards_set: CardsSet = Depends(use_cards_set)):
+async def concrete_card(card: Card = Depends(valid_card_uuid)):
     """Returns concrete user card by uuid"""
-    card = await cards_set.get_concrete(str(card_uuid))
     return CardOut.from_orm(card)
 
 
 @router.delete('/{card_uuid}/', status_code=204)
-async def delete_card(card_uuid: UUID, cards_set: CardsSet = Depends(use_cards_set)):
+async def delete_card(card: Card = Depends(valid_card_uuid), cards_set: CardsSet = Depends(use_cards_set)):
     """Deletes concrete user card by uuid"""
-    card = await cards_set.get_concrete(str(card_uuid))
     await cards_set.delete_concrete(card.uuid)
 
 
 @router.put('/{card_uuid}/', response_model=CardOut)
 async def update_card(
-        card_uuid: UUID, card_data: CardIn, cards_set: CardsSet = Depends(use_cards_set)
+        card_data: CardIn, card: Card = Depends(valid_card_uuid), cards_set: CardsSet = Depends(use_cards_set)
     ):
     """Updates concrete user card by uuid using data from request"""
-    card = await cards_set.get_concrete(str(card_uuid))
     updated_card = await cards_set.update(card, card_data)
     return CardOut.from_orm(updated_card)
