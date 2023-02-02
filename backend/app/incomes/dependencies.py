@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,5 +20,5 @@ def use_incomes_set(
     return IncomesSet(user, cards_set, session)
 
 
-async def valid_income_uuid(income_uuid: str, incomes_set: IncomesSet = Depends(use_incomes_set)) -> Income:
-    return incomes_set.get_concrete(income_uuid)
+async def valid_income_uuid(income_uuid: UUID, incomes_set: IncomesSet = Depends(use_incomes_set)) -> Income:
+    return await incomes_set.get_concrete(str(income_uuid))
